@@ -2,8 +2,10 @@
 
 import { Eye, EyeOff, Github } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type React from "react";
 import { useEffect, useState } from "react";
+import LoadingPage from "@/components/atoms/loading-page";
 import Logo from "@/components/atoms/logo-with-text";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,13 +25,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { useGuestGuard } from "@/hooks/useAuthGuard";
+import { registerWithEmailAndPassword, signInWithGitHub } from "@/lib/auth";
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const { loading: authLoading } = useGuestGuard();
   const [currentStep, setCurrentStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -41,6 +48,21 @@ export default function RegisterPage() {
   });
 
   const totalSteps = 5;
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Initial check
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Show loading while checking auth state
+  if (authLoading) {
+    return <LoadingPage />;
+  }
 
   const handleNext = () => {
     if (currentStep < totalSteps) {
@@ -54,13 +76,12 @@ export default function RegisterPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setIsLoading(true);
+    setError("");
 
     try {
-      console.log("Registration attempt:", formData);
-
       // Basic validation
       if (
         !formData.name ||
@@ -82,29 +103,55 @@ export default function RegisterPage() {
         throw new Error("Passwords do not match");
       }
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Register user with Firebase
+      const { user, error } = await registerWithEmailAndPassword(
+        formData.email,
+        formData.password,
+        formData.name,
+        {
+          role: formData.role,
+          experience: formData.experience,
+          howDidYouHear: formData.howDidYouHear,
+        },
+      );
 
-      // Redirect to dashboard on successful registration
-      window.location.href = "/dashboard";
+      if (error) {
+        setError(error);
+        return;
+      }
+
+      if (user) {
+        router.push("/dashboard");
+      }
     } catch (error) {
       console.error("Registration failed:", error);
-      alert(error instanceof Error ? error.message : "Registration failed");
+      setError(error instanceof Error ? error.message : "Registration failed");
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 640);
-    };
+  const handleGithubLogin = async () => {
+    setIsLoading(true);
+    setError("");
+    try {
+      const { user, error } = await signInWithGitHub();
 
-    window.addEventListener("resize", handleResize);
-    handleResize(); // Initial check
+      if (error) {
+        setError(error);
+        return;
+      }
 
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+      if (user) {
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      console.error("GitHub login failed:", error);
+      setError("GitHub login failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -511,6 +558,12 @@ export default function RegisterPage() {
               <CardDescription>{getStepDescription()}</CardDescription>
             </CardHeader>
             <CardContent>
+              {error && (
+                <div className="mb-4 p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
+                  {error}
+                </div>
+              )}
+
               <div className="overflow-hidden">
                 <div
                   className="flex transition-transform duration-300 ease-in-out"
@@ -611,6 +664,7 @@ export default function RegisterPage() {
                       type="button"
                       variant="outline"
                       className="w-full bg-transparent border-border hover:bg-accent"
+                      onClick={handleGithubLogin}
                       disabled={isLoading}
                     >
                       <Github className="h-4 w-4 mr-2" />

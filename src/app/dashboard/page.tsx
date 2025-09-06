@@ -40,6 +40,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import LoadingPage from "@/components/atoms/loading-page";
 import Logo from "@/components/atoms/logo-with-text";
 import { ThemeToggle } from "@/components/atoms/theme-toggle";
 import { Badge } from "@/components/ui/badge";
@@ -60,10 +61,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
+import { useAuth } from "@/providers/auth-provider";
 
 export default function DashboardPage() {
+  const { user, userData, signOut } = useAuth();
+  const { loading: authLoading } = useAuthGuard();
   const [timeRange, setTimeRange] = useState("30d");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Show loading while checking auth state
+  if (authLoading) {
+    return <LoadingPage message="Loading dashboard..." />;
+  }
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   // Mock data - would come from real analytics
   const recentSessions = [
@@ -288,6 +302,7 @@ export default function DashboardPage() {
           <Button
             variant="ghost"
             className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            onClick={handleSignOut}
           >
             <LogOut className="h-5 w-5 mr-3" />
             Sign Out
@@ -356,12 +371,19 @@ export default function DashboardPage() {
         <div className="px-4 py-8">
           {/* Header */}
           <div className="mb-8 lg:hidden">
-            <h1 className="text-4xl font-bold mb-2">Analytics Dashboard</h1>
+            <h1 className="text-4xl font-bold mb-2">
+              Welcome back,{" "}
+              {userData?.displayName || user?.displayName || "User"}!
+            </h1>
             <p className="text-xl text-muted-foreground">
               Track your interview preparation progress and insights
             </p>
           </div>
           <div className="mb-8 hidden lg:block">
+            <h1 className="text-4xl font-bold mb-2">
+              Welcome back,{" "}
+              {userData?.displayName || user?.displayName || "User"}!
+            </h1>
             <p className="text-xl text-muted-foreground">
               Track your interview preparation progress and insights
             </p>

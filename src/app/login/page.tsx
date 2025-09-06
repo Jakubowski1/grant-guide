@@ -2,8 +2,10 @@
 
 import { Eye, EyeOff, Github } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type React from "react";
 import { useState } from "react";
+import LoadingPage from "@/components/atoms/loading-page";
 import Logo from "@/components/atoms/logo-with-text";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,27 +18,42 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { useGuestGuard } from "@/hooks/useAuthGuard";
+import { signInWithEmailAndPassword, signInWithGitHub } from "@/lib/auth";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { loading: authLoading } = useGuestGuard();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // Show loading while checking auth state
+  if (authLoading) {
+    return <LoadingPage />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
 
     try {
-      console.log("Login attempt:", { email, password });
+      const { user, error } = await signInWithEmailAndPassword(email, password);
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      if (error) {
+        setError(error);
+        return;
+      }
 
-      // Redirect to dashboard on successful login
-      window.location.href = "/dashboard";
+      if (user) {
+        router.push("/dashboard");
+      }
     } catch (error) {
       console.error("Login failed:", error);
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -44,13 +61,13 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
+    setError("");
     try {
-      console.log("Google login initiated");
-      // In a real app, this would redirect to Google OAuth
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      window.location.href = "/dashboard";
+      // Google auth is disabled for now
+      setError("Google authentication is currently disabled.");
     } catch (error) {
       console.error("Google login failed:", error);
+      setError("Google login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -58,13 +75,21 @@ export default function LoginPage() {
 
   const handleGithubLogin = async () => {
     setIsLoading(true);
+    setError("");
     try {
-      console.log("GitHub login initiated");
-      // In a real app, this would redirect to GitHub OAuth
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      window.location.href = "/dashboard";
+      const { user, error } = await signInWithGitHub();
+
+      if (error) {
+        setError(error);
+        return;
+      }
+
+      if (user) {
+        router.push("/dashboard");
+      }
     } catch (error) {
       console.error("GitHub login failed:", error);
+      setError("GitHub login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -83,6 +108,12 @@ export default function LoginPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
+              {error && (
+                <div className="mb-4 p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
+                  {error}
+                </div>
+              )}
+
               <div className="space-y-4 mb-6">
                 <Button
                   type="button"

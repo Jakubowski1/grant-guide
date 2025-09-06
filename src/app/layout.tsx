@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import type React from "react";
-import { Suspense } from "react";
+import { type ReactNode, Suspense } from "react";
+import { AuthProvider } from "../providers/auth-provider";
 import { ThemeProvider } from "../providers/theme-provider";
 import "./globals.css";
 
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -26,7 +26,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {children}
+            <AuthProvider>{children}</AuthProvider>
           </ThemeProvider>
         </Suspense>
       </body>
