@@ -22,7 +22,7 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <ThemeProvider
             attribute="class"
-            defaultTheme="light"
+            defaultTheme="dark"
             enableSystem
             disableTransitionOnChange
           >
