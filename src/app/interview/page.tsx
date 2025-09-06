@@ -4,14 +4,15 @@ import {
   ArrowRight,
   Bot,
   Brain,
+  Building,
   CheckCircle,
   Clock,
   Code,
-  MessageSquare,
   Mic,
   MicOff,
   Play,
   Send,
+  Target,
   Timer,
   User,
 } from "lucide-react";
@@ -27,7 +28,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -84,190 +84,130 @@ export default function InterviewPage() {
 
   const [currentMessage, setCurrentMessage] = useState("");
   const [isRecording, setIsRecording] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(() => {
     if (config.interviewMode === "untimed") return Number.POSITIVE_INFINITY;
     return Number.parseInt(config.duration, 10) * 60;
   });
   const [isInterviewStarted, setIsInterviewStarted] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
+  // biome-ignore lint/suspicious/noExplicitAny: Speech Recognition API requires any type
+  const recognitionRef = useRef<any>(null);
 
-  const getAIResponse = (
-    _userMessage: string,
-    questionCount: number,
-  ): Message => {
-    const { interviewMode, interviewType, specificCompany, position } = config;
+  // Initialize speech recognition
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const SpeechRecognition =
+        // biome-ignore lint/suspicious/noExplicitAny: Browser API requires any type
+        (window as any).SpeechRecognition ||
+        // biome-ignore lint/suspicious/noExplicitAny: Browser API requires any type
+        (window as any).webkitSpeechRecognition;
 
-    // Different question sets based on interview mode
-    const responses: Record<string, Record<string, string[]>> = {
-      timed: {
-        technical: [
-          `Great! Let's dive into some technical concepts for ${position}. Can you explain the difference between let, const, and var in JavaScript? You have limited time, so focus on the key differences.`,
-          `Quick follow-up - how would you optimize the performance of a React application? Give me your top 3 techniques.`,
-          `Time check - explain asynchronous JavaScript. How do Promises differ from async/await?`,
-        ],
-        behavioral: [
-          `Tell me about a time when you had to work under tight deadlines. How did you prioritize your tasks?`,
-          `Describe a challenging project you completed. What made it difficult and how did you overcome obstacles?`,
-          `How do you handle feedback and criticism from team members or supervisors?`,
-        ],
-        coding: [
-          `Coding challenge time! Write a function that finds the longest palindromic substring. Walk through your approach quickly.`,
-          `Next challenge: implement a function to detect if a linked list has a cycle. Focus on efficiency.`,
-          `Final coding question: find two numbers in an array that add up to a target. Optimize for time complexity.`,
-        ],
-        "system-design": [
-          `System design question: How would you design a URL shortening service? Give me the high-level architecture in 5 minutes.`,
-          `Follow-up: How would you scale this to handle millions of requests? Focus on the key bottlenecks.`,
-          `Last question: Design a real-time chat system. What are the main components?`,
-        ],
-      },
-      untimed: {
-        technical: [
-          `Let's explore technical concepts in depth. Can you explain the difference between let, const, and var in JavaScript? Take your time to cover all aspects including hoisting, scope, and use cases.`,
-          `Excellent explanation! Now, let's discuss React performance optimization. What are all the techniques you know, and when would you use each one?`,
-          `Great insights! Let's dive deep into asynchronous JavaScript. Compare Promises, async/await, and callbacks. What are the pros and cons of each approach?`,
-        ],
-        behavioral: [
-          `Let's discuss your experience in detail. Tell me about a time when you had to work with a difficult team member. Walk me through the entire situation, your thought process, and the outcome.`,
-          `That shows great interpersonal skills. Now, describe the most challenging project you've worked on. I want to understand the technical challenges, team dynamics, and how you approached problem-solving.`,
-          `Impressive problem-solving approach. How do you typically handle competing priorities and tight deadlines? Give me specific examples and strategies.`,
-        ],
-        coding: [
-          `Let's work through a coding problem together. Write a function that finds the longest palindromic substring in a given string. Explain your thought process, consider edge cases, and optimize your solution.`,
-          `Great approach! Now let's tackle linked lists. Implement a function to detect if a linked list has a cycle. Walk me through different approaches and their trade-offs.`,
-          `Excellent! Here's another challenge: Given an array of integers, find two numbers that add up to a specific target. Consider multiple solutions and their complexities.`,
-        ],
-        "system-design": [
-          `Let's design a system together. How would you design a URL shortening service like bit.ly? Start with requirements gathering, then move to high-level design, and we'll dive into details.`,
-          `Excellent foundation! Now let's discuss scaling. How would you handle millions of users? Consider database sharding, caching strategies, and load balancing.`,
-          `Great system thinking! Let's design a real-time chat application. Consider the architecture, data flow, message delivery, and scalability challenges.`,
-        ],
-      },
-      behavioral: {
-        behavioral: [
-          `Let's focus on your leadership experience. Tell me about a time when you had to lead a team through a difficult situation.`,
-          `Describe a situation where you had to make a decision with incomplete information. How did you approach it?`,
-          `Tell me about a time when you disagreed with your manager or team lead. How did you handle it?`,
-          `Describe a project where you had to learn a new technology quickly. What was your approach?`,
-          `Tell me about a time when you had to give constructive feedback to a colleague.`,
-          `Describe a situation where you failed or made a significant mistake. What did you learn?`,
-        ],
-      },
-      whiteboard: {
-        coding: [
-          `Let's start with a classic algorithm problem. Implement a function to reverse a linked list. Write the code step by step and explain your approach.`,
-          `Great! Now let's try a tree problem. Write a function to find the maximum depth of a binary tree. Consider both recursive and iterative approaches.`,
-          `Excellent! Here's a dynamic programming challenge: implement the fibonacci sequence with memoization. Optimize for both time and space complexity.`,
-          `Perfect! Let's do one more: implement a function to validate if a binary tree is a valid binary search tree. Walk through your logic carefully.`,
-        ],
-        "system-design": [
-          `Let's design on the whiteboard. How would you architect a social media feed system? Start with the basic components and data flow.`,
-          `Good start! Now let's add complexity. How would you handle real-time updates and notifications in this system?`,
-          `Excellent thinking! Let's design a distributed cache system. What are the key components and how do they interact?`,
-        ],
-      },
-    };
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = "en-US";
 
-    const modeResponses = responses[interviewMode] || responses.timed;
-    const typeResponses =
-      modeResponses[interviewType] || responses.timed.technical;
-    const responseIndex = questionCount % typeResponses.length;
+        recognition.onstart = () => {
+          console.log("Speech recognition started");
+        };
 
-    let content = typeResponses[responseIndex];
+        // biome-ignore lint/suspicious/noExplicitAny: Speech Recognition event types not available
+        recognition.onresult = (event: any) => {
+          let transcript = "";
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            if (event.results[i].isFinal) {
+              transcript += event.results[i][0].transcript;
+            }
+          }
+          if (transcript) {
+            setCurrentMessage(transcript);
+          }
+        };
 
-    if (specificCompany) {
-      const companyContext: Record<string, string> = {
-        google:
-          "Keep in mind Google's focus on algorithmic thinking and scalability.",
-        meta: "Consider Meta's emphasis on user engagement and large-scale systems.",
-        apple: "Think about Apple's attention to detail and user experience.",
-        amazon:
-          "Remember Amazon's leadership principles and customer obsession.",
-        netflix:
-          "Consider Netflix's culture of high performance and innovation.",
-        microsoft:
-          "Think about Microsoft's collaborative approach and technical depth.",
-        tesla: "Consider Tesla's focus on innovation and rapid iteration.",
-        spotify:
-          "Think about Spotify's agile methodology and user-centric design.",
-        uber: "Consider Uber's real-time systems and global scale challenges.",
-        airbnb:
-          "Think about Airbnb's focus on belonging and community building.",
-      };
+        // biome-ignore lint/suspicious/noExplicitAny: Speech Recognition error event types not available
+        recognition.onerror = (event: any) => {
+          console.error("Speech recognition error:", event.error);
+          setIsListening(false);
+        };
 
-      const context = companyContext[specificCompany];
-      if (context) {
-        content += ` ${context}`;
+        recognition.onend = () => {
+          setIsListening(false);
+        };
+
+        recognitionRef.current = recognition;
       }
     }
+  }, []);
 
-    return {
-      id: `ai-${Date.now()}`,
-      type: "ai",
-      content,
-      timestamp: new Date(),
-      questionType: interviewType as
-        | "technical"
-        | "behavioral"
-        | "coding"
-        | "system-design",
-      isFollowUp: questionCount > 0,
-    };
-  };
+  // AI Response function using Mistral API
+  const getAIResponse = async (
+    userMessage: string,
+    questionCount: number,
+    isFollowUp = false,
+  ): Promise<Message> => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/interview", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: userMessage,
+          conversationHistory: session.messages,
+          interviewConfig: config,
+          questionCount,
+          isFollowUp,
+        }),
+      });
 
-  const getFollowUpResponse = (_userMessage: string): Message => {
-    const { interviewMode } = config;
+      const data = await response.json();
 
-    const followUps = {
-      timed: [
-        "Good point! Can you quickly elaborate on the key benefits?",
-        "Interesting approach! What's the main trade-off here?",
-        "That makes sense. Any potential issues with this solution?",
-        "Quick follow-up: how would this perform at scale?",
-      ],
-      untimed: [
-        "That's a thoughtful approach! Can you dive deeper into the implementation details? What specific challenges might you encounter?",
-        "Excellent reasoning! Let's explore the edge cases. How would you handle error scenarios and what validation would you implement?",
-        "I like your thinking! How would this solution evolve if the requirements changed? What would make it more maintainable?",
-        "Great explanation! Can you walk me through a concrete example? How would this work with real data?",
-        "Solid approach! What are the performance implications? How would you optimize this for production use?",
-      ],
-      behavioral: [
-        "That's a great example! What would you do differently if you faced a similar situation again?",
-        "Interesting approach! How did the other team members react to your decision?",
-        "Good insight! What did you learn about yourself from this experience?",
-        "That shows good judgment! How do you typically prepare for such challenging situations?",
-      ],
-      whiteboard: [
-        "Good start! Can you trace through your algorithm with a specific example?",
-        "Nice approach! What's the time and space complexity of your solution?",
-        "Excellent! Are there any edge cases we should consider?",
-        "Great implementation! How would you test this function?",
-      ],
-    };
-
-    const modeFollowUps =
-      followUps[interviewMode as keyof typeof followUps] || followUps.timed;
-    const randomFollowUp =
-      modeFollowUps[Math.floor(Math.random() * modeFollowUps.length)];
-
-    return {
-      id: `ai-followup-${Date.now()}`,
-      type: "ai",
-      content: randomFollowUp,
-      timestamp: new Date(),
-      isFollowUp: true,
-    };
+      if (data.success) {
+        return {
+          id: `ai-${Date.now()}`,
+          type: "ai",
+          content: data.message,
+          timestamp: new Date(),
+          questionType: data.questionType as
+            | "technical"
+            | "behavioral"
+            | "coding"
+            | "system-design",
+          isFollowUp,
+        };
+      } else {
+        throw new Error(data.error || "Failed to get AI response");
+      }
+    } catch (error) {
+      console.error("Error getting AI response:", error);
+      return {
+        id: `ai-error-${Date.now()}`,
+        type: "ai",
+        content:
+          "I apologize, but I'm experiencing technical difficulties. Could you please try again or rephrase your response?",
+        timestamp: new Date(),
+        questionType: config.interviewType as
+          | "technical"
+          | "behavioral"
+          | "coding"
+          | "system-design",
+        isFollowUp,
+      };
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Auto-scroll to bottom of messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, []);
+  });
 
   // Timer effect
   useEffect(() => {
@@ -300,7 +240,7 @@ export default function InterviewPage() {
   };
 
   // Start interview
-  const startInterview = () => {
+  const startInterview = async () => {
     setIsInterviewStarted(true);
 
     const welcomeMessages = {
@@ -328,8 +268,8 @@ export default function InterviewPage() {
     }));
 
     // Add first question after a delay
-    setTimeout(() => {
-      const firstQuestion = getAIResponse("", 0);
+    setTimeout(async () => {
+      const firstQuestion = await getAIResponse("", 0);
       setSession((prev) => ({
         ...prev,
         messages: [...prev.messages, firstQuestion],
@@ -339,8 +279,8 @@ export default function InterviewPage() {
   };
 
   // Send message
-  const sendMessage = () => {
-    if (!currentMessage.trim()) return;
+  const sendMessage = async () => {
+    if (!currentMessage.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: `user-${Date.now()}`,
@@ -357,52 +297,77 @@ export default function InterviewPage() {
     setCurrentMessage("");
     setIsTyping(true);
 
-    // Simulate AI thinking and response
-    setTimeout(
-      () => {
-        setIsTyping(false);
+    try {
+      // Decide whether to ask follow-up or new question
+      const shouldFollowUp =
+        Math.random() > 0.6 &&
+        session.currentQuestionCount < session.totalQuestions;
 
-        let aiResponse: Message;
+      let aiResponse: Message;
 
-        // Decide whether to ask follow-up or new question
-        const shouldFollowUp =
-          Math.random() > 0.6 &&
-          session.currentQuestionCount < session.totalQuestions;
+      if (session.currentQuestionCount >= session.totalQuestions) {
+        aiResponse = {
+          id: `ai-complete-${Date.now()}`,
+          type: "ai",
+          content:
+            "Excellent work! That concludes our interview session. You've demonstrated strong knowledge and problem-solving skills. I'll now analyze your responses and prepare detailed feedback. Thank you for your time!",
+          timestamp: new Date(),
+        };
 
-        if (shouldFollowUp) {
-          aiResponse = getFollowUpResponse(currentMessage);
-        } else {
-          if (session.currentQuestionCount >= session.totalQuestions) {
-            aiResponse = {
-              id: `ai-complete-${Date.now()}`,
-              type: "ai",
-              content:
-                "Excellent work! That concludes our interview session. You've demonstrated strong technical knowledge and problem-solving skills. I'll now analyze your responses and prepare detailed feedback. Thank you for your time!",
-              timestamp: new Date(),
-            };
-            setSession((prev) => ({ ...prev, isComplete: true }));
-          } else {
-            aiResponse = getAIResponse(
-              currentMessage,
-              session.currentQuestionCount,
-            );
-            setSession((prev) => ({
-              ...prev,
-              currentQuestionCount: prev.currentQuestionCount + 1,
-            }));
-          }
+        // Save interview data for analysis
+        const updatedSession = {
+          ...session,
+          messages: [...session.messages, userMessage, aiResponse],
+          isComplete: true,
+        };
+        localStorage.setItem(
+          "interviewSession",
+          JSON.stringify(updatedSession),
+        );
+        localStorage.setItem("interviewConfig", JSON.stringify(config));
+
+        setSession((prev) => ({ ...prev, isComplete: true }));
+      } else {
+        aiResponse = await getAIResponse(
+          currentMessage,
+          session.currentQuestionCount,
+          shouldFollowUp,
+        );
+
+        if (!shouldFollowUp) {
+          setSession((prev) => ({
+            ...prev,
+            currentQuestionCount: prev.currentQuestionCount + 1,
+          }));
         }
+      }
 
-        setSession((prev) => ({
-          ...prev,
-          messages: [...prev.messages, aiResponse],
-        }));
-      },
-      1500 + Math.random() * 1000,
-    ); // Random delay between 1.5-2.5 seconds
+      setSession((prev) => ({
+        ...prev,
+        messages: [...prev.messages, aiResponse],
+      }));
+    } catch (error) {
+      console.error("Error sending message:", error);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
-  // Handle Enter key
+  // Voice recording functions using Speech Recognition
+  const startRecording = () => {
+    if (recognitionRef.current && !isListening) {
+      setIsRecording(true);
+      recognitionRef.current.start();
+    }
+  };
+
+  const stopRecording = () => {
+    if (recognitionRef.current && isListening) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -410,317 +375,172 @@ export default function InterviewPage() {
     }
   };
 
-  // Audio recording functions
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (event) => {
-        audioChunksRef.current.push(event.data);
-      };
-
-      mediaRecorder.start();
-      setIsRecording(true);
-    } catch (error) {
-      console.error("Error starting recording:", error);
-    }
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-
-      mediaRecorderRef.current.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, {
-          type: "audio/wav",
-        });
-        console.log("Audio recorded:", audioBlob);
-        // Could convert to text and add to current message
-      };
-    }
-  };
-
   if (!isInterviewStarted) {
-    const modeIcons = {
-      timed: Timer,
-      untimed: Brain,
-      behavioral: MessageSquare,
-      whiteboard: Code,
-    };
-
-    const ModeIcon =
-      modeIcons[config.interviewMode as keyof typeof modeIcons] || Brain;
-
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-2xl border-border bg-card">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 flex items-center justify-center p-4">
+        <Card className="w-full max-w-2xl">
           <CardHeader className="text-center">
-            <ModeIcon className="h-16 w-16 text-primary mx-auto mb-4" />
-            <CardTitle className="text-3xl">Ready to Start?</CardTitle>
+            <div className="flex justify-center mb-4">
+              <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
+                <Brain className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+              </div>
+            </div>
+            <CardTitle className="text-2xl font-bold">
+              Ready to Start?
+            </CardTitle>
             <CardDescription className="text-lg">
-              Your {config.interviewMode} {config.interviewType} interview
-              session is configured and ready to begin
+              Your AI-powered {config.interviewType} interview for{" "}
+              <span className="font-semibold">{config.position}</span>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="space-y-2">
-                <h3 className="font-semibold">Configuration</h3>
-                <div className="space-y-1">
-                  <Badge variant="secondary">{config.position}</Badge>
-                  <Badge variant="secondary">{config.seniority} level</Badge>
-                  {config.specificCompany ? (
-                    <Badge variant="secondary">{config.specificCompany}</Badge>
-                  ) : config.companyProfile ? (
-                    <Badge variant="secondary">
-                      {config.companyProfile} style
-                    </Badge>
-                  ) : null}
-                  <Badge variant="secondary">{config.interviewType}</Badge>
-                  <Badge variant="secondary">{config.interviewMode} mode</Badge>
-                </div>
+                <Badge variant="outline" className="w-full justify-center">
+                  <Clock className="h-3 w-3 mr-1" />
+                  {config.interviewMode === "untimed"
+                    ? "Untimed"
+                    : `${config.duration} minutes`}
+                </Badge>
+                <Badge variant="outline" className="w-full justify-center">
+                  <Target className="h-3 w-3 mr-1" />
+                  {config.seniority} Level
+                </Badge>
               </div>
               <div className="space-y-2">
-                <h3 className="font-semibold">Session Details</h3>
-                <div className="text-sm text-muted-foreground space-y-1">
-                  <p>
-                    Duration:{" "}
-                    {config.interviewMode === "untimed"
-                      ? "Unlimited"
-                      : `${config.duration} minutes`}
-                  </p>
-                  <p>
-                    Format:{" "}
-                    {config.interviewMode === "whiteboard"
-                      ? "Interactive Coding"
-                      : "Conversational AI"}
-                  </p>
-                  <p>Questions: ~{session.totalQuestions} questions</p>
-                  <p>
-                    Follow-ups:{" "}
-                    {config.interviewMode === "timed" ? "Quick" : "Detailed"}
-                  </p>
-                </div>
+                <Badge variant="outline" className="w-full justify-center">
+                  <Code className="h-3 w-3 mr-1" />
+                  {config.interviewType}
+                </Badge>
+                {config.specificCompany && (
+                  <Badge variant="outline" className="w-full justify-center">
+                    <Building className="h-3 w-3 mr-1" />
+                    {config.specificCompany}
+                  </Badge>
+                )}
               </div>
             </div>
 
-            <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
-              <h4 className="font-semibold text-primary mb-2">
-                {config.interviewMode.charAt(0).toUpperCase() +
-                  config.interviewMode.slice(1)}{" "}
-                Interview Tips
-              </h4>
-              <ul className="text-sm text-muted-foreground space-y-1">
-                {config.interviewMode === "timed" && (
-                  <>
-                    <li>• Be concise but complete in your answers</li>
-                    <li>• Manage your time effectively across questions</li>
-                    <li>• Focus on key points and main concepts</li>
-                    <li>• Practice quick problem-solving</li>
-                  </>
-                )}
-                {config.interviewMode === "untimed" && (
-                  <>
-                    <li>
-                      • Take your time to think through problems thoroughly
-                    </li>
-                    <li>• Explore multiple approaches and solutions</li>
-                    <li>• Ask clarifying questions when needed</li>
-                    <li>• Provide detailed explanations and examples</li>
-                  </>
-                )}
-                {config.interviewMode === "behavioral" && (
-                  <>
-                    <li>
-                      • Use the STAR method (Situation, Task, Action, Result)
-                    </li>
-                    <li>• Provide specific examples from your experience</li>
-                    <li>• Focus on your role and contributions</li>
-                    <li>• Reflect on lessons learned and growth</li>
-                  </>
-                )}
-                {config.interviewMode === "whiteboard" && (
-                  <>
-                    <li>• Think out loud and explain your approach</li>
-                    <li>• Start with brute force, then optimize</li>
-                    <li>• Consider edge cases and error handling</li>
-                    <li>• Discuss time and space complexity</li>
-                  </>
-                )}
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+              <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                Interview Tips:
+              </h3>
+              <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                <li>• Think out loud to show your problem-solving process</li>
+                <li>• Ask clarifying questions when needed</li>
+                <li>• Use specific examples from your experience</li>
+                <li>• Take your time to understand each question fully</li>
               </ul>
             </div>
 
-            <div className="text-center">
-              <Button
-                onClick={startInterview}
-                size="lg"
-                className="bg-primary text-primary-foreground hover:bg-primary/90"
-              >
-                <Play className="h-5 w-5 mr-2" />
-                Start{" "}
-                {config.interviewMode.charAt(0).toUpperCase() +
-                  config.interviewMode.slice(1)}{" "}
-                Interview
-              </Button>
-            </div>
+            <Button
+              onClick={startInterview}
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              size="lg"
+            >
+              <Play className="h-4 w-4 mr-2" />
+              Start Interview
+            </Button>
           </CardContent>
         </Card>
       </div>
     );
   }
-
-  if (session.isComplete) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-2xl border-border bg-card">
-          <CardHeader className="text-center">
-            <CheckCircle className="h-16 w-16 text-primary mx-auto mb-4" />
-            <CardTitle className="text-3xl">Interview Complete!</CardTitle>
-            <CardDescription className="text-lg">
-              Excellent work! Your responses are being analyzed by our AI
-              system.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid md:grid-cols-3 gap-4 text-center">
-              <div>
-                <p className="text-2xl font-bold text-primary">
-                  {session.currentQuestionCount}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Questions Discussed
-                </p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-primary">
-                  {Math.floor(
-                    (Date.now() - session.startTime.getTime()) / 60000,
-                  )}
-                  m
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Session Duration
-                </p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-primary">
-                  {session.messages.filter((m) => m.type === "user").length}
-                </p>
-                <p className="text-sm text-muted-foreground">Your Responses</p>
-              </div>
-            </div>
-
-            <div className="text-center space-y-4">
-              <p className="text-muted-foreground">
-                Your detailed feedback and analysis will be available shortly.
-                You'll receive insights on technical accuracy, communication
-                skills, and areas for improvement.
-              </p>
-              <div className="flex gap-4 justify-center">
-                <Button
-                  variant="outline"
-                  className="bg-transparent"
-                  onClick={() => {
-                    window.location.href = "/results";
-                  }}
-                >
-                  View Results
-                </Button>
-                <Button
-                  className="bg-primary text-primary-foreground hover:bg-primary/90"
-                  onClick={() => {
-                    window.location.href = "/configure";
-                  }}
-                >
-                  Start New Interview
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  const progress =
-    (session.currentQuestionCount / session.totalQuestions) * 100;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
       {/* Header */}
-      <div className="border-b border-border bg-card/50 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4">
+      <div className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-md sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Brain className="h-8 w-8 text-primary" />
+              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
+                <Brain className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              </div>
               <div>
                 <h1 className="text-xl font-bold">AI Interview Session</h1>
-                <p className="text-sm text-muted-foreground">
-                  {config.position} - {config.interviewType} (
-                  {config.interviewMode} mode)
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {config.position} • {config.seniority} level
                 </p>
               </div>
             </div>
+
             <div className="flex items-center space-x-4">
               {config.interviewMode !== "untimed" && (
                 <div className="flex items-center space-x-2">
-                  <Clock className="h-4 w-4 text-primary" />
-                  <span className="font-mono text-lg">
+                  <Timer className="h-4 w-4" />
+                  <span
+                    className={`font-mono font-bold ${
+                      timeRemaining < 300
+                        ? "text-red-500"
+                        : timeRemaining < 600
+                          ? "text-yellow-500"
+                          : "text-green-500"
+                    }`}
+                  >
                     {formatTime(timeRemaining)}
                   </span>
                 </div>
               )}
-              <Badge variant="secondary">
-                Question {session.currentQuestionCount} of{" "}
-                {session.totalQuestions}
-              </Badge>
+
+              <div className="flex items-center space-x-2">
+                <Progress
+                  value={
+                    (session.currentQuestionCount / session.totalQuestions) *
+                    100
+                  }
+                  className="w-24"
+                />
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  {session.currentQuestionCount}/{session.totalQuestions}
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Progress */}
-      <div className="container mx-auto px-4 py-4">
-        <Progress value={progress} className="h-2" />
-      </div>
-
-      {/* Chat Messages */}
-      <div className="flex-1 container mx-auto px-4 pb-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="space-y-4 mb-4 max-h-[60vh] overflow-y-auto">
-            {session.messages.map((message) => (
+      {/* Chat Interface */}
+      <div className="max-w-4xl mx-auto p-4 h-[calc(100vh-120px)] flex flex-col">
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+          {session.messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex ${
+                message.type === "user" ? "justify-end" : "justify-start"
+              }`}
+            >
               <div
-                key={message.id}
-                className={`flex gap-3 ${message.type === "user" ? "justify-end" : "justify-start"}`}
+                className={`flex max-w-[80%] ${
+                  message.type === "user" ? "flex-row-reverse" : "flex-row"
+                } items-start space-x-3`}
               >
-                {message.type === "ai" && (
-                  <Avatar className="w-8 h-8 bg-primary/20">
-                    <AvatarFallback>
-                      <Bot className="h-4 w-4 text-primary" />
-                    </AvatarFallback>
-                  </Avatar>
-                )}
-
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback>
+                    {message.type === "user" ? (
+                      <User className="h-4 w-4" />
+                    ) : (
+                      <Bot className="h-4 w-4" />
+                    )}
+                  </AvatarFallback>
+                </Avatar>
                 <div
-                  className={`max-w-[80%] rounded-lg p-4 ${
+                  className={`rounded-lg p-4 ${
                     message.type === "user"
-                      ? "bg-primary text-primary-foreground ml-auto"
-                      : "bg-card border border-border"
+                      ? "bg-blue-600 text-white"
+                      : "bg-white dark:bg-gray-800 shadow-sm border"
                   }`}
                 >
-                  {message.questionType && !message.isFollowUp && (
-                    <Badge variant="secondary" className="mb-2 text-xs">
-                      {message.questionType.replace("-", " ")}
-                    </Badge>
-                  )}
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                  <p className="whitespace-pre-wrap leading-relaxed">
                     {message.content}
                   </p>
+                  {message.questionType && (
+                    <Badge variant="outline" className="mt-2 text-xs">
+                      {message.questionType}
+                      {message.isFollowUp && " • Follow-up"}
+                    </Badge>
+                  )}
                   <p className="text-xs opacity-70 mt-2">
                     {message.timestamp.toLocaleTimeString([], {
                       hour: "2-digit",
@@ -728,78 +548,70 @@ export default function InterviewPage() {
                     })}
                   </p>
                 </div>
-
-                {message.type === "user" && (
-                  <Avatar className="w-8 h-8 bg-muted">
-                    <AvatarFallback>
-                      <User className="h-4 w-4" />
-                    </AvatarFallback>
-                  </Avatar>
-                )}
               </div>
-            ))}
+            </div>
+          ))}
 
-            {isTyping && (
-              <div className="flex gap-3 justify-start">
-                <Avatar className="w-8 h-8 bg-primary/20">
+          {isTyping && (
+            <div className="flex justify-start">
+              <div className="flex items-start space-x-3 max-w-[80%]">
+                <Avatar className="h-8 w-8">
                   <AvatarFallback>
-                    <Bot className="h-4 w-4 text-primary" />
+                    <Bot className="h-4 w-4" />
                   </AvatarFallback>
                 </Avatar>
-                <div className="bg-card border border-border rounded-lg p-4">
+                <div className="bg-white dark:bg-gray-800 shadow-sm border rounded-lg p-4">
                   <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-primary rounded-full animate-bounce" />
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                     <div
-                      className="w-2 h-2 bg-primary rounded-full animate-bounce"
+                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
                       style={{ animationDelay: "0.1s" }}
-                    />
+                    ></div>
                     <div
-                      className="w-2 h-2 bg-primary rounded-full animate-bounce"
+                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
                       style={{ animationDelay: "0.2s" }}
-                    />
+                    ></div>
                   </div>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            <div ref={messagesEndRef} />
-          </div>
+          <div ref={messagesEndRef} />
+        </div>
 
-          {/* Input Area */}
-          <Card className="border-border bg-card">
-            <CardContent className="p-4">
-              <div className="flex gap-2">
-                <div className="flex-1">
-                  {config.interviewMode === "whiteboard" ? (
-                    <Textarea
-                      placeholder="Write your code or explanation here... (Press Ctrl+Enter to send)"
-                      value={currentMessage}
-                      onChange={(e) => setCurrentMessage(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && e.ctrlKey) {
-                          e.preventDefault();
-                          sendMessage();
-                        }
-                      }}
-                      className="bg-input border-border min-h-[100px] font-mono"
-                      disabled={isTyping}
-                    />
-                  ) : (
-                    <Input
-                      placeholder="Type your response here... (Press Enter to send)"
-                      value={currentMessage}
-                      onChange={(e) => setCurrentMessage(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      className="bg-input border-border"
-                      disabled={isTyping}
-                    />
-                  )}
-                </div>
+        {/* Input Area */}
+        {!session.isComplete && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg border shadow-sm p-4">
+            <div className="flex space-x-3">
+              <div className="flex-1">
+                <Textarea
+                  value={currentMessage}
+                  onChange={(e) => setCurrentMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Type your response here..."
+                  className="min-h-[60px] resize-none"
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="flex flex-col space-y-2">
                 <Button
+                  onClick={sendMessage}
+                  disabled={!currentMessage.trim() || isLoading}
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {isLoading ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                </Button>
+                <Button
+                  onClick={isRecording ? stopRecording : startRecording}
                   variant="outline"
                   size="sm"
-                  onClick={isRecording ? stopRecording : startRecording}
-                  className="bg-transparent"
+                  className={isRecording ? "text-red-500" : ""}
                 >
                   {isRecording ? (
                     <MicOff className="h-4 w-4" />
@@ -807,31 +619,32 @@ export default function InterviewPage() {
                     <Mic className="h-4 w-4" />
                   )}
                 </Button>
-                <Button
-                  onClick={sendMessage}
-                  disabled={!currentMessage.trim() || isTyping}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
               </div>
+            </div>
+          </div>
+        )}
 
-              {config.interviewMode === "whiteboard" && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  Use Ctrl+Enter to send your code. Format your code with proper
-                  indentation.
-                </p>
-              )}
-
-              {isRecording && (
-                <div className="flex items-center gap-2 text-sm text-primary mt-2">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                  Recording audio response...
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+        {/* Interview Complete */}
+        {session.isComplete && (
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6 text-center">
+            <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-green-900 dark:text-green-100 mb-2">
+              Interview Complete!
+            </h3>
+            <p className="text-green-700 dark:text-green-300 mb-4">
+              Great job! Your interview responses are being analyzed.
+            </p>
+            <Button
+              onClick={() => {
+                window.location.href = "/results";
+              }}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <ArrowRight className="h-4 w-4 mr-2" />
+              View Results
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -40,6 +40,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import Logo from "@/components/atoms/logo-with-text";
 import { ThemeToggle } from "@/components/atoms/theme-toggle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -211,12 +212,8 @@ export default function DashboardPage() {
         className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}
       >
         <div className="flex items-center justify-between h-16 px-6 border-b border-sidebar-border">
-          <Link href="/" className="flex items-center space-x-2">
-            <Brain className="h-8 w-8 text-sidebar-primary" />
-            <span className="text-xl font-bold text-sidebar-foreground">
-              Grant Guide
-            </span>
-          </Link>
+          <Logo size="md" />
+
           <Button
             variant="ghost"
             size="sm"
@@ -334,7 +331,7 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-center space-x-4">
                 <Select value={timeRange} onValueChange={setTimeRange}>
-                  <SelectTrigger className="w-32 bg-input border-border">
+                  <SelectTrigger className="w-fit bg-input border-border">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -347,8 +344,8 @@ export default function DashboardPage() {
                 <ThemeToggle />
                 <Link href="/configure">
                   <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                    <Plus className="h-4 w-4 mr-2" />
                     New Interview
+                    <Plus className="size-4" />
                   </Button>
                 </Link>
               </div>
