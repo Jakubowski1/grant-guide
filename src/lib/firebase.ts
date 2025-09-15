@@ -1,6 +1,8 @@
-import { getApps, initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { type FirebaseApp, getApps, initializeApp } from "firebase/app";
+import { type Auth, getAuth } from "firebase/auth";
+import { type Firestore, getFirestore } from "firebase/firestore";
+import { type Functions, getFunctions } from "firebase/functions";
+import { firebaseMonitor } from "./firebase-monitor";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,10 +14,70 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase
-const app =
-  getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-const auth = getAuth(app);
-const db = getFirestore(app);
-export { auth, db };
+// Validate Firebase configuration
+const validateConfig = () => {
+  const requiredFields = ["apiKey", "authDomain", "projectId"];
+  const missing = requiredFields.filter(
+    (field) => !firebaseConfig[field as keyof typeof firebaseConfig],
+  );
+
+  if (missing.length > 0) {
+    const error = new Error(
+      `Missing Firebase configuration: ${missing.join(", ")}`,
+    );
+    firebaseMonitor.reportError(error, "configuration");
+    throw error;
+  }
+};
+
+// Initialize Firebase with proper typing
+let app: FirebaseApp | null;
+let auth: Auth | null;
+let db: Firestore | null;
+let functions: Functions | null;
+
+try {
+  validateConfig();
+  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+  auth = getAuth(app);
+  db = getFirestore(app);
+  functions = getFunctions(app);
+
+  firebaseMonitor.reportSuccess("initialization");
+  console.log("🟢 Firebase initialized successfully");
+} catch (error) {
+  firebaseMonitor.reportError(error, "initialization");
+  console.error("🔴 Firebase initialization failed:", error);
+  console.error(
+    "❗ This might be due to missing environment variables or invalid configuration",
+  );
+
+  // Set to null to prevent crashes
+  app = null;
+  auth = null;
+  db = null;
+  functions = null;
+}
+
+// Monitor Firebase connectivity in development
+if (process.env.NODE_ENV === "development" && typeof window !== "undefined") {
+  firebaseMonitor.onStatusChange((status) => {
+    if (status.lastError?.isConnectionError) {
+      console.warn("⚠️ Firebase connection issue detected:", {
+        error: status.lastError.message,
+        context: status.lastError.context,
+        attempts: status.connectionAttempts,
+        isOnline: status.isOnline,
+      });
+
+      if (status.connectionAttempts > 3) {
+        console.error(
+          "🚨 Multiple Firebase connection failures. Check your network and Firebase configuration.",
+        );
+      }
+    }
+  });
+}
+
+export { auth, db, functions };
 export default app;

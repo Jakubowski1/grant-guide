@@ -9,9 +9,9 @@
   --card: oklch(0.975 0 0); /* Light gray cards */
   --card-foreground: oklch(0.145 0 0); /* Dark text on cards */
   --popover: oklch(0.975 0 0); /* Light popover background */
-  --popover-foreground: oklch(0.145 0 0); /* Dark popover text */
-  --primary: oklch(0.68 0.15 162); /* Celadon primary */
-  --primary-foreground: oklch(0.985 0 0); /* Light text on celadon */
+  --popover-foreground: #0a0a0a; /* Dark popover text */
+  --primary: #6817ae; /* Celadon primary */
+  --primary-foreground: #fafafa; /* Light text on celadon */
   --secondary: oklch(0.95 0 0); /* Light gray secondary */
   --secondary-foreground: oklch(0.145 0 0); /* Dark text on secondary */
   --muted: oklch(0.95 0 0); /* Light muted gray */
@@ -20,46 +20,46 @@
   --accent-foreground: oklch(0.985 0 0); /* Light text on accent */
   --destructive: oklch(0.55 0.245 27.325); /* Red for errors */
   --destructive-foreground: oklch(0.985 0 0); /* White text on red */
-  --border: oklch(0.85 0 0); /* Light border */
-  --input: oklch(0.95 0 0); /* Light input background */
-  --ring: oklch(0.68 0.15 162); /* Celadon focus ring */
-  --chart-1: oklch(0.68 0.15 162); /* Celadon */
-  --chart-2: oklch(0.65 0.12 85); /* Green */
-  --chart-3: oklch(0.62 0.18 45); /* Yellow-green */
-  --chart-4: oklch(0.58 0.22 25); /* Orange */
-  --chart-5: oklch(0.55 0.25 220); /* Blue */
+  --border: #d1d5db; /* Light border */
+  --input: #f3f4f6; /* Light input background */
+  --ring: #00b47b; /* Celadon focus ring */
+  --chart-1: #00b47b; /* Celadon */
+  --chart-2: #4ade80; /* Green */
+  --chart-3: #a3e635; /* Yellow-green */
+  --chart-4: #f97316; /* Orange */
+  --chart-5: #3b82f6; /* Blue */
   --radius: 0.75rem; /* Slightly larger radius for futuristic feel */
-  --sidebar: oklch(0.975 0 0); /* Light sidebar */
-  --sidebar-foreground: oklch(0.145 0 0); /* Dark sidebar text */
-  --sidebar-primary: oklch(0.68 0.15 162); /* Celadon active items */
-  --sidebar-primary-foreground: oklch(0.985 0 0); /* Light text on celadon */
-  --sidebar-accent: oklch(0.95 0 0); /* Light sidebar accent */
-  --sidebar-accent-foreground: oklch(0.145 0 0); /* Dark accent text */
-  --sidebar-border: oklch(0.85 0 0); /* Light sidebar border */
+  --sidebar: #f9fafb; /* Light sidebar */
+  --sidebar-foreground: #0a0a0a; /* Dark sidebar text */
+  --sidebar-primary: #00b47b; /* Celadon active items */
+  --sidebar-primary-foreground: #fafafa; /* Light text on celadon */
+  --sidebar-accent: #f3f4f6; /* Light sidebar accent */
+  --sidebar-accent-foreground: #374151; /* Dark accent text */
+  --sidebar-border: #e5e7eb; /* Light sidebar border */
   --sidebar-ring: oklch(0.68 0.15 162); /* Celadon sidebar focus */
 }
 
 .dark {
   --background: oklch(0.08 0 0); /* Even deeper black */
   --foreground: oklch(0.985 0 0); /* Bright white */
-  --card: oklch(0.12 0 0); /* Very dark cards */
-  --card-foreground: oklch(0.985 0 0); /* White card text */
-  --popover: oklch(0.12 0 0); /* Dark popover */
-  --popover-foreground: oklch(0.985 0 0); /* White popover text */
-  --primary: oklch(0.78 0.18 162); /* Brighter celadon */
-  --primary-foreground: oklch(0.08 0 0); /* Deep black text */
-  --secondary: oklch(0.18 0 0); /* Darker secondary */
-  --secondary-foreground: oklch(0.985 0 0); /* White secondary text */
-  --muted: oklch(0.18 0 0); /* Darker muted */
-  --muted-foreground: oklch(0.65 0 0); /* Medium gray muted text */
-  --accent: oklch(0.78 0.18 162); /* Bright celadon accent */
-  --accent-foreground: oklch(0.08 0 0); /* Deep black accent text */
-  --destructive: oklch(0.55 0.28 25); /* Bright red */
-  --destructive-foreground: oklch(0.985 0 0); /* White destructive text */
-  --border: oklch(0.25 0 0); /* Medium dark border */
-  --input: oklch(0.18 0 0); /* Dark input */
-  --ring: oklch(0.78 0.18 162); /* Bright celadon ring */
-  --chart-1: oklch(0.78 0.18 162); /* Bright celadon */
+  --card: #121212; /* Very dark cards */
+  --card-foreground: #ffffff; /* White card text */
+  --popover: #121212; /* Dark popover */
+  --popover-foreground: #ffffff; /* White popover text */
+  --primary: #7309a4; /* Brighter celadon */
+  --primary-foreground: #ffffff; /* Deep black text */
+  --secondary: #181818; /* Darker secondary */
+  --secondary-foreground: #ffffff; /* White secondary text */
+  --muted: #181818; /* Darker muted */
+  --muted-foreground: #a0a0a0; /* Medium gray muted text */
+  --accent: #78c2a8; /* Bright celadon accent */
+  --accent-foreground: #080808; /* Deep black accent text */
+  --destructive: #e57373; /* Bright red */
+  --destructive-foreground: #ffffff; /* White destructive text */
+  --border: #404040; /* Medium dark border */
+  --input: #2d2d2d; /* Dark input */
+  --ring: #78c2a8; /* Bright celadon ring */
+  --chart-1: #78c2a8; /* Bright celadon */
   --chart-2: oklch(0.8 0.15 85); /* Bright green */
   --chart-3: oklch(0.75 0.2 45); /* Bright yellow-green */
   --chart-4: oklch(0.7 0.25 25); /* Bright orange */
@@ -134,6 +134,29 @@
   }
 }
 
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .animate-scroll {
   animation: scroll 20s linear infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+.delay-100 {
+  animation-delay: 0.1s;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
 }

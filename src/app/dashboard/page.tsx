@@ -41,7 +41,7 @@ import {
   YAxis,
 } from "recharts";
 import LoadingPage from "@/components/atoms/loading-page";
-import Logo from "@/components/atoms/logo-with-text";
+import Logo from "@/components/atoms/logo-grant-guide";
 import { ThemeToggle } from "@/components/atoms/theme-toggle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

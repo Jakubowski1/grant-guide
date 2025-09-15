@@ -36,8 +36,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (user) {
         // Fetch additional user data from Firestore
-        const data = await getUserData(user.uid);
-        setUserData(data);
+        try {
+          const data = await getUserData(user.uid);
+          setUserData(data);
+        } catch (error) {
+          // If getUserData fails (e.g., offline), we still set the user
+          // but with null userData. The app can still function with just auth data
+          console.warn(
+            "Failed to fetch user data, continuing with auth-only data:",
+            error,
+          );
+          setUserData(null);
+        }
       } else {
         setUserData(null);
       }
@@ -48,18 +58,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return () => unsubscribe();
   }, []);
 
-  const signOut = async () => {
-    const { logout } = await import("@/lib/auth");
-    await logout();
-    setUser(null);
-    setUserData(null);
+  const handleSignOut = async () => {
+    try {
+      const { signOutUser } = await import("@/lib/auth");
+      await signOutUser();
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
-
   const value = {
     user,
     userData,
     loading,
-    signOut,
+    signOut: handleSignOut,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

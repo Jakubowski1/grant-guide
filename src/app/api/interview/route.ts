@@ -89,6 +89,7 @@ interface InterviewConfig {
   interviewType: string;
   interviewMode: string;
   specificCompany?: string;
+  isDemoMode?: boolean;
 }
 
 interface Message {
@@ -101,10 +102,30 @@ interface Message {
 }
 
 function generateSystemPrompt(config: InterviewConfig): string {
-  const { position, seniority, interviewType, interviewMode, specificCompany } =
-    config;
+  const {
+    position,
+    seniority,
+    interviewType,
+    interviewMode,
+    specificCompany,
+    isDemoMode,
+  } = config;
 
-  const basePrompt = `You are an expert technical interviewer conducting a ${interviewType} interview for a ${seniority}-level ${position} position. Your role is to:
+  if (isDemoMode) {
+    return `You are Alex, a friendly AI demo guide showing users how the Grant Guide interview system works. Your role is to:
+
+1. Keep things casual and relaxed - this is just a demo!
+2. Ask only 2-3 simple, non-intimidating questions
+3. Be encouraging and supportive throughout
+4. Explain what you're doing as you go ("Now I'll ask you about...")
+5. Make it feel like exploring the system rather than being evaluated
+6. Use a conversational, friendly tone
+7. Remind users this is just practice and not being scored
+
+Keep questions broad and approachable - focus on letting them experience the interface rather than testing their knowledge. Think of yourself as a helpful guide rather than an interviewer.`;
+  }
+
+  const basePrompt = `You are Sarah, an expert technical interviewer conducting a ${interviewType} interview for a ${seniority}-level ${position} position. Your role is to:
 
 1. Ask appropriate questions for ${seniority} level (keep junior/mid questions simple and practical)
 2. Provide thoughtful follow-up questions based on candidate responses
@@ -211,9 +232,24 @@ function generateUserPrompt(
 ): string {
   let prompt = "";
 
+  if (config.isDemoMode) {
+    if (conversationHistory.length === 0) {
+      prompt = `This is the start of a demo session. Ask a simple, friendly introductory question that helps the user get comfortable with the system. Something like asking about their interests in tech or what they'd like to learn. Keep it very casual and non-intimidating.`;
+    } else if (questionCount < 2) {
+      prompt = `The user just responded: "${userMessage}"
+
+Ask a casual follow-up question that keeps the conversation flowing. This is still demo mode, so keep it light and conversational. Maybe ask about their experience level or what type of role they're interested in.`;
+    } else {
+      prompt = `The user just responded: "${userMessage}"
+
+This should be the final demo question. Ask something fun and encouraging that wraps up the demo nicely, like asking about their career goals or what they found interesting about the demo. Then let them know the demo is wrapping up.`;
+    }
+    return prompt;
+  }
+
   if (conversationHistory.length === 0) {
     // First question
-    prompt = `This is the start of a ${config.interviewType} interview. Please introduce yourself as the interviewer and ask the first question appropriate for a ${config.seniority}-level ${config.position} position.`;
+    prompt = `This is the start of a ${config.interviewType} interview. Please introduce yourself as Sarah, the interviewer, and ask the first question appropriate for a ${config.seniority}-level ${config.position} position.`;
   } else if (isFollowUp) {
     // Follow-up question
     const _lastUserMessage = conversationHistory

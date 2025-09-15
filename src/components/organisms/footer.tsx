@@ -1,4 +1,4 @@
-import Logo from "@/components/atoms/logo-with-text";
+import Logo from "@/components/atoms/logo-grant-guide";
 
 export default function Footer() {
   return (

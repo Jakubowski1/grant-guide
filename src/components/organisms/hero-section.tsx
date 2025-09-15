@@ -18,7 +18,6 @@ export default function HeroSection() {
           <span className="block">Master Your Next</span>
           <span className="text-primary block">Interview</span>
         </h1>
-
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto text-balance">
           Practice with AI-generated questions, get instant feedback, and track
           your progress with our futuristic interview preparation platform.

@@ -1,4 +1,4 @@
-import Logo from "@/components/atoms/logo-with-text";
+import Logo from "@/components/atoms/logo-grant-guide";
 
 interface LoadingPageProps {
   message?: string;
@@ -9,12 +9,9 @@ export default function LoadingPage({
 }: LoadingPageProps) {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-      <div className="text-center">
+      <div className="text-center animate-pulse space-y-4">
         <Logo size="md" />
-        <p className="mt-4 text-muted-foreground">{message}</p>
-        <div className="mt-4 flex justify-center">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-        </div>
+        <p className="text-muted-foreground">{message}</p>
       </div>
     </div>
   );

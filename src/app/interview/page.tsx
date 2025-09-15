@@ -10,14 +10,18 @@ import {
   Code,
   Mic,
   MicOff,
+  Pause,
   Play,
   Send,
+  Square,
   Target,
   Timer,
   User,
 } from "lucide-react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -46,6 +50,9 @@ interface InterviewSession {
   totalQuestions: number;
   startTime: Date;
   isComplete: boolean;
+  isPaused: boolean;
+  isDemoMode: boolean;
+  hasPersonalizedIntro: boolean;
 }
 
 export default function InterviewPage() {
@@ -60,6 +67,7 @@ export default function InterviewPage() {
         interviewMode: params.get("interviewMode") || "timed",
         interviewType: params.get("interviewType") || "technical",
         duration: params.get("duration") || "30",
+        isDemoMode: params.get("demo") === "true",
       };
     }
     return {
@@ -70,6 +78,7 @@ export default function InterviewPage() {
       interviewMode: "timed",
       interviewType: "technical",
       duration: "30",
+      isDemoMode: false,
     };
   });
 
@@ -77,9 +86,16 @@ export default function InterviewPage() {
   const [session, setSession] = useState<InterviewSession>({
     messages: [],
     currentQuestionCount: 0,
-    totalQuestions: config.interviewMode === "behavioral" ? 6 : 8,
+    totalQuestions: config.isDemoMode
+      ? 3
+      : config.interviewMode === "behavioral"
+        ? 6
+        : 8,
     startTime: new Date(),
     isComplete: false,
+    isPaused: false,
+    isDemoMode: config.isDemoMode,
+    hasPersonalizedIntro: false,
   });
 
   const [currentMessage, setCurrentMessage] = useState("");
@@ -214,6 +230,7 @@ export default function InterviewPage() {
     if (
       !isInterviewStarted ||
       session.isComplete ||
+      session.isPaused ||
       config.interviewMode === "untimed"
     )
       return;
@@ -229,7 +246,12 @@ export default function InterviewPage() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isInterviewStarted, session.isComplete, config.interviewMode]);
+  }, [
+    isInterviewStarted,
+    session.isComplete,
+    session.isPaused,
+    config.interviewMode,
+  ]);
 
   // Format time display
   const formatTime = (seconds: number) => {
@@ -239,42 +261,83 @@ export default function InterviewPage() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  // Pause/Resume interview
+  const pauseInterview = () => {
+    setSession((prev) => ({ ...prev, isPaused: true }));
+  };
+
+  const resumeInterview = () => {
+    setSession((prev) => ({ ...prev, isPaused: false }));
+  };
+
+  // Stop interview early
+  const stopInterview = () => {
+    setSession((prev) => ({ ...prev, isComplete: true }));
+
+    // Save progress
+    const sessionData = {
+      ...session,
+      isComplete: true,
+      endedEarly: true,
+      endTime: new Date(),
+    };
+
+    localStorage.setItem("interviewSession", JSON.stringify(sessionData));
+    localStorage.setItem("interviewConfig", JSON.stringify(config));
+  };
+
   // Start interview
   const startInterview = async () => {
     setIsInterviewStarted(true);
 
-    const welcomeMessages = {
-      timed: `Hello! I'm your AI interviewer for today's timed ${config.interviewType} interview session. You have ${config.duration} minutes to complete this interview. I'll be asking you questions about ${config.position} topics at a ${config.seniority} level. Please be concise but thorough in your responses. Ready to begin?`,
-      untimed: `Hello! Welcome to your practice ${config.interviewType} interview session. Take your time to think through each question - there's no time pressure here. I'll be asking you questions about ${config.position} topics at a ${config.seniority} level. Feel free to ask for clarification and think out loud. Ready to start?`,
-      behavioral: `Hi! I'm here to conduct your behavioral interview. We'll focus on your past experiences, decision-making process, and how you handle various workplace situations. I'll be looking for specific examples from your career as a ${config.position}. Take your time to provide detailed, thoughtful responses. Shall we begin?`,
-      whiteboard: `Welcome to your coding interview session! We'll be working through algorithm and system design problems together. Please explain your thought process as you work through each problem, consider edge cases, and optimize your solutions. Think of this as a collaborative problem-solving session. Ready to code?`,
-    };
-
-    const welcomeMessage: Message = {
-      id: "welcome",
+    // First message - simple welcome
+    const firstWelcomeMessage: Message = {
+      id: "welcome-1",
       type: "ai",
-      content:
-        welcomeMessages[config.interviewMode as keyof typeof welcomeMessages] +
-        (config.specificCompany
-          ? ` This interview is tailored for ${config.specificCompany.charAt(0).toUpperCase() + config.specificCompany.slice(1)}-style questions.`
-          : ""),
+      content: config.isDemoMode
+        ? "Hi! Welcome to the Grant Guide interview demo. This is a casual practice session where you can get familiar with our AI interview system. No pressure here - just think of this as talking to the system to see how it works!"
+        : "Hi! Welcome to your interview session. I'm excited to chat with you today!",
       timestamp: new Date(),
     };
 
     setSession((prev) => ({
       ...prev,
-      messages: [welcomeMessage],
+      messages: [firstWelcomeMessage],
       startTime: new Date(),
     }));
 
-    // Add first question after a delay
+    // Second message with personalization (after a delay)
     setTimeout(async () => {
-      const firstQuestion = await getAIResponse("", 0);
+      const personalizedIntro = config.isDemoMode
+        ? `I'm Alex, your demo guide! We'll go through just 2-3 casual questions to show you how our interview system works. Feel free to experiment with voice input, ask questions, or just explore the interface. This won't be recorded or scored.`
+        : `I'm Sarah, your AI interviewer today. I'll be conducting your ${config.interviewType} interview for the ${config.position} position at a ${config.seniority} level.${config.interviewMode !== "untimed" ? ` We have ${config.duration} minutes together.` : ""} You can pause or stop the interview at any time using the controls above. Ready to begin?`;
+
+      const personalizedMessage: Message = {
+        id: "welcome-2",
+        type: "ai",
+        content:
+          personalizedIntro +
+          (config.specificCompany
+            ? ` This interview is tailored for ${config.specificCompany.charAt(0).toUpperCase() + config.specificCompany.slice(1)}-style questions.`
+            : ""),
+        timestamp: new Date(),
+      };
+
       setSession((prev) => ({
         ...prev,
-        messages: [...prev.messages, firstQuestion],
-        currentQuestionCount: 1,
+        messages: [...prev.messages, personalizedMessage],
+        hasPersonalizedIntro: true,
       }));
+
+      // Add first question after another delay
+      setTimeout(async () => {
+        const firstQuestion = await getAIResponse("", 0);
+        setSession((prev) => ({
+          ...prev,
+          messages: [...prev.messages, firstQuestion],
+          currentQuestionCount: 1,
+        }));
+      }, 1500);
     }, 2000);
   };
 
@@ -309,22 +372,25 @@ export default function InterviewPage() {
         aiResponse = {
           id: `ai-complete-${Date.now()}`,
           type: "ai",
-          content:
-            "Excellent work! That concludes our interview session. You've demonstrated strong knowledge and problem-solving skills. I'll now analyze your responses and prepare detailed feedback. Thank you for your time!",
+          content: session.isDemoMode
+            ? "Great job exploring the demo! You've seen how our AI interview system works - it's conversational, supportive, and designed to help you showcase your best self. When you're ready for a full interview, just head back to the configure page. Thanks for trying it out!"
+            : "Excellent work! That concludes our interview session. You've demonstrated strong knowledge and problem-solving skills. I'll now analyze your responses and prepare detailed feedback. Thank you for your time!",
           timestamp: new Date(),
         };
 
-        // Save interview data for analysis
-        const updatedSession = {
-          ...session,
-          messages: [...session.messages, userMessage, aiResponse],
-          isComplete: true,
-        };
-        localStorage.setItem(
-          "interviewSession",
-          JSON.stringify(updatedSession),
-        );
-        localStorage.setItem("interviewConfig", JSON.stringify(config));
+        // Save interview data for analysis (skip for demo mode)
+        if (!session.isDemoMode) {
+          const updatedSession = {
+            ...session,
+            messages: [...session.messages, userMessage, aiResponse],
+            isComplete: true,
+          };
+          localStorage.setItem(
+            "interviewSession",
+            JSON.stringify(updatedSession),
+          );
+          localStorage.setItem("interviewConfig", JSON.stringify(config));
+        }
 
         setSession((prev) => ({ ...prev, isComplete: true }));
       } else {
@@ -386,50 +452,88 @@ export default function InterviewPage() {
               </div>
             </div>
             <CardTitle className="text-2xl font-bold">
-              Ready to Start?
+              {config.isDemoMode ? "Try the Demo!" : "Ready to Start?"}
             </CardTitle>
             <CardDescription className="text-lg">
-              Your AI-powered {config.interviewType} interview for{" "}
-              <span className="font-semibold">{config.position}</span>
+              {config.isDemoMode ? (
+                "Experience our AI interview system with a quick, no-pressure demo"
+              ) : (
+                <>
+                  Your AI-powered {config.interviewType} interview for{" "}
+                  <span className="font-semibold">{config.position}</span>
+                </>
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div className="space-y-2">
-                <Badge variant="outline" className="w-full justify-center">
-                  <Clock className="h-3 w-3 mr-1" />
-                  {config.interviewMode === "untimed"
-                    ? "Untimed"
-                    : `${config.duration} minutes`}
-                </Badge>
-                <Badge variant="outline" className="w-full justify-center">
-                  <Target className="h-3 w-3 mr-1" />
-                  {config.seniority} Level
-                </Badge>
-              </div>
-              <div className="space-y-2">
-                <Badge variant="outline" className="w-full justify-center">
-                  <Code className="h-3 w-3 mr-1" />
-                  {config.interviewType}
-                </Badge>
-                {config.specificCompany && (
+            {!config.isDemoMode && (
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="space-y-2">
                   <Badge variant="outline" className="w-full justify-center">
-                    <Building className="h-3 w-3 mr-1" />
-                    {config.specificCompany}
+                    <Clock className="h-3 w-3 mr-1" />
+                    {config.interviewMode === "untimed"
+                      ? "Untimed"
+                      : `${config.duration} minutes`}
                   </Badge>
-                )}
+                  <Badge variant="outline" className="w-full justify-center">
+                    <Target className="h-3 w-3 mr-1" />
+                    {config.seniority} Level
+                  </Badge>
+                </div>
+                <div className="space-y-2">
+                  <Badge variant="outline" className="w-full justify-center">
+                    <Code className="h-3 w-3 mr-1" />
+                    {config.interviewType}
+                  </Badge>
+                  {config.specificCompany && (
+                    <Badge variant="outline" className="w-full justify-center">
+                      <Building className="h-3 w-3 mr-1" />
+                      {config.specificCompany}
+                    </Badge>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
+
+            {config.isDemoMode && (
+              <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                <Badge variant="outline" className="mb-3">
+                  Demo Mode
+                </Badge>
+                <h3 className="font-semibold text-green-900 dark:text-green-100 mb-2">
+                  What to Expect:
+                </h3>
+                <ul className="text-sm text-green-700 dark:text-green-300 space-y-1">
+                  <li>• Just 2-3 casual practice questions</li>
+                  <li>• No scoring or recording</li>
+                  <li>• Try voice input and chat features</li>
+                  <li>• Get comfortable with the interface</li>
+                </ul>
+              </div>
+            )}
 
             <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
               <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
-                Interview Tips:
+                {config.isDemoMode ? "Demo Tips:" : "Interview Tips:"}
               </h3>
               <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                <li>• Think out loud to show your problem-solving process</li>
-                <li>• Ask clarifying questions when needed</li>
-                <li>• Use specific examples from your experience</li>
-                <li>• Take your time to understand each question fully</li>
+                {config.isDemoMode ? (
+                  <>
+                    <li>• Relax and explore - this is just practice!</li>
+                    <li>• Try the voice recording feature</li>
+                    <li>• Ask questions to see how the AI responds</li>
+                    <li>• Check out the pause/stop controls</li>
+                  </>
+                ) : (
+                  <>
+                    <li>
+                      • Think out loud to show your problem-solving process
+                    </li>
+                    <li>• Ask clarifying questions when needed</li>
+                    <li>• Use specific examples from your experience</li>
+                    <li>• Take your time to understand each question fully</li>
+                  </>
+                )}
               </ul>
             </div>
 
@@ -439,7 +543,7 @@ export default function InterviewPage() {
               size="lg"
             >
               <Play className="h-4 w-4 mr-2" />
-              Start Interview
+              {config.isDemoMode ? "Start Demo" : "Start Interview"}
             </Button>
           </CardContent>
         </Card>
@@ -466,7 +570,7 @@ export default function InterviewPage() {
             </div>
 
             <div className="flex items-center space-x-4">
-              {config.interviewMode !== "untimed" && (
+              {config.interviewMode !== "untimed" && !session.isDemoMode && (
                 <div className="flex items-center space-x-2">
                   <Timer className="h-4 w-4" />
                   <span
@@ -480,7 +584,18 @@ export default function InterviewPage() {
                   >
                     {formatTime(timeRemaining)}
                   </span>
+                  {session.isPaused && (
+                    <Badge variant="secondary" className="text-xs">
+                      Paused
+                    </Badge>
+                  )}
                 </div>
+              )}
+
+              {session.isDemoMode && (
+                <Badge variant="outline" className="text-xs">
+                  Demo Mode
+                </Badge>
               )}
 
               <div className="flex items-center space-x-2">
@@ -494,6 +609,44 @@ export default function InterviewPage() {
                 <span className="text-sm text-gray-600 dark:text-gray-400">
                   {session.currentQuestionCount}/{session.totalQuestions}
                 </span>
+              </div>
+
+              {/* Interview Controls */}
+              <div className="flex items-center space-x-2">
+                {!session.isComplete && (
+                  <>
+                    {session.isPaused ? (
+                      <Button
+                        onClick={resumeInterview}
+                        variant="outline"
+                        size="sm"
+                        className="text-green-600 hover:text-green-700"
+                      >
+                        <Play className="h-3 w-3 mr-1" />
+                        Resume
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={pauseInterview}
+                        variant="outline"
+                        size="sm"
+                        className="text-yellow-600 hover:text-yellow-700"
+                      >
+                        <Pause className="h-3 w-3 mr-1" />
+                        Pause
+                      </Button>
+                    )}
+                    <Button
+                      onClick={stopInterview}
+                      variant="outline"
+                      size="sm"
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Square className="h-3 w-3 mr-1" />
+                      Stop
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -532,9 +685,17 @@ export default function InterviewPage() {
                       : "bg-white dark:bg-gray-800 shadow-sm border"
                   }`}
                 >
-                  <p className="whitespace-pre-wrap leading-relaxed">
-                    {message.content}
-                  </p>
+                  {message.type === "ai" ? (
+                    <div className="prose prose-sm max-w-none dark:prose-invert prose-p:leading-relaxed prose-pre:bg-gray-100 dark:prose-pre:bg-gray-900 prose-code:bg-gray-100 dark:prose-code:bg-gray-900 prose-code:px-1 prose-code:py-0.5 prose-code:rounded">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="whitespace-pre-wrap leading-relaxed">
+                      {message.content}
+                    </p>
+                  )}
                   {message.questionType && (
                     <Badge variant="outline" className="mt-2 text-xs">
                       {message.questionType}
@@ -583,21 +744,34 @@ export default function InterviewPage() {
         {/* Input Area */}
         {!session.isComplete && (
           <div className="bg-white dark:bg-gray-800 rounded-lg border shadow-sm p-4">
+            {session.isPaused && (
+              <div className="mb-3 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded text-center">
+                <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                  Interview is paused. Click Resume to continue.
+                </p>
+              </div>
+            )}
             <div className="flex space-x-3">
               <div className="flex-1">
                 <Textarea
                   value={currentMessage}
                   onChange={(e) => setCurrentMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Type your response here..."
+                  placeholder={
+                    session.isPaused
+                      ? "Interview paused..."
+                      : "Type your response here..."
+                  }
                   className="min-h-[60px] resize-none"
-                  disabled={isLoading}
+                  disabled={isLoading || session.isPaused}
                 />
               </div>
               <div className="flex flex-col space-y-2">
                 <Button
                   onClick={sendMessage}
-                  disabled={!currentMessage.trim() || isLoading}
+                  disabled={
+                    !currentMessage.trim() || isLoading || session.isPaused
+                  }
                   size="sm"
                   className="bg-blue-600 hover:bg-blue-700"
                 >
@@ -612,6 +786,7 @@ export default function InterviewPage() {
                   variant="outline"
                   size="sm"
                   className={isRecording ? "text-red-500" : ""}
+                  disabled={session.isPaused}
                 >
                   {isRecording ? (
                     <MicOff className="h-4 w-4" />
@@ -629,20 +804,46 @@ export default function InterviewPage() {
           <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6 text-center">
             <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-green-900 dark:text-green-100 mb-2">
-              Interview Complete!
+              {session.isDemoMode ? "Demo Complete!" : "Interview Complete!"}
             </h3>
             <p className="text-green-700 dark:text-green-300 mb-4">
-              Great job! Your interview responses are being analyzed.
+              {session.isDemoMode
+                ? "Thanks for trying the demo! Ready for the real thing? Configure your interview settings and let's get started."
+                : "Great job! Your interview responses are being analyzed."}
             </p>
-            <Button
-              onClick={() => {
-                window.location.href = "/results";
-              }}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <ArrowRight className="h-4 w-4 mr-2" />
-              View Results
-            </Button>
+            <div className="flex gap-3 justify-center">
+              {session.isDemoMode ? (
+                <>
+                  <Button
+                    onClick={() => {
+                      window.location.href = "/configure";
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Play className="h-4 w-4 mr-2" />
+                    Start Real Interview
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      window.location.href = "/dashboard";
+                    }}
+                    variant="outline"
+                  >
+                    Back to Dashboard
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  onClick={() => {
+                    window.location.href = "/results";
+                  }}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <ArrowRight className="h-4 w-4 mr-2" />
+                  View Results
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </div>

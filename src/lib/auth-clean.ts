@@ -1,7 +1,6 @@
 import {
   type AuthError,
   createUserWithEmailAndPassword,
-  fetchSignInMethodsForEmail,
   signInWithEmailAndPassword as firebaseSignIn,
   GithubAuthProvider,
   GoogleAuthProvider,
@@ -33,40 +32,6 @@ export interface UserData {
   createdAt: Date;
   lastLoginAt: Date;
 }
-
-// Check if email already exists (fallback method)
-export const checkEmailExists = async (
-  email: string,
-): Promise<{ exists: boolean; error: string | null }> => {
-  try {
-    if (!auth) {
-      return {
-        exists: false,
-        error: "Firebase Auth is not properly initialized",
-      };
-    }
-
-    // Use fetchSignInMethodsForEmail to check if email exists
-    // This is a client-side method that works without Cloud Functions
-    const signInMethods = await fetchSignInMethodsForEmail(auth, email);
-    return { exists: signInMethods.length > 0, error: null };
-  } catch (error) {
-    const authError = error as AuthError;
-
-    // Firebase might have email enumeration protection enabled
-    // In this case, we can't reliably check if email exists beforehand
-    // So we'll return false and let the registration handle the duplicate email error
-    if (
-      authError.code === "auth/configuration-not-found" ||
-      authError.code === "auth/invalid-api-key" ||
-      authError.code === "auth/operation-not-allowed"
-    ) {
-      return { exists: false, error: null };
-    }
-
-    return { exists: false, error: getErrorMessage(authError) };
-  }
-};
 
 // Register with email and password
 export const registerWithEmailAndPassword = async (

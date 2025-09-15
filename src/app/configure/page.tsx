@@ -724,14 +724,28 @@ export default function ConfigurePage() {
                   )}
                 </div>
 
-                <Button
-                  onClick={handleStartInterview}
-                  size="lg"
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-                >
-                  Start Interview Session
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
+                <div className="space-y-3">
+                  <Button
+                    onClick={handleStartInterview}
+                    size="lg"
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                  >
+                    Start Interview Session
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+
+                  <Button
+                    onClick={() => {
+                      window.location.href = "/interview?demo=true";
+                    }}
+                    variant="outline"
+                    size="lg"
+                    className="w-full"
+                  >
+                    <Zap className="mr-2 h-4 w-4" />
+                    Try Demo First
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           )}

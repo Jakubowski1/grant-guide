@@ -125,13 +125,30 @@ const LightRays: React.FC<LightRaysProps> = ({
   useEffect(() => {
     if (scrollThreshold === undefined) return;
 
+    let ticking = false;
+    let timeoutId: NodeJS.Timeout;
+
     const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      setIsScrolledPastThreshold(scrollPosition > scrollThreshold);
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          clearTimeout(timeoutId);
+
+          timeoutId = setTimeout(() => {
+            const scrollPosition = window.scrollY;
+            setIsScrolledPastThreshold(scrollPosition > scrollThreshold);
+          }, 16); // Small debounce to smooth out rapid scroll events
+
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      clearTimeout(timeoutId);
+    };
   }, [scrollThreshold]);
 
   useEffect(() => {
@@ -345,7 +362,7 @@ void main() {
         }
 
         try {
-          renderer.render({ scene: mesh });
+          renderer.render({ scene: meshRef.current });
           animationIdRef.current = requestAnimationFrame(loop);
         } catch (error) {
           console.warn("WebGL rendering error:", error);
@@ -469,11 +486,17 @@ void main() {
   return (
     <div
       ref={containerRef}
-      className={`w-full h-full pointer-events-none z-[3] overflow-hidden relative transition-opacity duration-300 ${
+      className={`w-full h-full pointer-events-none z-[3] overflow-hidden relative transition-opacity duration-300 ease-out ${
         scrollThreshold !== undefined && isScrolledPastThreshold
           ? "opacity-0"
           : "opacity-100"
       } ${className}`.trim()}
+      style={{
+        visibility:
+          scrollThreshold !== undefined && isScrolledPastThreshold
+            ? "hidden"
+            : "visible",
+      }}
     />
   );
 };
