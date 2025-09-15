@@ -28,8 +28,10 @@ import {
   SiNetflix,
   SiSpotify,
   SiTesla,
+  
   SiUber,
 } from "react-icons/si";
+import { FaMicrosoft } from "react-icons/fa";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -192,7 +194,7 @@ export default function ConfigurePage() {
       value: "microsoft",
       label: "Microsoft",
       description: "Collaboration, technical depth",
-      icon: "SiMicrosoft",
+      icon: FaMicrosoft,
       color: "text-blue-500",
     },
     {

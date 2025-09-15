@@ -18,6 +18,7 @@ import {
   Timer,
   User,
 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -56,20 +57,11 @@ interface InterviewSession {
 }
 
 export default function InterviewPage() {
+  const searchParams = useSearchParams();
+  const [isHydrated, setIsHydrated] = useState(false);
+
   const [config] = useState(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      return {
-        position: params.get("position") || "Frontend Engineer",
-        seniority: params.get("seniority") || "mid",
-        companyProfile: params.get("companyProfile") || "",
-        specificCompany: params.get("specificCompany") || "",
-        interviewMode: params.get("interviewMode") || "timed",
-        interviewType: params.get("interviewType") || "technical",
-        duration: params.get("duration") || "30",
-        isDemoMode: params.get("demo") === "true",
-      };
-    }
+    // Always return default values during SSR
     return {
       position: "Frontend Engineer",
       seniority: "mid",
@@ -82,32 +74,67 @@ export default function InterviewPage() {
     };
   });
 
+  // Update config based on search params after hydration
+  const [actualConfig, setActualConfig] = useState(config);
+
+  useEffect(() => {
+    setIsHydrated(true);
+    setActualConfig({
+      position: searchParams.get("position") || "Frontend Engineer",
+      seniority: searchParams.get("seniority") || "mid",
+      companyProfile: searchParams.get("companyProfile") || "faang",
+      specificCompany: searchParams.get("specificCompany") || "",
+      interviewMode: searchParams.get("interviewMode") || "timed",
+      interviewType: searchParams.get("interviewType") || "technical",
+      duration: searchParams.get("duration") || "30",
+      isDemoMode: searchParams.get("demo") === "true",
+    });
+  }, [searchParams]);
+
   // Interview state
-  const [session, setSession] = useState<InterviewSession>({
+  const [session, setSession] = useState<InterviewSession>(() => ({
     messages: [],
     currentQuestionCount: 0,
-    totalQuestions: config.isDemoMode
-      ? 3
-      : config.interviewMode === "behavioral"
-        ? 6
-        : 8,
+    totalQuestions: 8, // Default value, will be updated after hydration
     startTime: new Date(),
     isComplete: false,
     isPaused: false,
-    isDemoMode: config.isDemoMode,
+    isDemoMode: false,
     hasPersonalizedIntro: false,
-  });
+  }));
+
+  // Update session when actualConfig changes
+  useEffect(() => {
+    if (isHydrated) {
+      setSession(prev => ({
+        ...prev,
+        totalQuestions: actualConfig.isDemoMode
+          ? 3
+          : actualConfig.interviewMode === "behavioral"
+            ? 6
+            : 8,
+        isDemoMode: actualConfig.isDemoMode,
+      }));
+    }
+  }, [isHydrated, actualConfig]);
 
   const [currentMessage, setCurrentMessage] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(() => {
-    if (config.interviewMode === "untimed") return Number.POSITIVE_INFINITY;
-    return Number.parseInt(config.duration, 10) * 60;
-  });
+  const [timeRemaining, setTimeRemaining] = useState(Number.POSITIVE_INFINITY);
   const [isInterviewStarted, setIsInterviewStarted] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Update time remaining when actualConfig changes
+  useEffect(() => {
+    if (isHydrated) {
+      const newTimeRemaining = actualConfig.interviewMode === "untimed" 
+        ? Number.POSITIVE_INFINITY 
+        : Number.parseInt(actualConfig.duration, 10) * 60;
+      setTimeRemaining(newTimeRemaining);
+    }
+  }, [isHydrated, actualConfig]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   // biome-ignore lint/suspicious/noExplicitAny: Speech Recognition API requires any type
@@ -176,7 +203,7 @@ export default function InterviewPage() {
         body: JSON.stringify({
           message: userMessage,
           conversationHistory: session.messages,
-          interviewConfig: config,
+          interviewConfig: actualConfig,
           questionCount,
           isFollowUp,
         }),
@@ -208,7 +235,7 @@ export default function InterviewPage() {
         content:
           "I apologize, but I'm experiencing technical difficulties. Could you please try again or rephrase your response?",
         timestamp: new Date(),
-        questionType: config.interviewType as
+        questionType: actualConfig.interviewType as
           | "technical"
           | "behavioral"
           | "coding"
@@ -231,7 +258,7 @@ export default function InterviewPage() {
       !isInterviewStarted ||
       session.isComplete ||
       session.isPaused ||
-      config.interviewMode === "untimed"
+      actualConfig.interviewMode === "untimed"
     )
       return;
 
@@ -250,7 +277,7 @@ export default function InterviewPage() {
     isInterviewStarted,
     session.isComplete,
     session.isPaused,
-    config.interviewMode,
+    actualConfig.interviewMode,
   ]);
 
   // Format time display
@@ -283,7 +310,7 @@ export default function InterviewPage() {
     };
 
     localStorage.setItem("interviewSession", JSON.stringify(sessionData));
-    localStorage.setItem("interviewConfig", JSON.stringify(config));
+    localStorage.setItem("interviewConfig", JSON.stringify(actualConfig));
   };
 
   // Start interview
@@ -294,7 +321,7 @@ export default function InterviewPage() {
     const firstWelcomeMessage: Message = {
       id: "welcome-1",
       type: "ai",
-      content: config.isDemoMode
+      content: actualConfig.isDemoMode
         ? "Hi! Welcome to the Grant Guide interview demo. This is a casual practice session where you can get familiar with our AI interview system. No pressure here - just think of this as talking to the system to see how it works!"
         : "Hi! Welcome to your interview session. I'm excited to chat with you today!",
       timestamp: new Date(),
@@ -308,17 +335,17 @@ export default function InterviewPage() {
 
     // Second message with personalization (after a delay)
     setTimeout(async () => {
-      const personalizedIntro = config.isDemoMode
+      const personalizedIntro = actualConfig.isDemoMode
         ? `I'm Alex, your demo guide! We'll go through just 2-3 casual questions to show you how our interview system works. Feel free to experiment with voice input, ask questions, or just explore the interface. This won't be recorded or scored.`
-        : `I'm Sarah, your AI interviewer today. I'll be conducting your ${config.interviewType} interview for the ${config.position} position at a ${config.seniority} level.${config.interviewMode !== "untimed" ? ` We have ${config.duration} minutes together.` : ""} You can pause or stop the interview at any time using the controls above. Ready to begin?`;
+        : `I'm Sarah, your AI interviewer today. I'll be conducting your ${actualConfig.interviewType} interview for the ${actualConfig.position} position at a ${actualConfig.seniority} level.${actualConfig.interviewMode !== "untimed" ? ` We have ${actualConfig.duration} minutes together.` : ""} You can pause or stop the interview at any time using the controls above. Ready to begin?`;
 
       const personalizedMessage: Message = {
         id: "welcome-2",
         type: "ai",
         content:
           personalizedIntro +
-          (config.specificCompany
-            ? ` This interview is tailored for ${config.specificCompany.charAt(0).toUpperCase() + config.specificCompany.slice(1)}-style questions.`
+          (actualConfig.specificCompany
+            ? ` This interview is tailored for ${actualConfig.specificCompany.charAt(0).toUpperCase() + actualConfig.specificCompany.slice(1)}-style questions.`
             : ""),
         timestamp: new Date(),
       };
@@ -443,7 +470,7 @@ export default function InterviewPage() {
 
   if (!isInterviewStarted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 flex items-center justify-center p-4">
+      <div className="min-h-screen  dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 flex items-center justify-center p-4">
         <Card className="w-full max-w-2xl">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
@@ -452,32 +479,32 @@ export default function InterviewPage() {
               </div>
             </div>
             <CardTitle className="text-2xl font-bold">
-              {config.isDemoMode ? "Try the Demo!" : "Ready to Start?"}
+              {actualConfig.isDemoMode ? "Try the Demo!" : "Ready to Start?"}
             </CardTitle>
             <CardDescription className="text-lg">
-              {config.isDemoMode ? (
+              {actualConfig.isDemoMode ? (
                 "Experience our AI interview system with a quick, no-pressure demo"
               ) : (
                 <>
-                  Your AI-powered {config.interviewType} interview for{" "}
-                  <span className="font-semibold">{config.position}</span>
+                  Your AI-powered {actualConfig.interviewType} interview for{" "}
+                  <span className="font-semibold">{actualConfig.position}</span>
                 </>
               )}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {!config.isDemoMode && (
+            {!actualConfig.isDemoMode && (
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="space-y-2">
                   <Badge variant="outline" className="w-full justify-center">
                     <Clock className="h-3 w-3 mr-1" />
-                    {config.interviewMode === "untimed"
+                    {actualConfig.interviewMode === "untimed"
                       ? "Untimed"
-                      : `${config.duration} minutes`}
+                      : `${actualConfig.duration} minutes`}
                   </Badge>
                   <Badge variant="outline" className="w-full justify-center">
                     <Target className="h-3 w-3 mr-1" />
-                    {config.seniority} Level
+                    {actualConfig.seniority} Level
                   </Badge>
                 </div>
                 <div className="space-y-2">
@@ -539,7 +566,7 @@ export default function InterviewPage() {
 
             <Button
               onClick={startInterview}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              variant="default"
               size="lg"
             >
               <Play className="h-4 w-4 mr-2" />
@@ -551,8 +578,24 @@ export default function InterviewPage() {
     );
   }
 
+  // Don't render until hydrated to prevent hydration mismatch
+  if (!isHydrated) {
+    return (
+      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+        <Card className="w-full max-w-4xl">
+          <CardContent className="p-8 text-center">
+            <div className="animate-pulse">
+              <div className="h-4 bg-gray-300 rounded w-3/4 mx-auto mb-4"></div>
+              <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto"></div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
+    <div className="min-h-screen  ">
       {/* Header */}
       <div className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-md sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4">

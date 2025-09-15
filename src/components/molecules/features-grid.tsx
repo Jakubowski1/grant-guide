@@ -64,7 +64,6 @@ export default function FeaturesGrid() {
             className="border-border bg-card hover:bg-card/80 transition-colors"
           >
             <CardHeader>
-              <feature.icon className="h-12 w-12 text-primary mb-4" />
               <CardTitle>{feature.title}</CardTitle>
               <CardDescription>{feature.description}</CardDescription>
             </CardHeader>
