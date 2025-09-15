@@ -32,6 +32,7 @@ import {
   SiUber,
 } from "react-icons/si";
 import { FaMicrosoft } from "react-icons/fa";
+import DashboardLayout from "@/components/organisms/dashboard-layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -320,7 +321,7 @@ export default function ConfigurePage() {
     config.interviewType;
 
   return (
-    <div className="min-h-screen bg-background">
+    <DashboardLayout title="Configure Your Interview">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
         <div className="text-center mb-12">
@@ -753,6 +754,6 @@ export default function ConfigurePage() {
           )}
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }

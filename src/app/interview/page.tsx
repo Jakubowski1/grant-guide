@@ -23,6 +23,7 @@ import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import DashboardLayout from "@/components/organisms/dashboard-layout";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -594,107 +595,110 @@ export default function InterviewPage() {
     );
   }
 
-  return (
-    <div className="min-h-screen  ">
-      {/* Header */}
-      <div className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-md sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
-                <Brain className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold">AI Interview Session</h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {config.position} • {config.seniority} level
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              {config.interviewMode !== "untimed" && !session.isDemoMode && (
-                <div className="flex items-center space-x-2">
-                  <Timer className="h-4 w-4" />
-                  <span
-                    className={`font-mono font-bold ${
-                      timeRemaining < 300
-                        ? "text-red-500"
-                        : timeRemaining < 600
-                          ? "text-yellow-500"
-                          : "text-green-500"
-                    }`}
-                  >
-                    {formatTime(timeRemaining)}
-                  </span>
-                  {session.isPaused && (
-                    <Badge variant="secondary" className="text-xs">
-                      Paused
-                    </Badge>
-                  )}
-                </div>
-              )}
-
-              {session.isDemoMode && (
-                <Badge variant="outline" className="text-xs">
-                  Demo Mode
-                </Badge>
-              )}
-
-              <div className="flex items-center space-x-2">
-                <Progress
-                  value={
-                    (session.currentQuestionCount / session.totalQuestions) *
-                    100
-                  }
-                  className="w-24"
-                />
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  {session.currentQuestionCount}/{session.totalQuestions}
-                </span>
-              </div>
-
-              {/* Interview Controls */}
-              <div className="flex items-center space-x-2">
-                {!session.isComplete && (
-                  <>
-                    {session.isPaused ? (
-                      <Button
-                        onClick={resumeInterview}
-                        variant="outline"
-                        size="sm"
-                        className="text-green-600 hover:text-green-700"
-                      >
-                        <Play className="h-3 w-3 mr-1" />
-                        Resume
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={pauseInterview}
-                        variant="outline"
-                        size="sm"
-                        className="text-yellow-600 hover:text-yellow-700"
-                      >
-                        <Pause className="h-3 w-3 mr-1" />
-                        Pause
-                      </Button>
-                    )}
-                    <Button
-                      onClick={stopInterview}
-                      variant="outline"
-                      size="sm"
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Square className="h-3 w-3 mr-1" />
-                      Stop
-                    </Button>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
+  // Create navbar actions for interview controls
+  const navbarActions = (
+    <>
+      {actualConfig.interviewMode !== "untimed" && !session.isDemoMode && (
+        <div className="flex items-center space-x-2">
+          <Timer className="h-4 w-4" />
+          <span
+            className={`font-mono font-bold text-sm ${
+              timeRemaining < 300
+                ? "text-red-500"
+                : timeRemaining < 600
+                  ? "text-yellow-500"
+                  : "text-green-500"
+            }`}
+          >
+            {formatTime(timeRemaining)}
+          </span>
+          {session.isPaused && (
+            <Badge variant="secondary" className="text-xs">
+              Paused
+            </Badge>
+          )}
         </div>
+      )}
+
+      {session.isDemoMode && (
+        <Badge variant="outline" className="text-xs">
+          Demo Mode
+        </Badge>
+      )}
+
+      <div className="flex items-center space-x-2">
+        <Progress
+          value={
+            (session.currentQuestionCount / session.totalQuestions) * 100
+          }
+          className="w-24"
+        />
+        <span className="text-sm text-gray-600 dark:text-gray-400">
+          {session.currentQuestionCount}/{session.totalQuestions}
+        </span>
       </div>
+
+      {/* Interview Controls */}
+      <div className="flex items-center space-x-2">
+        {!session.isComplete && (
+          <>
+            {session.isPaused ? (
+              <Button
+                onClick={resumeInterview}
+                variant="outline"
+                size="sm"
+                className="text-green-600 hover:text-green-700"
+              >
+                <Play className="h-3 w-3 mr-1" />
+                Resume
+              </Button>
+            ) : (
+              <Button
+                onClick={pauseInterview}
+                variant="outline"
+                size="sm"
+                className="text-yellow-600 hover:text-yellow-700"
+              >
+                <Pause className="h-3 w-3 mr-1" />
+                Pause
+              </Button>
+            )}
+            <Button
+              onClick={stopInterview}
+              variant="outline"
+              size="sm"
+              className="text-red-600 hover:text-red-700"
+            >
+              <Square className="h-3 w-3 mr-1" />
+              Stop
+            </Button>
+          </>
+        )}
+      </div>
+    </>
+  );
+
+  // Create navbar children for interview info
+  const navbarChildren = (
+    <div className="flex items-center space-x-4 lg:hidden">
+      <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
+        <Brain className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+      </div>
+      <div>
+        <h1 className="text-lg font-bold">AI Interview Session</h1>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          {actualConfig.position} • {actualConfig.seniority} level
+        </p>
+      </div>
+    </div>
+  );
+
+  return (
+    <DashboardLayout 
+      title="AI Interview Session"
+      navbarActions={navbarActions}
+      navbarChildren={navbarChildren}
+    >
 
       {/* Chat Interface */}
       <div className="max-w-4xl mx-auto p-4 h-[calc(100vh-120px)] flex flex-col">
@@ -890,6 +894,6 @@ export default function InterviewPage() {
           </div>
         )}
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
