@@ -21,6 +21,9 @@ const googleProvider = new GoogleAuthProvider();
 // Add scopes for GitHub
 githubProvider.addScope("user:email");
 
+googleProvider.addScope("email");
+googleProvider.addScope("profile");
+
 // User data interface
 export interface UserData {
   uid: string;
