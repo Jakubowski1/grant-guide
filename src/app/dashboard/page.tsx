@@ -62,6 +62,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
+import { useDashboardData } from "@/hooks/useDashboardData";
 import { useAuth } from "@/providers/auth-provider";
 
 export default function DashboardPage() {
@@ -70,135 +71,86 @@ export default function DashboardPage() {
   const [timeRange, setTimeRange] = useState("30d");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Show loading while checking auth state
-  if (authLoading) {
+  // Import the dashboard data hook
+  const dashboardData = useDashboardData();
+
+  // Show loading while checking auth state or loading dashboard data
+  if (authLoading || dashboardData.loading) {
     return <LoadingPage message="Loading dashboard..." />;
+  }
+
+  // Show error if dashboard data failed to load
+  if (dashboardData.error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-foreground mb-2">
+            Error Loading Dashboard
+          </h2>
+          <p className="text-muted-foreground mb-4">{dashboardData.error}</p>
+          <Button onClick={() => window.location.reload()}>Reload Page</Button>
+        </div>
+      </div>
+    );
   }
 
   const handleSignOut = async () => {
     await signOut();
   };
 
-  // Mock data - would come from real analytics
-  const recentSessions = [
+  // Use real data from the dashboard hook
+  const { recentSessions, stats, skills } = dashboardData;
+
+  // Convert session data for display
+  const displaySessions = recentSessions.slice(0, 5).map((session, index) => ({
+    id: index + 1,
+    position: session.config?.position || "Interview Session",
+    score: session.scores?.overall || 0,
+    date: session.createdAt
+      ? new Date(session.createdAt.toDate()).toLocaleDateString()
+      : "Unknown",
+    duration: `${session.totalDuration || 0} min`,
+    type: session.config?.interviewType || "general",
+    improvement: "+0%", // TODO: Calculate improvement from historical data
+  }));
+
+  // Performance over time data from real sessions
+  const performanceData = recentSessions
+    .filter((session) => session.status === "completed" && session.scores)
+    .slice(-7) // Last 7 sessions
+    .map((session, index) => ({
+      date: session.createdAt
+        ? new Date(session.createdAt.toDate()).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+          })
+        : `Session ${index + 1}`,
+      overall: session.scores?.overall || 0,
+      technical: session.scores?.technical || 0,
+      communication: session.scores?.communication || 0,
+      problemSolving: session.scores?.problemSolving || 0,
+    }));
+
+  // Fallback data if no sessions exist yet
+  const fallbackPerformanceData = [
     {
-      id: 1,
-      position: "Frontend Engineer",
-      score: 85,
-      date: "2025-01-02",
-      duration: "30 min",
-      type: "technical",
-      improvement: "+5%",
-    },
-    {
-      id: 2,
-      position: "Backend Engineer",
-      score: 78,
-      date: "2025-01-01",
-      duration: "45 min",
-      type: "behavioral",
-      improvement: "+12%",
-    },
-    {
-      id: 3,
-      position: "Full Stack Engineer",
-      score: 92,
-      date: "2024-12-30",
-      duration: "60 min",
-      type: "coding",
-      improvement: "+8%",
-    },
-    {
-      id: 4,
-      position: "DevOps Engineer",
-      score: 73,
-      date: "2024-12-28",
-      duration: "35 min",
-      type: "technical",
-      improvement: "+3%",
-    },
-    {
-      id: 5,
-      position: "Frontend Engineer",
-      score: 88,
-      date: "2024-12-25",
-      duration: "40 min",
-      type: "behavioral",
-      improvement: "+15%",
+      date: "Start Here",
+      overall: 50,
+      technical: 50,
+      communication: 50,
+      problemSolving: 50,
     },
   ];
 
-  const stats = {
-    totalSessions: 12,
-    averageScore: 83,
-    improvementRate: 15,
-    streakDays: 7,
-    totalTime: 420, // minutes
-    questionsAnswered: 48,
-  };
-
-  // Performance over time data
-  const performanceData = [
-    {
-      date: "Dec 20",
-      overall: 65,
-      technical: 60,
-      communication: 70,
-      problemSolving: 68,
-    },
-    {
-      date: "Dec 22",
-      overall: 68,
-      technical: 65,
-      communication: 72,
-      problemSolving: 70,
-    },
-    {
-      date: "Dec 25",
-      overall: 72,
-      technical: 70,
-      communication: 75,
-      problemSolving: 71,
-    },
-    {
-      date: "Dec 28",
-      overall: 75,
-      technical: 73,
-      communication: 78,
-      problemSolving: 74,
-    },
-    {
-      date: "Dec 30",
-      overall: 80,
-      technical: 78,
-      communication: 82,
-      problemSolving: 79,
-    },
-    {
-      date: "Jan 01",
-      overall: 83,
-      technical: 82,
-      communication: 85,
-      problemSolving: 82,
-    },
-    {
-      date: "Jan 02",
-      overall: 85,
-      technical: 85,
-      communication: 87,
-      problemSolving: 84,
-    },
-  ];
-
-  // Skills breakdown data
-  const skillsData = [
-    { skill: "JavaScript", score: 88, sessions: 8, color: "#68d391" },
-    { skill: "React", score: 85, sessions: 6, color: "#4fd1c7" },
-    { skill: "System Design", score: 72, sessions: 4, color: "#63b3ed" },
-    { skill: "Algorithms", score: 78, sessions: 5, color: "#f6ad55" },
-    { skill: "Communication", score: 90, sessions: 12, color: "#fc8181" },
-    { skill: "Problem Solving", score: 82, sessions: 10, color: "#d69e2e" },
-  ];
+  // Skills breakdown data from real database
+  const skillsData = skills.slice(0, 6).map((skill, index) => ({
+    skill: skill.name,
+    score: skill.currentLevel * 10, // Convert 1-10 scale to percentage
+    sessions: skill.practiceCount || 0,
+    color: ["#68d391", "#4fd1c7", "#63b3ed", "#f6ad55", "#fc8181", "#d69e2e"][
+      index % 6
+    ],
+  }));
 
   // Question types distribution
   const questionTypesData = [
@@ -487,7 +439,13 @@ export default function DashboardPage() {
                   </CardHeader>
                   <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
-                      <AreaChart data={performanceData}>
+                      <AreaChart
+                        data={
+                          performanceData.length > 0
+                            ? performanceData
+                            : fallbackPerformanceData
+                        }
+                      >
                         <CartesianGrid
                           strokeDasharray="3 3"
                           stroke="hsl(var(--border))"
@@ -527,7 +485,7 @@ export default function DashboardPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {recentSessions.slice(0, 4).map((session) => (
+                      {displaySessions.slice(0, 4).map((session) => (
                         <div
                           key={session.id}
                           className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20"
@@ -590,7 +548,13 @@ export default function DashboardPage() {
                   </CardHeader>
                   <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
-                      <LineChart data={performanceData}>
+                      <LineChart
+                        data={
+                          performanceData.length > 0
+                            ? performanceData
+                            : fallbackPerformanceData
+                        }
+                      >
                         <CartesianGrid
                           strokeDasharray="3 3"
                           stroke="hsl(var(--border))"

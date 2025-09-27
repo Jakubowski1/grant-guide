@@ -255,7 +255,7 @@ export default function AuthForm({
     setIsLoading(true);
     setError("");
     try {
- const { user, error } = await signInWithGoogle();
+      const { user, error } = await signInWithGoogle();
 
       if (error) {
         setError(error);

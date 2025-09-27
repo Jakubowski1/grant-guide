@@ -1,11 +1,12 @@
 "use client";
 
+import { LogOut, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Logo from "@/components/atoms/logo-grant-guide";
 import { ThemeToggle } from "@/components/atoms/theme-toggle";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +15,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/providers/auth-provider";
-import { User, LogOut, Settings } from "lucide-react";
 
 interface NavbarProps {
   scrollThreshold?: number;
@@ -110,9 +110,7 @@ export default function Navbar({ scrollThreshold = 100 }: NavbarProps) {
                         alt={userData?.displayName || "User"}
                       />
                       <AvatarFallback className="bg-primary/10">
-                        {getInitials(
-                          userData?.displayName || user.displayName,
-                        )}
+                        {getInitials(userData?.displayName || user.displayName)}
                       </AvatarFallback>
                     </Avatar>
                   </Button>

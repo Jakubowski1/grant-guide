@@ -1,13 +1,12 @@
 import { type FirebaseApp, getApps, initializeApp } from "firebase/app";
 import { type Auth, getAuth } from "firebase/auth";
-import { 
-  type Firestore, 
+import {
+  CACHE_SIZE_UNLIMITED,
+  disableNetwork,
+  enableNetwork,
+  type Firestore,
   getFirestore,
   initializeFirestore,
-  connectFirestoreEmulator,
-  enableNetwork,
-  disableNetwork,
-  CACHE_SIZE_UNLIMITED
 } from "firebase/firestore";
 import { type Functions, getFunctions } from "firebase/functions";
 import { firebaseMonitor } from "./firebase-monitor";
@@ -48,17 +47,17 @@ try {
   validateConfig();
   app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
   auth = getAuth(app);
-  
+
   // Initialize Firestore with better offline handling
   if (getApps().length === 0) {
     db = initializeFirestore(app, {
       cacheSizeBytes: CACHE_SIZE_UNLIMITED,
-      experimentalForceLongPolling: true, // Forces long polling instead of WebSocket
+      // Removed experimentalForceLongPolling as it causes internal assertion failures in Firebase v12.2.x
     });
   } else {
     db = getFirestore(app);
   }
-  
+
   functions = getFunctions(app);
 
   firebaseMonitor.reportSuccess("initialization");
@@ -126,13 +125,13 @@ export const disableFirestoreNetwork = async () => {
 
 // Auto-reconnect logic for network issues
 if (typeof window !== "undefined") {
-  window.addEventListener('online', () => {
-    console.log('🌐 Network back online, enabling Firestore');
+  window.addEventListener("online", () => {
+    console.log("🌐 Network back online, enabling Firestore");
     enableFirestoreNetwork();
   });
-  
-  window.addEventListener('offline', () => {
-    console.log('🌐 Network offline, disabling Firestore');
+
+  window.addEventListener("offline", () => {
+    console.log("🌐 Network offline, disabling Firestore");
     disableFirestoreNetwork();
   });
 }

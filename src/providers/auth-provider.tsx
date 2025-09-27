@@ -43,10 +43,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         } catch (error) {
           // If getUserData fails (e.g., offline), we still set the user
           // but with null userData. The app can still function with just auth data
-          console.warn(
+          console.error(
             "Failed to fetch user data, continuing with auth-only data:",
             error,
           );
+          // Check if it's a Firestore internal assertion error
+          if (
+            error instanceof Error &&
+            error.message.includes("INTERNAL ASSERTION FAILED")
+          ) {
+            console.error(
+              "🚨 FIRESTORE INTERNAL ASSERTION ERROR detected in auth provider:",
+              error.message,
+            );
+          }
           setUserData(null);
         }
       } else {

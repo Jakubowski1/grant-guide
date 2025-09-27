@@ -91,7 +91,7 @@ export class FirebaseStatusMonitor {
       "unavailable",
       "deadline-exceeded",
       "400",
-      "bad request", 
+      "bad request",
       "WebChannelConnection",
       "transport errored",
       "Listen",

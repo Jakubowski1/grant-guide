@@ -11,9 +11,11 @@ import {
   type User,
   updateProfile,
 } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
+import type { UserProfile } from "../types/firestore";
+import { DatabaseService } from "./database";
 import { auth, db } from "./firebase";
-import { safeGetDoc, safeSetDoc, safeUpdateDoc } from "./firestore-utils";
+import { safeSetDoc } from "./firestore-utils";
 
 // Auth providers
 const githubProvider = new GithubAuthProvider();
@@ -25,7 +27,7 @@ githubProvider.addScope("user:email");
 googleProvider.addScope("email");
 googleProvider.addScope("profile");
 
-// User data interface
+// User data interface (for backward compatibility)
 export interface UserData {
   uid: string;
   email: string;
@@ -37,6 +39,19 @@ export interface UserData {
   createdAt: Date;
   lastLoginAt: Date;
 }
+
+// Convert UserProfile to UserData for backward compatibility
+const userProfileToUserData = (profile: UserProfile): UserData => ({
+  uid: profile.uid,
+  email: profile.email,
+  displayName: profile.displayName,
+  photoURL: profile.photoURL,
+  role: profile.role,
+  experience: profile.experience,
+  howDidYouHear: profile.howDidYouHear,
+  createdAt: profile.createdAt.toDate(),
+  lastLoginAt: profile.lastLoginAt.toDate(),
+});
 
 // Check if email already exists (fallback method)
 export const checkEmailExists = async (
@@ -103,20 +118,17 @@ export const registerWithEmailAndPassword = async (
     // Update the user's display name
     await updateProfile(user, { displayName });
 
-    // Save additional user data to Firestore
-    const userData: UserData = {
-      uid: user.uid,
+    // Create comprehensive user profile with default skills using our database service
+    const profileData = {
       email: user.email || "",
       displayName,
       photoURL: user.photoURL || undefined,
       role: additionalData.role,
       experience: additionalData.experience,
       howDidYouHear: additionalData.howDidYouHear,
-      createdAt: new Date(),
-      lastLoginAt: new Date(),
     };
 
-    await safeSetDoc(doc(db, "users", user.uid), userData);
+    await DatabaseService.createUserWithCompleteProfile(user.uid, profileData);
 
     return { user, error: null };
   } catch (error) {
@@ -241,50 +253,39 @@ export const signOutUser = async (): Promise<{ error: string | null }> => {
   }
 };
 
-// Update user's last login time
+// Update user's last login time using our database service
 const updateUserLastLogin = async (uid: string) => {
   try {
-    if (!db) {
-      console.warn("Firestore is not initialized, skipping last login update");
-      return;
-    }
-    await safeSetDoc(
-      doc(db, "users", uid),
-      { lastLoginAt: new Date() },
-      { merge: true },
-    );
+    await DatabaseService.updateLastLogin(uid);
   } catch (error) {
     console.error("Error updating last login:", error);
   }
 };
 
-// Get user data from Firestore
+// Get user data from Firestore using our database service
 export const getUserData = async (uid: string): Promise<UserData | null> => {
   try {
-    if (!db) {
-      console.warn("Firestore is not initialized, skipping user data fetch");
-      return null;
-    }
-
     console.log("🔍 getUserData called for uid:", uid);
-    const userDoc = await safeGetDoc(doc(db, "users", uid));
-    console.log("🔍 User document exists:", userDoc.exists());
-    
-    if (userDoc.exists()) {
-      const data = userDoc.data() as UserData;
-      console.log("✅ User data retrieved:", data);
-      return data;
+
+    // Use our comprehensive database service to get user profile
+    const profile = await DatabaseService.getUserProfile(uid);
+
+    if (profile) {
+      console.log("✅ User profile retrieved:", profile);
+      // Convert UserProfile to UserData for backward compatibility
+      return userProfileToUserData(profile);
     } else {
-      console.log("❌ User document does not exist in Firestore for uid:", uid);
+      console.log("❌ User profile does not exist in Firestore for uid:", uid);
       return null;
     }
   } catch (error: unknown) {
-    // Handle specific Firebase errors gracefully
     const firebaseError = error as { code?: string; message?: string };
     console.error("❌ Error getting user data:", error);
-    
+
     if (firebaseError?.code === "permission-denied") {
-      console.error("❌ Permission denied: User document access not allowed. Check Firestore security rules.");
+      console.error(
+        "❌ Permission denied: User document access not allowed. Check Firestore security rules.",
+      );
     } else if (firebaseError?.code === "not-found") {
       console.warn("⚠️ User document not found in Firestore for uid:", uid);
     } else {

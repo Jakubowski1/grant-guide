@@ -16,10 +16,7 @@ import {
   Home,
   LogOut,
   Menu,
-  MessageSquare,
-  PenTool,
   Plus,
-  Search,
   Server,
   Settings,
   Smartphone,
@@ -32,18 +29,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import {
-  SiAirbnb,
-  SiAmazon,
-  SiApple,
-  SiGoogle,
-  SiMeta,
-  SiNetflix,
-  SiSpotify,
-  SiTesla,
-  SiUber,
-} from "react-icons/si";
-import { FaApple, FaGoogle, FaMicrosoft, FaUber } from "react-icons/fa";
+import { FaGoogle, FaMicrosoft } from "react-icons/fa";
+import { SiAmazon, SiApple, SiMeta, SiNetflix } from "react-icons/si";
 import LoadingPage from "@/components/atoms/loading-page";
 import Logo from "@/components/atoms/logo-grant-guide";
 import { Badge } from "@/components/ui/badge";
@@ -120,11 +107,11 @@ const STEPS: ConfigStep[] = [
 ];
 
 export default function ConfigurePage() {
-  const { user, signOut } = useAuth();
+  const { signOut } = useAuth();
   const { loading: authLoading } = useAuthGuard();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  
+
   const [config, setConfig] = useState<InterviewConfig>({
     position: "",
     seniority: "",
@@ -785,18 +772,22 @@ export default function ConfigurePage() {
           {/* Progress Indicator */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Step {currentStep + 1} of {STEPS.length}</h2>
-              <span className="text-sm text-muted-foreground">{Math.round(getStepProgress())}% complete</span>
+              <h2 className="text-lg font-semibold">
+                Step {currentStep + 1} of {STEPS.length}
+              </h2>
+              <span className="text-sm text-muted-foreground">
+                {Math.round(getStepProgress())}% complete
+              </span>
             </div>
             <Progress value={getStepProgress()} className="w-full" />
-            
+
             {/* Step Navigation Breadcrumb */}
             <div className="flex items-center mt-4 space-x-2 overflow-x-auto pb-2">
               {STEPS.map((step, index) => {
                 const StepIcon = step.icon;
                 const isActive = index === currentStep;
                 const isCompleted = index < currentStep;
-                
+
                 return (
                   <div key={step.id} className="flex items-center">
                     <div
@@ -835,7 +826,7 @@ export default function ConfigurePage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="min-h-[400px] relative overflow-hidden">
-              <div 
+              <div
                 key={currentStep}
                 className="animate-in slide-in-from-right-4 fade-in duration-300"
               >
@@ -883,33 +874,75 @@ export default function ConfigurePage() {
           {isConfigComplete && (
             <Card className="border-primary/20 bg-primary/5 mt-6">
               <CardHeader>
-                <CardTitle className="text-primary">Configuration Summary</CardTitle>
+                <CardTitle className="text-primary">
+                  Configuration Summary
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary" className="bg-primary/20 text-primary">
+                  <Badge
+                    variant="secondary"
+                    className="bg-primary/20 text-primary"
+                  >
                     {positions.find((p) => p.value === config.position)?.label}
                   </Badge>
-                  <Badge variant="secondary" className="bg-primary/20 text-primary">
-                    {seniorityLevels.find((s) => s.value === config.seniority)?.label}
+                  <Badge
+                    variant="secondary"
+                    className="bg-primary/20 text-primary"
+                  >
+                    {
+                      seniorityLevels.find((s) => s.value === config.seniority)
+                        ?.label
+                    }
                   </Badge>
                   {config.specificCompany ? (
-                    <Badge variant="secondary" className="bg-primary/20 text-primary">
-                      {specificCompanies.find((c) => c.value === config.specificCompany)?.label}
+                    <Badge
+                      variant="secondary"
+                      className="bg-primary/20 text-primary"
+                    >
+                      {
+                        specificCompanies.find(
+                          (c) => c.value === config.specificCompany,
+                        )?.label
+                      }
                     </Badge>
                   ) : (
-                    <Badge variant="secondary" className="bg-primary/20 text-primary">
-                      {companyProfiles.find((c) => c.value === config.companyProfile)?.label}
+                    <Badge
+                      variant="secondary"
+                      className="bg-primary/20 text-primary"
+                    >
+                      {
+                        companyProfiles.find(
+                          (c) => c.value === config.companyProfile,
+                        )?.label
+                      }
                     </Badge>
                   )}
-                  <Badge variant="secondary" className="bg-primary/20 text-primary">
-                    {interviewTypes.find((t) => t.value === config.interviewType)?.label}
+                  <Badge
+                    variant="secondary"
+                    className="bg-primary/20 text-primary"
+                  >
+                    {
+                      interviewTypes.find(
+                        (t) => t.value === config.interviewType,
+                      )?.label
+                    }
                   </Badge>
-                  <Badge variant="secondary" className="bg-primary/20 text-primary">
-                    {interviewModes.find((m) => m.value === config.interviewMode)?.label}
+                  <Badge
+                    variant="secondary"
+                    className="bg-primary/20 text-primary"
+                  >
+                    {
+                      interviewModes.find(
+                        (m) => m.value === config.interviewMode,
+                      )?.label
+                    }
                   </Badge>
                   {config.interviewMode === "timed" && (
-                    <Badge variant="secondary" className="bg-primary/20 text-primary">
+                    <Badge
+                      variant="secondary"
+                      className="bg-primary/20 text-primary"
+                    >
                       {config.duration} minutes
                     </Badge>
                   )}

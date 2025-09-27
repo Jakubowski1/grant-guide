@@ -1,29 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useAuth } from "@/providers/auth-provider";
+import { updateProfile } from "firebase/auth";
+import { doc, setDoc, updateDoc } from "firebase/firestore";
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
+import {
+  ArrowLeft,
+  Briefcase,
+  Calendar,
+  Clock,
+  Mail,
+  Save,
+  Upload,
+  User,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import {
-  User,
-  Mail,
-  Calendar,
-  Clock,
-  Briefcase,
-  Upload,
-  Save,
-  ArrowLeft,
-} from "lucide-react";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { doc, updateDoc, setDoc } from "firebase/firestore";
-import { updateProfile } from "firebase/auth";
-import { db, auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
+import { useAuth } from "@/providers/auth-provider";
 
 export default function ProfilePage() {
   const { user, userData, loading, refreshUserData } = useAuth();
@@ -106,8 +106,11 @@ export default function ProfilePage() {
     console.log("User:", user?.uid);
     console.log("UserData:", userData);
     console.log("EditData:", editData);
-    console.log("Database connection:", db ? "✅ Connected" : "❌ Not connected");
-    
+    console.log(
+      "Database connection:",
+      db ? "✅ Connected" : "❌ Not connected",
+    );
+
     if (!user) {
       console.error("❌ Missing user");
       alert("User not authenticated. Please sign in again.");
@@ -116,7 +119,9 @@ export default function ProfilePage() {
 
     if (!db) {
       console.error("❌ Database not initialized");
-      alert("Database connection failed. Please refresh the page and try again.");
+      alert(
+        "Database connection failed. Please refresh the page and try again.",
+      );
       return;
     }
 
@@ -130,7 +135,7 @@ export default function ProfilePage() {
       console.log("✅ Firebase Auth profile updated");
 
       console.log("🔄 Updating/Creating Firestore document...");
-      
+
       // Prepare user data for Firestore
       const userDocData = {
         displayName: editData.displayName,
@@ -157,13 +162,15 @@ export default function ProfilePage() {
       console.log("🔄 Refreshing user data...");
       await refreshUserData();
       console.log("✅ User data refreshed");
-      
+
       setIsEditing(false);
       console.log("✅ Profile save completed successfully");
       alert("Profile updated successfully!");
     } catch (error) {
       console.error("❌ Error updating profile:", error);
-      alert(`Failed to update profile: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      alert(
+        `Failed to update profile: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     } finally {
       setSaving(false);
       console.log("🏁 handleSaveProfile finished");
@@ -278,7 +285,10 @@ export default function ProfilePage() {
               <Button
                 variant={isEditing ? "outline" : "default"}
                 onClick={() => {
-                  console.log("🖱️ Edit Profile button clicked! Current editing state:", isEditing);
+                  console.log(
+                    "🖱️ Edit Profile button clicked! Current editing state:",
+                    isEditing,
+                  );
                   if (isEditing) {
                     console.log("🔄 Cancelling edit mode");
                     setIsEditing(false);
@@ -381,11 +391,18 @@ export default function ProfilePage() {
                   <Button
                     onClick={() => {
                       console.log("🖱️ Save button clicked!");
-                      console.log("Button state:", { saving, isEditing, user: !!user, userData: !!userData });
+                      console.log("Button state:", {
+                        saving,
+                        isEditing,
+                        user: !!user,
+                        userData: !!userData,
+                      });
                       handleSaveProfile();
                     }}
                     onMouseDown={() => console.log("🖱️ Save button mouse down!")}
-                    onMouseEnter={() => console.log("🖱️ Save button mouse enter!")}
+                    onMouseEnter={() =>
+                      console.log("🖱️ Save button mouse enter!")
+                    }
                     disabled={saving}
                     className="flex items-center gap-2"
                     type="button"

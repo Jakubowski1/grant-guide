@@ -1,15 +1,8 @@
-import type { Metadata } from "next";
 import { type ReactNode, Suspense } from "react";
+import { CookieBanner } from "../components/organisms/cookie-banner";
 import { AuthProvider } from "../providers/auth-provider";
 import { ThemeProvider } from "../providers/theme-provider";
 import "./globals.css";
-
-export const metadata: Metadata = {
-  title: "Grant Guide - AI Interview Preparation Platform",
-  description:
-    "Master your interviews with AI-powered practice sessions, personalized feedback, and company-specific preparation",
-  generator: "v0.app",
-};
 
 export default function RootLayout({
   children,
@@ -26,7 +19,10 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <AuthProvider>{children}</AuthProvider>
+            <AuthProvider>
+              {children}
+              <CookieBanner />
+            </AuthProvider>
           </ThemeProvider>
         </Suspense>
       </body>
