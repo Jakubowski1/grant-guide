@@ -13,6 +13,7 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "./firebase";
+import { safeGetDoc, safeSetDoc, safeUpdateDoc } from "./firestore-utils";
 
 // Auth providers
 const githubProvider = new GithubAuthProvider();
@@ -115,7 +116,7 @@ export const registerWithEmailAndPassword = async (
       lastLoginAt: new Date(),
     };
 
-    await setDoc(doc(db, "users", user.uid), userData);
+    await safeSetDoc(doc(db, "users", user.uid), userData);
 
     return { user, error: null };
   } catch (error) {
@@ -174,7 +175,7 @@ export const signInWithGitHub = async (): Promise<{
         createdAt: new Date(),
         lastLoginAt: new Date(),
       };
-      await setDoc(doc(db, "users", user.uid), userData);
+      await safeSetDoc(doc(db, "users", user.uid), userData);
     } else {
       // Update last login time
       await updateUserLastLogin(user.uid);
@@ -213,7 +214,7 @@ export const signInWithGoogle = async (): Promise<{
         lastLoginAt: new Date(),
       };
 
-      await setDoc(doc(db, "users", user.uid), userData);
+      await safeSetDoc(doc(db, "users", user.uid), userData);
     } else {
       // Update last login time
       await updateUserLastLogin(user.uid);
@@ -247,7 +248,7 @@ const updateUserLastLogin = async (uid: string) => {
       console.warn("Firestore is not initialized, skipping last login update");
       return;
     }
-    await setDoc(
+    await safeSetDoc(
       doc(db, "users", uid),
       { lastLoginAt: new Date() },
       { merge: true },
@@ -265,28 +266,32 @@ export const getUserData = async (uid: string): Promise<UserData | null> => {
       return null;
     }
 
-    const userDoc = await getDoc(doc(db, "users", uid));
+    console.log("🔍 getUserData called for uid:", uid);
+    const userDoc = await safeGetDoc(doc(db, "users", uid));
+    console.log("🔍 User document exists:", userDoc.exists());
+    
     if (userDoc.exists()) {
-      return userDoc.data() as UserData;
+      const data = userDoc.data() as UserData;
+      console.log("✅ User data retrieved:", data);
+      return data;
+    } else {
+      console.log("❌ User document does not exist in Firestore for uid:", uid);
+      return null;
     }
-    return null;
   } catch (error: unknown) {
-    // Handle specific Firebase offline errors gracefully
+    // Handle specific Firebase errors gracefully
     const firebaseError = error as { code?: string; message?: string };
-    if (
-      firebaseError?.code === "failed-precondition" ||
-      firebaseError?.message?.includes("offline") ||
-      firebaseError?.message?.includes("network") ||
-      firebaseError?.message?.includes("400") ||
-      firebaseError?.message?.includes("unavailable")
-    ) {
+    console.error("❌ Error getting user data:", error);
+    
+    if (firebaseError?.code === "permission-denied") {
+      console.error("❌ Permission denied: User document access not allowed. Check Firestore security rules.");
+    } else if (firebaseError?.code === "not-found") {
+      console.warn("⚠️ User document not found in Firestore for uid:", uid);
+    } else {
       console.warn(
         "Firebase is offline or experiencing connectivity issues. User data will be available when connection is restored.",
       );
-      return null;
     }
-
-    console.error("Error getting user data:", error);
     return null;
   }
 };

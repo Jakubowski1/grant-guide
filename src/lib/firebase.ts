@@ -1,6 +1,14 @@
 import { type FirebaseApp, getApps, initializeApp } from "firebase/app";
 import { type Auth, getAuth } from "firebase/auth";
-import { type Firestore, getFirestore } from "firebase/firestore";
+import { 
+  type Firestore, 
+  getFirestore,
+  initializeFirestore,
+  connectFirestoreEmulator,
+  enableNetwork,
+  disableNetwork,
+  CACHE_SIZE_UNLIMITED
+} from "firebase/firestore";
 import { type Functions, getFunctions } from "firebase/functions";
 import { firebaseMonitor } from "./firebase-monitor";
 
@@ -40,7 +48,17 @@ try {
   validateConfig();
   app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
   auth = getAuth(app);
-  db = getFirestore(app);
+  
+  // Initialize Firestore with better offline handling
+  if (getApps().length === 0) {
+    db = initializeFirestore(app, {
+      cacheSizeBytes: CACHE_SIZE_UNLIMITED,
+      experimentalForceLongPolling: true, // Forces long polling instead of WebSocket
+    });
+  } else {
+    db = getFirestore(app);
+  }
+  
   functions = getFunctions(app);
 
   firebaseMonitor.reportSuccess("initialization");
@@ -76,6 +94,46 @@ if (process.env.NODE_ENV === "development" && typeof window !== "undefined") {
         );
       }
     }
+  });
+}
+
+// Utility functions for managing Firestore network state
+export const enableFirestoreNetwork = async () => {
+  if (db) {
+    try {
+      await enableNetwork(db);
+      console.log("🟢 Firestore network enabled");
+      firebaseMonitor.reportSuccess("network-enable");
+    } catch (error) {
+      console.warn("⚠️ Failed to enable Firestore network:", error);
+      firebaseMonitor.reportError(error, "network-enable");
+    }
+  }
+};
+
+export const disableFirestoreNetwork = async () => {
+  if (db) {
+    try {
+      await disableNetwork(db);
+      console.log("🔴 Firestore network disabled");
+      firebaseMonitor.reportSuccess("network-disable");
+    } catch (error) {
+      console.warn("⚠️ Failed to disable Firestore network:", error);
+      firebaseMonitor.reportError(error, "network-disable");
+    }
+  }
+};
+
+// Auto-reconnect logic for network issues
+if (typeof window !== "undefined") {
+  window.addEventListener('online', () => {
+    console.log('🌐 Network back online, enabling Firestore');
+    enableFirestoreNetwork();
+  });
+  
+  window.addEventListener('offline', () => {
+    console.log('🌐 Network offline, disabling Firestore');
+    disableFirestoreNetwork();
   });
 }
 

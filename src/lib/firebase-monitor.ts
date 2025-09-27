@@ -91,8 +91,14 @@ export class FirebaseStatusMonitor {
       "unavailable",
       "deadline-exceeded",
       "400",
+      "bad request", 
       "WebChannelConnection",
       "transport errored",
+      "Listen",
+      "webchannel_blob",
+      "ERR_ABORTED",
+      "gsessionid",
+      "firestore.googleapis.com",
     ];
 
     const errorStr = JSON.stringify(error).toLowerCase();

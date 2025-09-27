@@ -9,6 +9,7 @@ interface AuthContextType {
   userData: UserData | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  refreshUserData: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -66,11 +67,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       console.error("Error signing out:", error);
     }
   };
+
+  const refreshUserData = async () => {
+    if (user) {
+      try {
+        const data = await getUserData(user.uid);
+        setUserData(data);
+      } catch (error) {
+        console.warn("Failed to refresh user data:", error);
+      }
+    }
+  };
+
   const value = {
     user,
     userData,
     loading,
     signOut: handleSignOut,
+    refreshUserData,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
