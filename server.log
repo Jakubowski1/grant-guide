@@ -1,0 +1,402 @@
+
+> grant-guide@0.1.0 dev
+> next dev --turbopack
+
+   ▲ Next.js 15.5.2 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.0.101:3000
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Ready in 676ms
+ ○ Compiling /api/interview/analyze ...
+ ✓ Compiled /api/interview/analyze in 948ms
+Raw analysis response: ---
+
+## **OVERALL SCORE**
+**Score: 30/100**
+*Brief Summary:* The candidate’s response was **extremely minimal** and lacked depth, technical accuracy, and practical relevance for a mid-level Frontend Developer role. While the answer was factually correct at a surface level, it failed to demonstrate understanding of React’s core concepts, use cases, or why it’s relevant in modern frontend development. This response would raise significant concerns about the candidate’s ability to discuss technical topics at the expected level.
+
+---
+
+## **STRENGTHS**
+1. **Basic Accuracy** – The statement *"React is a JavaScript library"* is technically correct.
+2. **Conciseness** – The answer was brief (though *too* brief for a mid-level interview).
+3. **No Incorrect Information** – No false claims were made, which is a baseline positive.
+
+*(Note: Only 3 strengths could be identified due to the brevity of the response.)*
+
+---
+
+## **AREAS FOR IMPROVEMENT**
+1. **Lack of Depth** – No explanation of React’s purpose, key features (e.g., components, JSX, virtual DOM), or how it differs from other frameworks.
+2. **No Real-World Context** – Missing examples of when/why React is used (e.g., SPAs, dynamic UIs, state management).
+3. **Poor Communication** – The answer was **too vague** for a mid-level role; interviewers expect elaboration without prompting.
+4. **No Demonstration of Experience** – No mention of personal projects, challenges solved, or best practices (e.g., hooks, performance optimization).
+5. **Missed Opportunity to Showcase Problem-Solving** – Could have tied React to common frontend problems (e.g., DOM manipulation, state complexity).
+
+---
+
+## **DETAILED ANALYSIS**
+
+### **1. Technical Knowledge & Accuracy (5/20)**
+- **What Was Good**: The candidate correctly identified React as a JavaScript library.
+- **What Was Missing**:
+  - No mention of **core concepts** (components, props, state, hooks, lifecycle methods).
+  - No comparison to alternatives (e.g., Angular, Vue) or explanation of React’s advantages (e.g., declarative syntax, ecosystem).
+  - No reference to **modern React** (e.g., functional components, hooks, concurrent features).
+- **Example of Expected Depth**:
+  > *"React is a declarative, component-based JavaScript library for building user interfaces. It uses a virtual DOM for efficient updates and encourages reusable UI components. Key features include JSX for templating, hooks for state management, and a rich ecosystem like Next.js for SSR. I’ve used it to build [specific project], where it helped manage complex state with Context API and improved performance via memoization."*
+
+### **2. Problem-Solving Approach (0/20)**
+- **No evidence of problem-solving**. The question was open-ended, but the candidate didn’t connect React to **real frontend challenges** (e.g., dynamic rendering, state synchronization, performance).
+- **Missed Opportunity**: Could have explained how React solves problems like:
+  - Manual DOM updates (vs. jQuery).
+  - State management in large apps (vs. vanilla JS).
+  - Code organization (component-based architecture).
+
+### **3. Communication Clarity (5/20)**
+- **Too Vague**: The answer was **one sentence** with no elaboration. Mid-level candidates should **volunteer details** without being prompted.
+- **Lack of Structure**: No logical flow (e.g., *what* React is → *why* it’s used → *how* it works → *personal experience*).
+- **No Engagement**: The response didn’t invite follow-up questions (e.g., "Would you like me to elaborate on hooks or state management?").
+
+### **4. Depth of Understanding (3/20)**
+- **Surface-Level Only**: The answer suggested **rookie-level knowledge** (e.g., memorized definition without application).
+- **No Nuance**: No discussion of:
+  - React’s **unidirectional data flow**.
+  - **Trade-offs** (e.g., SEO challenges in SPAs, need for routing libraries).
+  - **Recent updates** (e.g., React 18’s concurrent rendering).
+
+### **5. Real-World Application (0/20)**
+- **No Examples**: Didn’t cite **projects, tools, or workflows** where React was used.
+- **No Lessons Learned**: Missed chance to share:
+  - How React improved a project (e.g., "Reduced bundle size by 30% with lazy loading").
+  - Challenges faced (e.g., "Debugged performance issues using React DevTools").
+- **No Team Context**: No mention of collaboration (e.g., "Worked with designers to implement a component library in React").
+
+### **6. Areas for Improvement (Summary)**
+| **Category**               | **Issue**                          | **How to Fix** |
+|----------------------------|------------------------------------|----------------|
+| **Technical Depth**        | Answer was too shallow.           | Study React’s core concepts (hooks, context, reconciliation) and practice explaining them. |
+| **Communication**          | Didn’t elaborate or structure response. | Use the **STAR method** (Situation, Task, Action, Result) or **ELI5** (Explain Like I’m 5) for clarity. |
+| **Problem-Solving**        | No connection to real problems.   | Relate React to **specific pain points** (e.g., "Before React, we manually updated the DOM, which led to bugs..."). |
+| **Experience Demonstration** | No projects or lessons shared.   | Prepare **2-3 concrete examples** of React use (e.g., "Built a dashboard with reusable components..."). |
+| **Confidence**             | Seemed unprepared.                | **Mock interviews** to practice speaking concisely but thoroughly. |
+
+---
+
+## **RECOMMENDATIONS**
+
+### **1. Study Core React Concepts (Technical Depth)**
+- **Topics to Master**:
+  - Components (class vs. functional), props, state, and lifecycle methods.
+  - Hooks (`useState`, `useEffect`, `useContext`, `useReducer`).
+  - Virtual DOM and reconciliation.
+  - State management (Context API, Redux, Zustand).
+  - Performance optimization (memo, `useCallback`, code splitting).
+- **Resources**:
+  - [React Official Docs (Beta)](https://beta.reactjs.org/) (Focus on "Thinking in React").
+  - [Epic React by Kent C. Dodds](https://epicreact.dev/) (Paid, but excellent for mid-level).
+  - [React Patterns](https://reactpatterns.com/) (For best practices).
+
+### **2. Improve Communication (Clarity & Structure)**
+- **Use the "Rule of 3"**: For any technical question, cover:
+  1. **What it is** (definition).
+  2. **Why it matters** (problem it solves).
+  3. **How you’ve used it** (example).
+- **Example Rewrite**:
+  > *"React is a component-based JavaScript library for building interactive UIs. Unlike jQuery, which requires manual DOM updates, React uses a virtual DOM to efficiently render changes when state updates. For example, in my last project, we used React to build a real-time analytics dashboard. By breaking the UI into reusable components and managing state with the Context API, we reduced code duplication by 40% and improved render performance with `React.memo`."*
+
+### **3. Practice Problem-Solving Narratives**
+- **Connect React to Pain Points**:
+  - *"Before React, our team struggled with spaghetti code in jQuery. React’s component model forced us to organize logic by feature, making the codebase easier to maintain."*
+  - *"We chose React over Angular because its lightweight nature fit our microservices architecture better."*
+- **Use the STAR Method** for behavioral + technical questions:
+  - **Situation**: "Our app had slow load times due to large bundles."
+  - **Task**: "I needed to optimize performance."
+  - **Action**: "I implemented code splitting with `React.lazy` and Suspense."
+  - **Result**: "Reduced initial load time by 2 seconds."
+
+### **4. Prepare Project Stories**
+- **Have 2-3 React projects ready to discuss**, including:
+  - **Challenges faced** (e.g., "State management became messy, so we migrated to Redux").
+  - **Tools used** (e.g., "Styled Components for CSS-in-JS, Axios for API calls").
+  - **Impact** (e.g., "Improved user retention by 15% after rewriting the frontend in React").
+
+### **5. Mock Interviews**
+- **Practice with peers** or tools like:
+  - [Pramp](https://www.pramp.com/) (Free peer interviews).
+  - [Interviewing.io](https://interviewing.io/) (Anonymous practice with engineers).
+- **Record yourself** and critique:
+  - Did you sound confident?
+  - Did you cover **what, why, and how**?
+  - Did you invite follow-ups (e.g., "Would you like me to dive deeper into hooks?").
+
+---
+
+## **NEXT STEPS**
+
+### **Week 1: Deep Dive into React**
+- **
+Extracting score from: 
+No valid score found, returning 0
+Parsed feedback score: 0
+Parsed overallScore: 
+ POST /api/interview/analyze 200 in 19673ms
+Raw analysis response: ---
+
+## **OVERALL SCORE**
+**Score: 65/100**
+The candidate demonstrated a **basic understanding** of React hooks but lacked depth, real-world context, and clarity in explaining trade-offs or advanced use cases. The response was **technically correct but superficial**, missing an opportunity to showcase deeper expertise expected for a mid-level role.
+
+---
+
+## **STRENGTHS**
+1. **Core Concept Accuracy**
+   - Correctly identified `useState` and `useEffect` as primary hooks and their basic purposes (state management and side effects).
+   - Acknowledged hooks enable functional components to use state/lifecycle features (a key React paradigm shift).
+
+2. **Conciseness**
+   - Answer was brief and to the point, avoiding unnecessary tangents.
+
+3. **Relevance to Role**
+   - Focused on hooks, a critical topic for modern React development (mid-level expectation).
+
+---
+## **AREAS FOR IMPROVEMENT**
+1. **Lack of Depth**
+   - No mention of **rules of hooks** (e.g., calling them at the top level, custom hooks).
+   - Missed key hooks like `useContext`, `useReducer`, or `useMemo`/`useCallback` (critical for performance optimization).
+
+2. **No Real-World Examples**
+   - Failed to tie hooks to practical scenarios (e.g., `useEffect` for API calls, `useState` for form handling).
+   - No discussion of **common pitfalls** (e.g., infinite loops in `useEffect`, stale closures).
+
+3. **Weak Problem-Solving Context**
+   - Did not explain **why hooks solve problems** (e.g., avoiding class component boilerplate, better code reuse via custom hooks).
+   - No comparison to pre-hooks patterns (e.g., HOCs, render props).
+
+4. **Communication Clarity**
+   - Answer was **too terse**; could have structured it as:
+     *"React hooks are functions that let functional components manage state and side effects. For example, `useState` replaces `this.state`, while `useEffect` combines `componentDidMount`, `componentDidUpdate`, and `componentWillUnmount`. They simplify code reuse—e.g., creating a `useFetch` custom hook for API calls."*
+
+5. **Mid-Level Expectations Gap**
+   - Mid-level candidates should discuss **performance implications** (e.g., dependency arrays in `useEffect`), **testing hooks**, or **integration with state management** (e.g., Redux + `useSelector`).
+
+---
+
+## **DETAILED ANALYSIS**
+
+| **Criteria**               | **Score (1-10)** | **Analysis** |
+|----------------------------|------------------|--------------|
+| **Technical Knowledge**    | 6/10             | Correct but **incomplete**. Missed advanced hooks (`useRef`, `useLayoutEffect`) and edge cases (e.g., `useEffect` cleanup). |
+| **Problem-Solving Approach** | 5/10           | Did not frame hooks as **solutions to specific problems** (e.g., "Before hooks, we used classes for state; now we avoid `this` binding issues"). |
+| **Communication Clarity**  | 5/10             | Answer was **underdeveloped**. Could have used a **structure**: Definition → Examples → Trade-offs. |
+| **Depth of Understanding** | 5/10             | No discussion of **how hooks work under the hood** (e.g., fiber reconciliation, hook queues) or **custom hooks**. |
+| **Real-World Application** | 4/10             | Failed to connect hooks to **common tasks** (e.g., debouncing with `useEffect`, form validation with `useState`). |
+| **Areas for Improvement**  | 8/10             | Clear gaps in **breadth** (missing hooks) and **depth** (no performance/debugging insights). |
+
+---
+### **Key Missed Opportunities**
+1. **Custom Hooks**
+   - Example: *"You can create a `useLocalStorage` hook to sync state with `localStorage`, reducing duplicate code across components."*
+
+2. **Performance**
+   - Example: *"`useMemo` and `useCallback` prevent unnecessary re-renders by memoizing values/functions, which is critical for large lists or expensive calculations."*
+
+3. **Debugging**
+   - Example: *"The React DevTools hooks tab helps inspect hook states, and the ESLint plugin enforces the rules of hooks."*
+
+4. **Migration from Classes**
+   - Example: *"Hooks replace lifecycle methods like `componentDidMount` with `useEffect(() => {...}, [])`."*
+
+---
+
+## **RECOMMENDATIONS**
+### **1. Deepen Technical Knowledge**
+- **Study Advanced Hooks**:
+  - `useReducer` (for complex state logic), `useContext` (for prop drilling), `useRef` (for DOM access/mutable values).
+  - **Resource**: [React Docs: Hooks API Reference](https://reactjs.org/docs/hooks-reference.html).
+- **Understand Internals**:
+  - How React tracks hook state via **linked lists** in the fiber tree.
+  - **Resource**: [React as a UI Runtime](https://overreacted.io/react-as-a-ui-runtime/) (Dan Abramov).
+
+### **2. Practice Structured Communication**
+- Use the **PREP framework** for technical answers:
+  - **P**oint (definition), **R**eason (why it matters), **E**xample (code snippet), **P**oint (summary).
+  - Example:
+    > *"React hooks are functions that add statefulness to functional components (Point). They solve issues like class component boilerplate and inconsistent `this` binding (Reason). For example, `useState` replaces `this.state` and `setState` with a simpler API: `const [count, setCount] = useState(0)` (Example). This makes components more readable and reusable (Point)."*
+
+### **3. Relate to Real-World Scenarios**
+- Prepare **2–3 concrete examples** of hooks in action:
+  - `useEffect` for data fetching (with `axios`/`fetch`).
+  - `useMemo` for optimizing a filter/sort operation.
+  - Custom hook for window resize events.
+- **Resource**: Build a small project (e.g., a GitHub user search app) using hooks.
+
+### **4. Anticipate Follow-Ups**
+- Mid-level interviews often probe deeper. Prepare for:
+  - *"How would you test a custom hook?"* → Use `@testing-library/react-hooks`.
+  - *"What’s the difference between `useMemo` and `useCallback`?"* → One memoizes values, the other functions.
+  - *"When would you *not* use hooks?"* → Complex state management (e.g., Redux) or legacy class components.
+
+---
+## **NEXT STEPS**
+### **Short-Term (1–2 Weeks)**
+1. **Code Practice**:
+   - Rebuild a class component (e.g., a timer or form) using hooks. Focus on `useEffect` cleanup and `useReducer`.
+   - **Exercise**: [React Hooks Challenges](https://github.com/alexgurghis/react-hooks-challenges).
+
+2. **Mock Interviews**:
+   - Practice explaining hooks with peers using the **PREP framework**.
+   - **Tool**: [Pramp](https://www.pramp.com/) (free peer interviews).
+
+3. **Watch/Read**:
+   - [React Hooks Deep Dive (YouTube)](https://www.youtube.com/watch?v=wXLf18DvzWw) by Web Dev Simplified.
+   - [A Complete Guide to useEffect](https://overreacted.io/a-complete-guide-to-useeffect/) (Dan Abramov).
+
+### **Long-Term (1 Month+)**
+1. **Contribute to Open Source**:
+   - Fix hook-related issues in React repos (e.g., [React GitHub](https://github.com/facebook/react/issues?q=is%3Aissue+is%3Aopen+hooks)).
+2. **Teach Others**:
+   - Write a blog post or create a video explaining a specific hook (e.g., "How `useReducer` Replaces Redux for Local State").
+3. **Learn Adjacent Concepts**:
+   - How hooks interact with **React’s concurrent mode** or **Suspense**.
+   - **Resource**: [React 18 Features](https://reactjs.org/blog/2022/03/29/react-v18.html).
+
+---
+### **Final Note**
+Your answer was **correct but lacked the depth and polish expected for a mid-level role**. Focus on:
+✅ **Breadth** (know all major hooks).
+✅ **Depth** (explain trade-offs, internals, and debugging).
+✅ **Communication** (structure answers clearly with examples).
+
+**Next interview goal**: Aim for a **85/100** by incorporating **real-world examples** and **follow-up readiness**. You’ve got this! 🚀
+Extracting score from: **Score: 65/100**
+The candidate demonstrated a **basic understanding** of React hooks but lacked depth, real-world context, and clarity in explaining trade-offs or advanced use cases. The response was **technically correct but superficial**, missing an opportunity to showcase deeper expertise expected for a mid-level role.
+Found score: 65 using pattern: /(\d+)(?:\s*\/\s*100|\s*out\s*of\s*100|\s*%)/i
+Parsed feedback score: 65
+Parsed overallScore: **Score: 65/100**
+The candidate demonstrated a **basic understanding** of React hooks but lacked depth, real-world context, and clarity in explaining trade-offs or advanced use cases. The response was **technically correct but superficial**, missing an opportunity to showcase deeper expertise expected for a mid-level role.
+ POST /api/interview/analyze 200 in 20593ms
+ ○ Compiling /results ...
+ ✓ Compiled /results in 1291ms
+🟢 Firebase initialized successfully
+ GET /results?id=c8638bb1-1a77-4d8e-9c97-4672e42e2e35&vscodeBrowserReqId=1758980589248 200 in 1591ms
+Raw analysis response: ---
+
+## **OVERALL SCORE**
+**Score: 65/100**
+*Brief Summary:* The candidate demonstrates foundational knowledge of React but lacks depth in explanations, real-world context, and clarity in communication. While the answers are technically correct, they are overly concise and miss opportunities to showcase problem-solving skills, trade-offs, or practical experience. For a mid-level role, the interviewer would expect more nuanced responses with examples, edge cases, or architectural considerations.
+
+---
+
+## **STRENGTHS**
+1. **Core Technical Knowledge** – Correctly identifies the primary use cases for `useState` and `useReducer`, showing familiarity with React hooks.
+2. **Conciseness** – Answers are direct and avoid unnecessary tangents (though this is also a weakness—see below).
+3. **Relevant Experience** – Mentions practical tools (Redux, Context) that align with mid-level expectations.
+4. **Confidence** – Responses are delivered without hesitation, suggesting comfort with the topics.
+
+---
+
+## **AREAS FOR IMPROVEMENT**
+1. **Depth of Explanation** – Answers are superficial and lack details about *why* or *how* to choose between tools (e.g., when `useReducer` is *actually* preferable).
+2. **Real-World Application** – No examples of past projects, trade-offs, or edge cases encountered. Mid-level candidates should tie concepts to experience.
+3. **Communication Clarity** – Responses are abrupt and could benefit from structure (e.g., "The key differences are X, Y, and Z. For example, in my project A, I used Y because...").
+4. **Problem-Solving Insight** – Missed opportunities to discuss performance, scalability, or debugging (e.g., "How would you debug a `useReducer` action that isn’t updating state?").
+5. **Proactive Engagement** – Doesn’t ask clarifying questions (e.g., "Are you asking about syntax, use cases, or performance?") to demonstrate critical thinking.
+
+---
+
+## **DETAILED ANALYSIS**
+
+### **1. Technical Knowledge & Accuracy (15/20)**
+- **Strengths**:
+  - Correctly distinguishes `useState` (simple state) from `useReducer` (complex state with actions).
+  - Mentions Redux and Context, showing awareness of state management ecosystems.
+- **Weaknesses**:
+  - No mention of **how** `useReducer` works under the hood (e.g., it uses a reducer function like Redux).
+  - Omits key details like:
+    - `useReducer`’s ability to lazy-initialize state.
+    - How it pairs with `useContext` for a lightweight Redux alternative.
+    - Performance implications (e.g., avoiding unnecessary re-renders with `useReducer` + memoization).
+- **Example of Depth Missing**:
+  - *Weak*: "useReducer is better for complex state logic."
+  - *Stronger*: "useReducer is better for complex state because it centralizes logic in a pure reducer function, making it easier to test and debug. For example, in a shopping cart with 10+ actions (add/remove/update items, apply discounts), `useReducer` keeps the component cleaner than a sprawling `useState` with multiple setters. I used this in Project X to manage a multi-step form with validation states."
+
+### **2. Problem-Solving Approach (10/20)**
+- **Strengths**:
+  - Implicitly shows judgment by categorizing tools by complexity.
+- **Weaknesses**:
+  - No discussion of **trade-offs** (e.g., "When would you *not* use `useReducer`?").
+  - No examples of **problems solved** (e.g., "I refactored a component from `useState` to `useReducer` when adding undo/redo functionality").
+  - Missed chance to highlight **debugging** (e.g., "I once had a bug where `useReducer`’s state wasn’t updating because I mutated the state directly—here’s how I fixed it").
+- **Suggestion**: Use the **STAR method** (Situation, Task, Action, Result) to frame answers. For example:
+  > *"In my last project, we had a dashboard with 5+ interactive filters controlled by `useState`. When we added a 'reset all' feature, the component became hard to maintain. I refactored to `useReducer` to group related actions, which reduced the code by 30% and made it easier to add new features like 'save filter presets'."*
+
+### **3. Communication Clarity (12/20)**
+- **Strengths**:
+  - Answers are grammatically correct and jargon-free.
+- **Weaknesses**:
+  - **Too concise**: Leaves the interviewer guessing about depth of knowledge.
+  - **Lacks structure**: No clear beginning/middle/end to responses.
+  - **No engagement**: Doesn’t ask follow-ups (e.g., "Would you like me to compare this to Redux?").
+- **Improvement Tip**: Use a **3-part structure**:
+  1. **Direct answer** ("`useReducer` is for complex state with actions.").
+  2. **Elaboration** ("It’s useful when you have multiple sub-values or when the next state depends on the previous one, like in a game or form with validation steps.").
+  3. **Example** ("I used it in a Kanban board to manage drag-and-drop state transitions between 'todo,' 'in progress,' and 'done' columns.").
+
+### **4. Depth of Understanding (10/15)**
+- **Gaps**:
+  - Doesn’t connect hooks to **React’s rendering model** (e.g., how `useReducer` can optimize re-renders with `React.memo`).
+  - No mention of **alternatives** (e.g., Zustand, Jotai) or when to use them.
+  - Doesn’t explain **why** Redux/Context might still be needed alongside `useReducer`.
+- **Mid-Level Expectation**: Candidates should discuss:
+  - Performance (e.g., `useReducer` + `useMemo` for derived state).
+  - Patterns (e.g., combining `useReducer` with `useContext` for a mini-Redux).
+  - Testing (e.g., how reducers are easier to unit test than `useState` setters).
+
+### **5. Real-World Application (8/15)**
+- **Missed Opportunities**:
+  - No **project examples** to ground the answer in experience.
+  - No **code snippets** (even pseudocode) to illustrate usage.
+  - No **lessons learned** (e.g., "I initially overused `useReducer` and had to refactor back to `useState` for simpler cases").
+- **How to Improve**:
+  - Prepare **2–3 anecdotes** where you used these tools. Example:
+    > *"In my e-commerce app, I used `useReducer` to manage the checkout flow’s 7-step state (shipping, payment, review). This made it easier to persist the state to localStorage and replay actions if the user navigated back. Previously, with `useState`, we had race conditions when updating multiple fields at once."*
+
+### **6. Areas for Improvement (Summary)**
+| **Area**               | **Issue**                          | **Actionable Fix**                                                                 |
+|-------------------------|------------------------------------|------------------------------------------------------------------------------------|
+| **Depth**               | Answers are shallow.               | Study advanced use cases (e.g., `useReducer` with TypeScript, middleware patterns). |
+| **Examples**            | No real-world context.            | Prepare 2–3 project stories using the STAR method.                                  |
+| **Communication**       | Too concise.                      | Practice the 3-part answer structure (answer + elaboration + example).            |
+| **Problem-Solving**     | No trade-offs or debugging mentioned. | Research common pitfalls (e.g., stale state in `useReducer`).                     |
+| **Engagement**          | Passive responses.                | Ask clarifying questions (e.g., "Should I compare this to Redux?").                |
+
+---
+
+## **RECOMMENDATIONS**
+
+### **1. Short-Term (Next 1–2 Weeks)**
+- **Study Deeper**:
+  - Read React docs on [`useReducer`](https://react.dev/reference/react/useReducer) (focus on "avoiding recreating initial state" and "bailing out of state updates").
+  - Watch: [Epics in Redux vs. useReducer Middleware](https://youtu.be/9zyFZHwS9OQ) (even if not asked, this shows depth).
+- **Practice Storytelling**:
+  - Write down 3 project examples where you used `useState`/`useReducer`/Redux. Use the STAR method.
+  - Example prompt: *"Tell me about a time you chose one state management tool over another."*
+- **Mock Interviews**:
+  - Use [Pramp](https://www.pramp.com/) or [Interviewing.io](https://interviewing.io/) to practice explaining concepts aloud.
+
+### **2. Long-Term (Next 1–3 Months)**
+- **Build a Complex Example**:
+  - Create a GitHub repo with a non-trivial `useReducer` implementation (e.g., a Trello clone or multi
+Extracting score from: **Score: 65/100**
+*Brief Summary:* The candidate demonstrates foundational knowledge of React but lacks depth in explanations, real-world context, and clarity in communication. While the answers are technically correct, they are overly concise and miss opportunities to showcase problem-solving skills, trade-offs, or practical experience. For a mid-level role, the interviewer would expect more nuanced responses with examples, edge cases, or architectural considerations.
+Found score: 65 using pattern: /(\d+)(?:\s*\/\s*100|\s*out\s*of\s*100|\s*%)/i
+Parsed feedback score: 65
+Parsed overallScore: **Score: 65/100**
+*Brief Summary:* The candidate demonstrates foundational knowledge of React but lacks depth in explanations, real-world context, and clarity in communication. While the answers are technically correct, they are overly concise and miss opportunities to showcase problem-solving skills, trade-offs, or practical experience. For a mid-level role, the interviewer would expect more nuanced responses with examples, edge cases, or architectural considerations.
+ POST /api/interview/analyze 200 in 21695ms
+ ✓ Compiled in 183ms
+[?25h

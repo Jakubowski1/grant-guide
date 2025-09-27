@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { ThemeToggle } from "@/components/atoms/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +25,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { DatabaseService } from "@/lib/database";
+import { useAuth } from "@/providers/auth-provider";
 
 interface InterviewResults {
   score: number;
@@ -37,6 +41,7 @@ interface InterviewResults {
 
 export default function ResultsPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [isAnalyzing, setIsAnalyzing] = useState(true);
   const [results, setResults] = useState<InterviewResults | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -94,6 +99,22 @@ export default function ResultsPage() {
 
         if (data.success) {
           setResults(data.feedback);
+
+          // Save to database if user is authenticated
+          if (user?.uid) {
+            try {
+              await DatabaseService.saveInterviewResults(
+                user.uid,
+                session,
+                config,
+                data.feedback,
+              );
+              console.log("Interview results saved to database");
+            } catch (dbError) {
+              console.error("Error saving to database:", dbError);
+              // Don't fail the UI if database save fails
+            }
+          }
         } else {
           throw new Error(data.error || "Analysis failed");
         }
@@ -116,7 +137,7 @@ export default function ResultsPage() {
     };
 
     loadAnalysis();
-  }, []);
+  }, [user?.uid]);
 
   const getScoreColor = (score: number) => {
     if (score >= 90) return "text-green-600";
@@ -251,8 +272,10 @@ export default function ResultsPage() {
             <CardTitle className="text-3xl font-bold">
               Overall Performance
             </CardTitle>
-            <CardDescription className="text-lg">
-              {results.overallScore}
+            <CardDescription className="text-lg prose prose-gray dark:prose-invert max-w-none">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {results.overallScore}
+              </ReactMarkdown>
             </CardDescription>
           </CardHeader>
         </Card>
@@ -312,9 +335,9 @@ export default function ResultsPage() {
           </CardHeader>
           <CardContent>
             <div className="prose dark:prose-invert max-w-none">
-              <div className="whitespace-pre-wrap">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {results.detailedAnalysis}
-              </div>
+              </ReactMarkdown>
             </div>
           </CardContent>
         </Card>
@@ -329,9 +352,9 @@ export default function ResultsPage() {
           </CardHeader>
           <CardContent>
             <div className="prose dark:prose-invert max-w-none">
-              <div className="whitespace-pre-wrap">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {results.recommendations}
-              </div>
+              </ReactMarkdown>
             </div>
           </CardContent>
         </Card>
@@ -346,7 +369,9 @@ export default function ResultsPage() {
           </CardHeader>
           <CardContent>
             <div className="prose dark:prose-invert max-w-none">
-              <div className="whitespace-pre-wrap">{results.nextSteps}</div>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {results.nextSteps}
+              </ReactMarkdown>
             </div>
           </CardContent>
         </Card>

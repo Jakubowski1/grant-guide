@@ -13,6 +13,7 @@ import {
   Pause,
   Play,
   Send,
+  SkipForward,
   Square,
   Target,
   Timer,
@@ -34,13 +35,14 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/providers/auth-provider";
 
 interface Message {
   id: string;
   type: "ai" | "user";
   content: string;
   timestamp: Date;
-  questionType?: "technical" | "behavioral" | "coding" | "system-design";
+  questionType?: "technical" | "bullet" | "coding" | "system-design";
   isFollowUp?: boolean;
 }
 
@@ -56,55 +58,84 @@ interface InterviewSession {
 }
 
 export default function InterviewPage() {
-  const [config] = useState(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      return {
-        position: params.get("position") || "Frontend Engineer",
-        seniority: params.get("seniority") || "mid",
-        companyProfile: params.get("companyProfile") || "",
-        specificCompany: params.get("specificCompany") || "",
-        interviewMode: params.get("interviewMode") || "timed",
-        interviewType: params.get("interviewType") || "technical",
-        duration: params.get("duration") || "30",
-        isDemoMode: params.get("demo") === "true",
-      };
-    }
-    return {
-      position: "Frontend Engineer",
-      seniority: "mid",
-      companyProfile: "faang",
-      specificCompany: "",
-      interviewMode: "timed",
-      interviewType: "technical",
-      duration: "30",
-      isDemoMode: false,
-    };
+  const { user } = useAuth();
+  const [mounted, setMounted] = useState(false);
+  const [config, setConfig] = useState({
+    position: "Frontend Engineer",
+    seniority: "mid",
+    technologies: [] as string[],
+    companyProfile: "faang",
+    specificCompany: "",
+    interviewMode: "timed",
+    interviewType: "technical",
+    duration: "30",
+    isDemoMode: false,
   });
+
+  // Load config from URL params after component mounts (client-side only)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const technologiesParam = params.get("technologies");
+    let technologies: string[] = [];
+    if (technologiesParam) {
+      try {
+        technologies = JSON.parse(technologiesParam);
+      } catch {
+        technologies = [];
+      }
+    }
+
+    setConfig({
+      position: params.get("position") || "Frontend Engineer",
+      seniority: params.get("seniority") || "mid",
+      technologies,
+      companyProfile: params.get("companyProfile") || "",
+      specificCompany: params.get("specificCompany") || "",
+      interviewMode: params.get("interviewMode") || "timed",
+      interviewType: params.get("interviewType") || "technical",
+      duration: params.get("duration") || "30",
+      isDemoMode: params.get("demo") === "true",
+    });
+    setMounted(true);
+  }, []);
+
+  // Update session and timer when config changes
+  useEffect(() => {
+    if (mounted) {
+      setSession((prev) => ({
+        ...prev,
+        totalQuestions: config.isDemoMode
+          ? 3
+          : config.interviewType === "bullet"
+            ? 3
+            : 8,
+        isDemoMode: config.isDemoMode,
+      }));
+
+      if (config.interviewMode === "untimed") {
+        setTimeRemaining(Number.POSITIVE_INFINITY);
+      } else {
+        setTimeRemaining(Number.parseInt(config.duration, 10) * 60);
+      }
+    }
+  }, [config, mounted]);
 
   // Interview state
   const [session, setSession] = useState<InterviewSession>({
     messages: [],
     currentQuestionCount: 0,
-    totalQuestions: config.isDemoMode
-      ? 3
-      : config.interviewMode === "behavioral"
-        ? 6
-        : 8,
+    totalQuestions: 8, // Default value, will be updated in useEffect
     startTime: new Date(),
     isComplete: false,
     isPaused: false,
-    isDemoMode: config.isDemoMode,
+    isDemoMode: false, // Default value, will be updated in useEffect
     hasPersonalizedIntro: false,
   });
 
   const [currentMessage, setCurrentMessage] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(() => {
-    if (config.interviewMode === "untimed") return Number.POSITIVE_INFINITY;
-    return Number.parseInt(config.duration, 10) * 60;
-  });
+  const [timeRemaining, setTimeRemaining] = useState(30 * 60); // Default 30 minutes
   const [isInterviewStarted, setIsInterviewStarted] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -192,7 +223,7 @@ export default function InterviewPage() {
           timestamp: new Date(),
           questionType: data.questionType as
             | "technical"
-            | "behavioral"
+            | "bullet"
             | "coding"
             | "system-design",
           isFollowUp,
@@ -210,7 +241,7 @@ export default function InterviewPage() {
         timestamp: new Date(),
         questionType: config.interviewType as
           | "technical"
-          | "behavioral"
+          | "bullet"
           | "coding"
           | "system-design",
         isFollowUp,
@@ -290,55 +321,25 @@ export default function InterviewPage() {
   const startInterview = async () => {
     setIsInterviewStarted(true);
 
-    // First message - simple welcome
-    const firstWelcomeMessage: Message = {
-      id: "welcome-1",
-      type: "ai",
-      content: config.isDemoMode
-        ? "Hi! Welcome to the Grant Guide interview demo. This is a casual practice session where you can get familiar with our AI interview system. No pressure here - just think of this as talking to the system to see how it works!"
-        : "Hi! Welcome to your interview session. I'm excited to chat with you today!",
-      timestamp: new Date(),
-    };
-
+    // Initialize session with start time
     setSession((prev) => ({
       ...prev,
-      messages: [firstWelcomeMessage],
+      messages: [],
       startTime: new Date(),
+      hasPersonalizedIntro: true,
     }));
 
-    // Second message with personalization (after a delay)
-    setTimeout(async () => {
-      const personalizedIntro = config.isDemoMode
-        ? `I'm Alex, your demo guide! We'll go through just 2-3 casual questions to show you how our interview system works. Feel free to experiment with voice input, ask questions, or just explore the interface. This won't be recorded or scored.`
-        : `I'm Sarah, your AI interviewer today. I'll be conducting your ${config.interviewType} interview for the ${config.position} position at a ${config.seniority} level.${config.interviewMode !== "untimed" ? ` We have ${config.duration} minutes together.` : ""} You can pause or stop the interview at any time using the controls above. Ready to begin?`;
-
-      const personalizedMessage: Message = {
-        id: "welcome-2",
-        type: "ai",
-        content:
-          personalizedIntro +
-          (config.specificCompany
-            ? ` This interview is tailored for ${config.specificCompany.charAt(0).toUpperCase() + config.specificCompany.slice(1)}-style questions.`
-            : ""),
-        timestamp: new Date(),
-      };
-
+    // Get the first question directly
+    try {
+      const firstQuestion = await getAIResponse("", 0);
       setSession((prev) => ({
         ...prev,
-        messages: [...prev.messages, personalizedMessage],
-        hasPersonalizedIntro: true,
+        messages: [firstQuestion],
+        currentQuestionCount: 1,
       }));
-
-      // Add first question after another delay
-      setTimeout(async () => {
-        const firstQuestion = await getAIResponse("", 0);
-        setSession((prev) => ({
-          ...prev,
-          messages: [...prev.messages, firstQuestion],
-          currentQuestionCount: 1,
-        }));
-      }, 1500);
-    }, 2000);
+    } catch (error) {
+      console.error("Error getting first question:", error);
+    }
   };
 
   // Send message
@@ -384,12 +385,27 @@ export default function InterviewPage() {
             ...session,
             messages: [...session.messages, userMessage, aiResponse],
             isComplete: true,
+            endTime: new Date(),
           };
+
+          // Save to localStorage for immediate access by results page
           localStorage.setItem(
             "interviewSession",
             JSON.stringify(updatedSession),
           );
           localStorage.setItem("interviewConfig", JSON.stringify(config));
+
+          // Also save to database if user is authenticated
+          if (user?.uid) {
+            try {
+              // We'll save the analysis results when they're generated in the results page
+              console.log(
+                "Interview completed, will save to database after analysis",
+              );
+            } catch (error) {
+              console.error("Error saving interview to database:", error);
+            }
+          }
         }
 
         setSession((prev) => ({ ...prev, isComplete: true }));
@@ -419,6 +435,44 @@ export default function InterviewPage() {
     }
   };
 
+  // Skip current question
+  const skipQuestion = async () => {
+    if (isLoading || session.isPaused) return;
+
+    const skipMessage: Message = {
+      id: `user-${Date.now()}`,
+      type: "user",
+      content: "[Question skipped]",
+      timestamp: new Date(),
+    };
+
+    setSession((prev) => ({
+      ...prev,
+      messages: [...prev.messages, skipMessage],
+    }));
+
+    setCurrentMessage("");
+    setIsTyping(true);
+
+    try {
+      const aiResponse = await getAIResponse(
+        "[Question skipped]",
+        session.currentQuestionCount,
+        false,
+      );
+
+      setSession((prev) => ({
+        ...prev,
+        messages: [...prev.messages, aiResponse],
+        currentQuestionCount: prev.currentQuestionCount + 1,
+      }));
+    } catch (error) {
+      console.error("Error skipping question:", error);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
   // Voice recording functions using Speech Recognition
   const startRecording = () => {
     if (recognitionRef.current && !isListening) {
@@ -443,7 +497,7 @@ export default function InterviewPage() {
 
   if (!isInterviewStarted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-2xl">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
@@ -452,21 +506,32 @@ export default function InterviewPage() {
               </div>
             </div>
             <CardTitle className="text-2xl font-bold">
-              {config.isDemoMode ? "Try the Demo!" : "Ready to Start?"}
+              {!mounted
+                ? "Ready to Start?"
+                : config.isDemoMode
+                  ? "Try the Demo!"
+                  : "Ready to Start?"}
             </CardTitle>
             <CardDescription className="text-lg">
-              {config.isDemoMode ? (
+              {!mounted ? (
+                <>
+                  Your AI-powered technical interview for{" "}
+                  <span className="font-semibold">Frontend Engineer</span>
+                </>
+              ) : mounted && config.isDemoMode ? (
                 "Experience our AI interview system with a quick, no-pressure demo"
-              ) : (
+              ) : mounted ? (
                 <>
                   Your AI-powered {config.interviewType} interview for{" "}
                   <span className="font-semibold">{config.position}</span>
                 </>
+              ) : (
+                "Loading interview configuration..."
               )}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {!config.isDemoMode && (
+            {mounted && !config.isDemoMode && (
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="space-y-2">
                   <Badge variant="outline" className="w-full justify-center">
@@ -495,7 +560,7 @@ export default function InterviewPage() {
               </div>
             )}
 
-            {config.isDemoMode && (
+            {mounted && config.isDemoMode && (
               <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
                 <Badge variant="outline" className="mb-3">
                   Demo Mode
@@ -537,11 +602,7 @@ export default function InterviewPage() {
               </ul>
             </div>
 
-            <Button
-              onClick={startInterview}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              size="lg"
-            >
+            <Button onClick={startInterview} className="w-full " size="lg">
               <Play className="h-4 w-4 mr-2" />
               {config.isDemoMode ? "Start Demo" : "Start Interview"}
             </Button>
@@ -552,14 +613,14 @@ export default function InterviewPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
+    <div className="min-h-screen">
       {/* Header */}
       <div className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-md sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
-                <Brain className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              <div className="p-2 bg-blue-100 dark:bg-purple-900 rounded-full">
+                <Brain className="h-6 w-6 text-muted-foreground dark:text-muted-foreground" />
               </div>
               <div>
                 <h1 className="text-xl font-bold">AI Interview Session</h1>
@@ -769,9 +830,7 @@ export default function InterviewPage() {
               <div className="flex flex-col space-y-2">
                 <Button
                   onClick={sendMessage}
-                  disabled={
-                    !currentMessage.trim() || isLoading || session.isPaused
-                  }
+                  disabled={!currentMessage.trim() || session.isPaused}
                   size="sm"
                   className="bg-blue-600 hover:bg-blue-700"
                 >
@@ -780,6 +839,15 @@ export default function InterviewPage() {
                   ) : (
                     <Send className="h-4 w-4" />
                   )}
+                </Button>
+                <Button
+                  onClick={skipQuestion}
+                  disabled={isLoading || session.isPaused}
+                  variant="outline"
+                  size="sm"
+                  className="text-orange-600 hover:text-orange-700 border-orange-300 hover:border-orange-400"
+                >
+                  <SkipForward className="h-4 w-4" />
                 </Button>
                 <Button
                   onClick={isRecording ? stopRecording : startRecording}

@@ -27,7 +27,7 @@ export default function CTASection() {
                 skills with Grant Guide.
               </p>
 
-              <Link href="/register">
+              <Link href="/auth">
                 <Button
                   size="lg"
                   className="bg-primary text-primary-foreground hover:bg-primary/90 px-6"

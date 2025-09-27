@@ -22,7 +22,7 @@ export async function testCreateUserProfile(userId: string): Promise<boolean> {
       experience: "mid-level",
       preferences: {
         preferredDifficulty: "intermediate",
-        preferredInterviewTypes: ["technical", "behavioral"],
+        preferredInterviewTypes: ["technical", "bullet"],
         targetCompanies: ["Google", "Microsoft"],
         notificationsEnabled: true,
         darkMode: false,

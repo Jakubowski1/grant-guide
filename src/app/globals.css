@@ -31,12 +31,12 @@
   --radius: 0.75rem; /* Slightly larger radius for futuristic feel */
   --sidebar: #f9fafb; /* Light sidebar */
   --sidebar-foreground: #0a0a0a; /* Dark sidebar text */
-  --sidebar-primary: #00b47b; /* Celadon active items */
-  --sidebar-primary-foreground: #fafafa; /* Light text on celadon */
+  --sidebar-primary: #6817ae; /* Purple active items */
+  --sidebar-primary-foreground: #fafafa; /* Light text on purple */
   --sidebar-accent: #f3f4f6; /* Light sidebar accent */
   --sidebar-accent-foreground: #374151; /* Dark accent text */
   --sidebar-border: #e5e7eb; /* Light sidebar border */
-  --sidebar-ring: oklch(0.68 0.15 162); /* Celadon sidebar focus */
+  --sidebar-ring: #6817ae; /* Purple sidebar focus */
 }
 
 .dark {
@@ -66,12 +66,12 @@
   --chart-5: oklch(0.68 0.28 220); /* Bright blue */
   --sidebar: oklch(0.08 0 0); /* Deep black sidebar */
   --sidebar-foreground: oklch(0.985 0 0); /* White sidebar text */
-  --sidebar-primary: oklch(0.78 0.18 162); /* Bright celadon active */
-  --sidebar-primary-foreground: oklch(0.08 0 0); /* Deep black active text */
+  --sidebar-primary: #6817ae; /* Purple active */
+  --sidebar-primary-foreground: oklch(0.985 0 0); /* White active text */
   --sidebar-accent: oklch(0.18 0 0); /* Dark sidebar accent */
   --sidebar-accent-foreground: oklch(0.985 0 0); /* White accent text */
   --sidebar-border: oklch(0.25 0 0); /* Medium dark sidebar border */
-  --sidebar-ring: oklch(0.78 0.18 162); /* Bright celadon sidebar ring */
+  --sidebar-ring: #6817ae; /* Purple sidebar ring */
 }
 
 @theme inline {

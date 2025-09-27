@@ -13,7 +13,6 @@ import {
   Home,
   LogOut,
   Menu,
-  MessageSquare,
   Plus,
   Settings,
   Target,
@@ -155,7 +154,7 @@ export default function DashboardPage() {
   // Question types distribution
   const questionTypesData = [
     { name: "Technical", value: 45, color: "#68d391" },
-    { name: "Behavioral", value: 25, color: "#4fd1c7" },
+    { name: "Bullet", value: 25, color: "#4fd1c7" },
     { name: "Coding", value: 20, color: "#63b3ed" },
     { name: "System Design", value: 10, color: "#f6ad55" },
   ];
@@ -241,7 +240,7 @@ export default function DashboardPage() {
             </Link>
 
             <Link
-              href="/help"
+              href="/support"
               className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
             >
               <HelpCircle className="h-5 w-5" />
@@ -495,8 +494,8 @@ export default function DashboardPage() {
                               {session.type === "technical" && (
                                 <Code className="h-4 w-4 text-primary" />
                               )}
-                              {session.type === "behavioral" && (
-                                <MessageSquare className="h-4 w-4 text-primary" />
+                              {session.type === "bullet" && (
+                                <Target className="h-4 w-4 text-primary" />
                               )}
                               {session.type === "coding" && (
                                 <Brain className="h-4 w-4 text-primary" />

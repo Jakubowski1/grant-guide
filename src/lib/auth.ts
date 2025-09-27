@@ -122,7 +122,7 @@ export const registerWithEmailAndPassword = async (
     const profileData = {
       email: user.email || "",
       displayName,
-      photoURL: user.photoURL || undefined,
+      ...(user.photoURL && { photoURL: user.photoURL }),
       role: additionalData.role,
       experience: additionalData.experience,
       howDidYouHear: additionalData.howDidYouHear,

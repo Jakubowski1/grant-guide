@@ -59,6 +59,7 @@ import { useAuth } from "@/providers/auth-provider";
 interface InterviewConfig {
   position: string;
   seniority: string;
+  technologies: string[];
   companyProfile: string;
   specificCompany: string;
   interviewMode: string;
@@ -85,6 +86,12 @@ const STEPS: ConfigStep[] = [
     title: "Experience",
     description: "Choose your level",
     icon: Target,
+  },
+  {
+    id: "technologies",
+    title: "Technologies",
+    description: "Select relevant tech stack",
+    icon: Server,
   },
   {
     id: "company",
@@ -115,6 +122,7 @@ export default function ConfigurePage() {
   const [config, setConfig] = useState<InterviewConfig>({
     position: "",
     seniority: "",
+    technologies: [],
     companyProfile: "",
     specificCompany: "",
     interviewMode: "",
@@ -272,6 +280,212 @@ export default function ConfigurePage() {
     },
   ];
 
+  const technologies = [
+    // Frontend
+    "HTML",
+    "CSS",
+    "JavaScript",
+    "TypeScript",
+    "React",
+    "Angular",
+    "Vue.js",
+    "Svelte",
+    "jQuery",
+    "Backbone.js",
+    "Sass",
+    "Less",
+    "Tailwind CSS",
+    "Bootstrap",
+    "Material UI",
+    "Webpack",
+    "Rollup",
+    "Parcel",
+    "Vite",
+    "Redux",
+    "MobX",
+    "Zustand",
+    "Vuex",
+    "Pinia",
+
+    // Testing
+    "Jest",
+    "Mocha",
+    "Cypress",
+    "Selenium",
+    "Testing Library",
+    "JUnit",
+    "pytest",
+    "Chai",
+    "XCTest",
+    "Espresso",
+    "Detox",
+    "Appium",
+
+    // Version Control & APIs
+    "Git",
+    "GitHub",
+    "GitLab",
+    "Bitbucket",
+    "AJAX",
+    "Fetch API",
+    "GraphQL",
+    "REST",
+    "WebSockets",
+    "OAuth2",
+    "JWT",
+    "OpenID Connect",
+    "SAML",
+    "RabbitMQ",
+    "Kafka",
+    "Webhooks",
+
+    // Backend Languages
+    "Java",
+    "Python",
+    "Node.js",
+    "C#",
+    "Go",
+    "PHP",
+    "Ruby",
+    "Kotlin",
+    "Rust",
+    "Swift",
+    "Objective-C",
+    "Dart",
+    "Assembly",
+
+    // Backend Frameworks
+    "Express.js",
+    "NestJS",
+    "Django",
+    "Flask",
+    "Spring Boot",
+    "Ruby on Rails",
+    "Laravel",
+    "ASP.NET",
+
+    // Databases
+    "MySQL",
+    "PostgreSQL",
+    "MongoDB",
+    "Redis",
+    "Cassandra",
+    "Oracle",
+    "Firebase",
+    "DynamoDB",
+    "SQLite",
+    "Realm",
+
+    // Architecture
+    "LAMP stack",
+    "JAMstack",
+    "MEAN stack",
+
+    // Mobile Development
+    "Xcode",
+    "UIKit",
+    "SwiftUI",
+    "Android Studio",
+    "Jetpack Compose",
+    "Flutter",
+    "React Native",
+    "Xamarin",
+    "Ionic",
+
+    // Game Development
+    "Unity",
+    "Unreal Engine",
+    "Godot",
+    "CryEngine",
+    "OpenGL",
+    "DirectX",
+    "Vulkan",
+    "WebGL",
+    "Metal",
+    "Blender",
+    "Maya",
+    "Photoshop",
+    "Substance Painter",
+    "Photon",
+    "Mirror",
+    "Steamworks SDK",
+
+    // Data & ML
+    "Hadoop",
+    "Spark",
+    "Flink",
+    "Airflow",
+    "Beam",
+    "Talend",
+    "Informatica",
+    "dbt",
+    "Scikit-learn",
+    "Keras",
+    "TensorFlow",
+    "PyTorch",
+    "XGBoost",
+    "LightGBM",
+    "Pandas",
+    "NumPy",
+    "Matplotlib",
+    "Seaborn",
+    "MLflow",
+    "Sagemaker",
+    "TensorFlow Serving",
+
+    // DevOps & Cloud
+    "Jenkins",
+    "GitLab CI",
+    "GitHub Actions",
+    "CircleCI",
+    "Docker",
+    "Kubernetes",
+    "Helm",
+    "OpenShift",
+    "AWS",
+    "Azure",
+    "GCP",
+    "DigitalOcean",
+    "Terraform",
+    "Ansible",
+    "Pulumi",
+    "CloudFormation",
+    "Prometheus",
+    "Grafana",
+    "ELK stack",
+    "Datadog",
+
+    // Embedded & Security
+    "Keil",
+    "PlatformIO",
+    "OpenOCD",
+    "GDB",
+    "I2C",
+    "SPI",
+    "UART",
+    "CAN",
+    "Wireshark",
+    "Metasploit",
+    "Burp Suite",
+    "Nessus",
+    "OpenSSL",
+
+    // API & Serverless
+    "Apigee",
+    "Kong",
+    "Postman",
+    "Swagger",
+    "AWS Lambda",
+    "Azure Functions",
+    "Cloudflare Workers",
+
+    // AR/VR
+    "Unity XR",
+    "ARKit",
+    "ARCore",
+    "Vuforia",
+  ];
+
   const interviewTypes = [
     {
       value: "technical",
@@ -280,10 +494,10 @@ export default function ConfigurePage() {
       icon: Code,
     },
     {
-      value: "behavioral",
-      label: "Behavioral Interview",
-      description: "Experience and soft skills",
-      icon: Users,
+      value: "bullet",
+      label: "Bullet Interview",
+      description: "Quick 3-question session",
+      icon: Target,
     },
     {
       value: "system-design",
@@ -295,7 +509,7 @@ export default function ConfigurePage() {
       value: "mixed",
       label: "Mixed Interview",
       description: "Combination of all types",
-      icon: Target,
+      icon: Users,
     },
   ];
 
@@ -303,6 +517,7 @@ export default function ConfigurePage() {
     if (
       config.position &&
       config.seniority &&
+      config.technologies.length > 0 &&
       (config.companyProfile || config.specificCompany) &&
       config.interviewMode &&
       config.interviewType
@@ -310,7 +525,11 @@ export default function ConfigurePage() {
       const urlParams = new URLSearchParams();
       Object.entries(config).forEach(([key, value]) => {
         if (value) {
-          urlParams.append(key, value);
+          if (key === "technologies" && Array.isArray(value)) {
+            urlParams.append(key, JSON.stringify(value));
+          } else {
+            urlParams.append(key, value as string);
+          }
         }
       });
       window.location.href = `/interview?${urlParams.toString()}`;
@@ -320,6 +539,7 @@ export default function ConfigurePage() {
   const isConfigComplete =
     config.position &&
     config.seniority &&
+    config.technologies.length > 0 &&
     (config.companyProfile || config.specificCompany) &&
     config.interviewMode &&
     config.interviewType;
@@ -331,10 +551,12 @@ export default function ConfigurePage() {
       case 1:
         return config.seniority !== "";
       case 2:
-        return config.companyProfile !== "" || config.specificCompany !== "";
+        return config.technologies.length > 0;
       case 3:
-        return config.interviewType !== "";
+        return config.companyProfile !== "" || config.specificCompany !== "";
       case 4:
+        return config.interviewType !== "";
+      case 5:
         return config.interviewMode !== "";
       default:
         return false;
@@ -365,7 +587,7 @@ export default function ConfigurePage() {
           return (
             <Card
               key={position.value}
-              className={`cursor-pointer transition-all hover:bg-accent/50 h-full ${
+              className={`cursor-pointer transition-all hover:bg-purple-100 hover:border-purple-300 dark:hover:bg-purple-900/20 dark:hover:border-purple-600 h-full ${
                 config.position === position.value
                   ? "ring-2 ring-primary bg-primary/10"
                   : "border-border"
@@ -377,7 +599,7 @@ export default function ConfigurePage() {
                 }))
               }
             >
-              <CardContent className="p-4 h-full flex flex-col">
+              <CardContent className="p-4 h-full flex  flex-col">
                 <div className="flex items-start gap-3 flex-1">
                   <Icon className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
                   <div className="flex-1">
@@ -413,7 +635,7 @@ export default function ConfigurePage() {
             />
             <Label
               htmlFor={level.value}
-              className={`flex flex-col p-6 rounded-lg border cursor-pointer transition-all hover:bg-accent/50 h-full min-h-[120px] ${
+              className={`flex flex-col p-6 rounded-lg border cursor-pointer transition-all hover:bg-purple-100 hover:border-purple-300 dark:hover:bg-purple-900/20 dark:hover:border-purple-600 h-full min-h-[120px] ${
                 config.seniority === level.value
                   ? "ring-2 ring-primary bg-primary/10 border-primary"
                   : "border-border"
@@ -433,6 +655,74 @@ export default function ConfigurePage() {
     );
   }
 
+  function renderTechnologiesStep() {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-lg font-semibold mb-4">
+            Select Technologies & Skills
+          </h3>
+          <p className="text-muted-foreground mb-6">
+            Choose the technologies, frameworks, and tools relevant to your
+            interview. This helps us tailor questions to your tech stack.
+          </p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-96 overflow-y-auto">
+          {technologies.map((tech) => (
+            <button
+              key={tech}
+              type="button"
+              className={`p-3 rounded-lg border cursor-pointer transition-all hover:scale-105 text-left ${
+                config.technologies.includes(tech)
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-card hover:bg-accent"
+              }`}
+              onClick={() => {
+                setConfig((prev) => ({
+                  ...prev,
+                  technologies: prev.technologies.includes(tech)
+                    ? prev.technologies.filter((t) => t !== tech)
+                    : [...prev.technologies, tech],
+                }));
+              }}
+            >
+              <span className="text-sm font-medium">{tech}</span>
+            </button>
+          ))}
+        </div>
+        {config.technologies.length > 0 && (
+          <div className="mt-4">
+            <p className="text-sm text-muted-foreground mb-2">
+              Selected ({config.technologies.length}):
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {config.technologies.map((tech) => (
+                <Badge key={tech} variant="secondary" className="text-xs">
+                  {tech}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ml-1 h-auto p-0 text-xs"
+                    onClick={() => {
+                      setConfig((prev) => ({
+                        ...prev,
+                        technologies: prev.technologies.filter(
+                          (t) => t !== tech,
+                        ),
+                      }));
+                    }}
+                  >
+                    ×
+                  </Button>
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   function renderCompanyStep() {
     return (
       <div className="space-y-6">
@@ -444,7 +734,7 @@ export default function ConfigurePage() {
               return (
                 <Card
                   key={profile.value}
-                  className={`cursor-pointer transition-all hover:bg-accent/50 h-full ${
+                  className={`cursor-pointer transition-all hover:bg-purple-100 hover:border-purple-300 dark:hover:bg-purple-900/20 dark:hover:border-purple-600 h-full ${
                     config.companyProfile === profile.value
                       ? "ring-2 ring-primary bg-primary/10"
                       : "border-border"
@@ -484,7 +774,7 @@ export default function ConfigurePage() {
               return (
                 <Card
                   key={company.value}
-                  className={`cursor-pointer transition-all hover:bg-accent/50 hover:scale-105 h-full ${
+                  className={`cursor-pointer transition-all hover:bg-purple-100 hover:border-purple-300 hover:scale-105 dark:hover:bg-purple-900/20 dark:hover:border-purple-600 h-full ${
                     config.specificCompany === company.value
                       ? "ring-2 ring-primary bg-primary/10"
                       : "border-border"
@@ -527,7 +817,7 @@ export default function ConfigurePage() {
           return (
             <Card
               key={type.value}
-              className={`cursor-pointer transition-all hover:bg-accent/50 h-full ${
+              className={`cursor-pointer transition-all hover:bg-purple-100 hover:border-purple-300 dark:hover:bg-purple-900/20 dark:hover:border-purple-600 h-full ${
                 config.interviewType === type.value
                   ? "ring-2 ring-primary bg-primary/10"
                   : "border-border"
@@ -566,7 +856,7 @@ export default function ConfigurePage() {
             return (
               <Card
                 key={mode.value}
-                className={`cursor-pointer transition-all hover:bg-accent/50 h-full ${
+                className={`cursor-pointer transition-all hover:bg-purple-100 hover:border-purple-300 dark:hover:bg-purple-900/20 dark:hover:border-purple-600 h-full ${
                   config.interviewMode === mode.value
                     ? "ring-2 ring-primary bg-primary/10"
                     : "border-border"
@@ -629,10 +919,12 @@ export default function ConfigurePage() {
       case 1:
         return renderExperienceStep();
       case 2:
-        return renderCompanyStep();
+        return renderTechnologiesStep();
       case 3:
-        return renderInterviewTypeStep();
+        return renderCompanyStep();
       case 4:
+        return renderInterviewTypeStep();
+      case 5:
         return renderModeStep();
       default:
         return null;
@@ -828,7 +1120,7 @@ export default function ConfigurePage() {
             <CardContent className="min-h-[400px] relative overflow-hidden">
               <div
                 key={currentStep}
-                className="animate-in slide-in-from-right-4 fade-in duration-300"
+                className="animate-in slide-in-from-right-4 fade-in duration-300 py-2"
               >
                 {renderStepContent()}
               </div>

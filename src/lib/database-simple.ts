@@ -440,7 +440,7 @@ export const getDefaultSkills = (): UserSkill[] => {
     },
     {
       skillId: "communication",
-      category: "behavioral",
+      category: "bullet",
       name: "Communication",
       currentLevel: 7,
       targetLevel: 9,

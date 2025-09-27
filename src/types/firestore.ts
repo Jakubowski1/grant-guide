@@ -116,7 +116,7 @@ export interface SkillProgressEntry {
 
 export type SkillCategory =
   | "technical"
-  | "behavioral"
+  | "bullet"
   | "system-design"
   | "communication"
   | "problem-solving"
@@ -173,7 +173,7 @@ export interface InterviewConfig {
 
 export type InterviewType =
   | "technical"
-  | "behavioral"
+  | "bullet"
   | "system-design"
   | "mixed"
   | "coding"
@@ -194,7 +194,7 @@ export interface SessionScores {
   problemSolving: number;
   codeQuality?: number;
   systemDesign?: number;
-  behavioral?: number;
+  bullet?: number;
   presentation?: number;
 }
 

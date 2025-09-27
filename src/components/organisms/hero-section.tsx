@@ -24,7 +24,7 @@ export default function HeroSection() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link href="/register">
+          <Link href="/auth">
             <Button
               size="lg"
               className="bg-primary text-primary-foreground hover:bg-primary/90 px-8"

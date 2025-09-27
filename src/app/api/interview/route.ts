@@ -146,10 +146,10 @@ Keep questions broad and approachable - focus on letting them experience the int
 - Encourage explanations matching their experience level
 - Ask follow-up questions suited to their knowledge`,
 
-    behavioral: `
-- Focus on STAR method responses
-- Ask for examples appropriate to ${seniority} experience level
-- Probe for relevant situations they would have encountered`,
+    bullet: `
+- Ask only 3 focused, concise questions
+- Keep responses brief and to the point
+- Cover essential ${seniority} level topics efficiently`,
 
     whiteboard: `
 - Present challenges appropriate for ${seniority} level
@@ -163,10 +163,10 @@ Keep questions broad and approachable - focus on letting them experience the int
 - Ask about frameworks and tools they should know
 - Include practical scenarios they might face`,
 
-    behavioral: `
-- Focus on situations relevant to ${seniority} level experience
-- Ask about teamwork and learning experiences
-- Explore problem-solving approaches`,
+    bullet: `
+- Ask 3 essential questions for ${seniority} level
+- Focus on core competencies and quick assessment
+- Keep questions concise and direct`,
 
     coding: `
 - Present problems appropriate for ${seniority} level
@@ -285,7 +285,7 @@ function determineQuestionType(
 ): string {
   const types = {
     technical: ["conceptual", "practical", "architectural", "debugging"],
-    behavioral: ["leadership", "teamwork", "problem-solving", "communication"],
+    bullet: ["core-concept", "quick-assessment", "essential-skill"],
     coding: ["algorithms", "data-structures", "optimization", "implementation"],
     "system-design": [
       "architecture",

@@ -58,12 +58,21 @@ export const useDashboardData = (): DashboardData => {
       try {
         setData((prev) => ({ ...prev, loading: true, error: null }));
 
-        // Fetch user profile, skills, and recent sessions in parallel
-        const [profile, skills, sessions] = await Promise.all([
-          DatabaseService.getUserProfile(user.uid),
-          DatabaseService.getUserSkills(user.uid),
-          DatabaseService.getUserSessions(user.uid, 10),
-        ]);
+        // Fetch data sequentially to avoid potential Firestore query race conditions
+        console.log("Fetching dashboard data for user:", user.uid);
+
+        const profile = await DatabaseService.getUserProfile(user.uid);
+        console.log("Profile fetched successfully");
+
+        const skills = await DatabaseService.getUserSkills(user.uid);
+        console.log("Skills fetched successfully:", skills.length, "skills");
+
+        const sessions = await DatabaseService.getUserSessions(user.uid, 10);
+        console.log(
+          "Sessions fetched successfully:",
+          sessions.length,
+          "sessions",
+        );
 
         // Calculate stats from sessions
         const stats = calculateStats(sessions);

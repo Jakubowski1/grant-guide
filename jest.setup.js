@@ -1,11 +1,11 @@
-import '@testing-library/jest-dom/jest-globals'
+import "@testing-library/jest-dom/jest-globals";
 
 // Mock Firebase
-jest.mock('firebase/app', () => ({
+jest.mock("firebase/app", () => ({
   initializeApp: jest.fn(),
-}))
+}));
 
-jest.mock('firebase/auth', () => ({
+jest.mock("firebase/auth", () => ({
   getAuth: jest.fn(),
   createUserWithEmailAndPassword: jest.fn(),
   signInWithEmailAndPassword: jest.fn(),
@@ -15,9 +15,9 @@ jest.mock('firebase/auth', () => ({
   signOut: jest.fn(),
   onAuthStateChanged: jest.fn(),
   updateProfile: jest.fn(),
-}))
+}));
 
-jest.mock('firebase/firestore', () => ({
+jest.mock("firebase/firestore", () => ({
   getFirestore: jest.fn(),
   collection: jest.fn(),
   doc: jest.fn(),
@@ -34,40 +34,40 @@ jest.mock('firebase/firestore', () => ({
   addDoc: jest.fn(),
   writeBatch: jest.fn(),
   onSnapshot: jest.fn(),
-}))
+}));
 
 // Mock Next.js router
-jest.mock('next/navigation', () => ({
+jest.mock("next/navigation", () => ({
   useRouter: () => ({
     push: jest.fn(),
     replace: jest.fn(),
     back: jest.fn(),
   }),
-  usePathname: () => '/',
+  usePathname: () => "/",
   useSearchParams: () => new URLSearchParams(),
-}))
+}));
 
 // Global test utilities
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
   unobserve: jest.fn(),
   disconnect: jest.fn(),
-}))
+}));
 
 // Suppress console warnings during tests
-const originalError = console.error
+const originalError = console.error;
 beforeAll(() => {
   console.error = (...args) => {
     if (
-      typeof args[0] === 'string' &&
-      args[0].includes('Warning: ReactDOM.render is no longer supported')
+      typeof args[0] === "string" &&
+      args[0].includes("Warning: ReactDOM.render is no longer supported")
     ) {
-      return
+      return;
     }
-    originalError.call(console, ...args)
-  }
-})
+    originalError.call(console, ...args);
+  };
+});
 
 afterAll(() => {
-  console.error = originalError
-})
+  console.error = originalError;
+});
