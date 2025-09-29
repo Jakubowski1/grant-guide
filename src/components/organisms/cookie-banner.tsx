@@ -258,7 +258,7 @@ export const CookieBanner = () => {
   if (!showBanner) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-gradient-to-t from-black/20 to-transparent pointer-events-none animate-in slide-in-from-bottom duration-300">
+    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 pointer-events-none animate-in slide-in-from-bottom duration-300">
       <Card className="max-w-4xl mx-auto p-6 shadow-2xl border-border/50 backdrop-blur-md bg-background/95 pointer-events-auto">
         {!showDetails ? (
           <div className="space-y-4">

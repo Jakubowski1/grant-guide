@@ -39,12 +39,37 @@ interface InterviewResults {
   nextSteps: string;
 }
 
+const calmingMessages = [
+  "Just a moment...",
+  "We are analyzing your interview data...",
+  "Might take just a second more...",
+  "Reviewing your responses...",
+  "Preparing detailed feedback...",
+  "Almost there...",
+  "Generating personalized insights...",
+  "Finalizing your analysis...",
+];
+
 export default function ResultsPage() {
   const router = useRouter();
   const { user } = useAuth();
   const [isAnalyzing, setIsAnalyzing] = useState(true);
   const [results, setResults] = useState<InterviewResults | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+
+  // Rotate calming messages while analyzing
+  useEffect(() => {
+    if (!isAnalyzing) return;
+
+    const messageInterval = setInterval(() => {
+      setCurrentMessageIndex(
+        (prevIndex) => (prevIndex + 1) % calmingMessages.length,
+      );
+    }, 2000); // Change message every 2 seconds
+
+    return () => clearInterval(messageInterval);
+  }, [isAnalyzing]);
 
   // Load interview analysis on component mount
   useEffect(() => {
@@ -162,7 +187,7 @@ export default function ResultsPage() {
   // Loading state
   if (isAnalyzing) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="w-full max-w-md text-center">
           <CardContent className="pt-6">
             <div className="flex justify-center mb-4">
@@ -171,9 +196,8 @@ export default function ResultsPage() {
             <h3 className="text-lg font-semibold mb-2">
               Analyzing Your Interview
             </h3>
-            <p className="text-gray-600 dark:text-gray-400">
-              Our AI is reviewing your responses and preparing detailed
-              feedback...
+            <p className="text-muted-foreground min-h-[1.5rem] transition-opacity duration-300">
+              {calmingMessages[currentMessageIndex]}
             </p>
           </CardContent>
         </Card>
@@ -184,12 +208,12 @@ export default function ResultsPage() {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="w-full max-w-md text-center">
           <CardContent className="pt-6">
             <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Analysis Failed</h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+            <p className="text-muted-foreground mb-4">{error}</p>
             <Button onClick={() => router.push("/dashboard")}>
               Return to Dashboard
             </Button>
@@ -201,11 +225,11 @@ export default function ResultsPage() {
 
   if (!results) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="w-full max-w-md text-center">
           <CardContent className="pt-6">
             <h3 className="text-lg font-semibold mb-2">No Results Found</h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-muted-foreground mb-4">
               Please complete an interview to see your results.
             </p>
             <Button onClick={() => router.push("/configure")}>
@@ -218,9 +242,9 @@ export default function ResultsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-md sticky top-0 z-10">
+      <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">

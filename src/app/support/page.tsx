@@ -2,13 +2,13 @@
 
 import {
   BookOpen,
+  ChevronDown,
+  ChevronUp,
   HelpCircle,
   History,
   Home,
   LogOut,
-  Mail,
   Menu,
-  MessageCircle,
   Plus,
   Settings,
   User,
@@ -21,20 +21,96 @@ import Logo from "@/components/atoms/logo-grant-guide";
 import { ThemeToggle } from "@/components/atoms/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { useAuth } from "@/providers/auth-provider";
 
+const faqData = [
+  {
+    id: "getting-started",
+    question: "How do I start my first mock interview?",
+    answer:
+      "To start your first interview, click on 'New Interview' from the sidebar or dashboard. You can then configure your interview settings including topic focus, difficulty level, and duration before beginning.",
+  },
+  {
+    id: "interview-types",
+    question: "What types of interviews are available?",
+    answer:
+      "We offer various interview types including technical coding interviews, system design discussions, and frontend development questions. You can filter by company and difficulty level to match your preparation needs.",
+  },
+  {
+    id: "practice-questions",
+    question: "How can I access practice questions?",
+    answer:
+      "Visit the 'Practice Library' from the sidebar to browse through our comprehensive collection of questions. You can filter by company, difficulty, category, and specific tags to find relevant practice material.",
+  },
+  {
+    id: "results-analysis",
+    question: "How does the AI analysis work?",
+    answer:
+      "After completing an interview, our AI analyzes your responses and provides detailed feedback including strengths, areas for improvement, and personalized recommendations for your interview preparation.",
+  },
+  {
+    id: "interview-history",
+    question: "Can I review my past interviews?",
+    answer:
+      "Yes! Go to 'Interview History' to view all your completed sessions. You can search, filter, and sort your interviews to track your progress over time.",
+  },
+  {
+    id: "technical-issues",
+    question: "What should I do if I encounter technical problems?",
+    answer:
+      "If you experience any technical issues, try refreshing the page first. Make sure you have a stable internet connection. Most issues are resolved by restarting your browser session.",
+  },
+  {
+    id: "account-settings",
+    question: "How can I update my profile and settings?",
+    answer:
+      "Click on 'Profile' or 'Settings' in the sidebar to update your account information, preferences, and interview configurations.",
+  },
+  {
+    id: "progress-tracking",
+    question: "How do I track my improvement over time?",
+    answer:
+      "The dashboard provides an overview of your performance trends, success rates, and areas of focus. You can also review detailed analytics in your interview history.",
+  },
+  {
+    id: "company-specific",
+    question: "Can I practice for specific companies?",
+    answer:
+      "Absolutely! Our practice library includes questions tagged with specific companies where they were asked. Use the company filter to focus on your target companies.",
+  },
+  {
+    id: "difficulty-levels",
+    question: "What do the different difficulty levels mean?",
+    answer:
+      "Beginner: Entry-level questions suitable for new graduates. Intermediate: Mid-level questions for 2-4 years experience. Advanced: Senior-level questions for 5+ years. Expert: Principal/Staff level questions for senior engineers.",
+  },
+];
+
 export default function SupportPage() {
-  const { user, loading } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    subject: "",
-    message: "",
-    email: "",
-  });
+  const [openItems, setOpenItems] = useState<string[]>([]);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
+  const toggleItem = (itemId: string) => {
+    setOpenItems((prev) =>
+      prev.includes(itemId)
+        ? prev.filter((id) => id !== itemId)
+        : [...prev, itemId],
+    );
+  };
 
   if (loading) {
     return <LoadingPage />;
@@ -43,14 +119,6 @@ export default function SupportPage() {
   if (!user) {
     return null;
   }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement support form submission
-    console.log("Support form submitted:", formData);
-    alert("Thank you for your message! We'll get back to you soon.");
-    setFormData({ subject: "", message: "", email: "" });
-  };
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -133,10 +201,7 @@ export default function SupportPage() {
           <div className="pt-4 border-t border-sidebar-border">
             <button
               type="button"
-              onClick={() => {
-                // Add logout functionality
-                window.location.href = "/auth";
-              }}
+              onClick={handleSignOut}
               className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors w-full text-left"
             >
               <LogOut className="h-5 w-5" />
@@ -194,149 +259,44 @@ export default function SupportPage() {
 
         {/* Support Content */}
         <div className="container mx-auto px-6 py-8 max-w-4xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Contact Form */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageCircle className="h-5 w-5" />
-                  Contact Us
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          email: e.target.value,
-                        }))
-                      }
-                      placeholder="your.email@example.com"
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="subject">Subject</Label>
-                    <Input
-                      id="subject"
-                      value={formData.subject}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          subject: e.target.value,
-                        }))
-                      }
-                      placeholder="What can we help you with?"
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="message">Message</Label>
-                    <Textarea
-                      id="message"
-                      value={formData.message}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          message: e.target.value,
-                        }))
-                      }
-                      placeholder="Please describe your issue or question in detail..."
-                      rows={6}
-                      required
-                    />
-                  </div>
-
-                  <Button type="submit" className="w-full">
-                    Send Message
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-
-            {/* FAQ & Quick Help */}
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <HelpCircle className="h-5 w-5" />
-                    Frequently Asked Questions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold mb-2">
-                      How do I start a new interview?
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      Click on "New Interview" in the navigation or sidebar to
-                      configure and start a new interview session.
-                    </p>
-                  </div>
-
-                  <Separator />
-
-                  <div>
-                    <h4 className="font-semibold mb-2">
-                      Can I review my past interviews?
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      Yes! Visit the "Interview History" section to view all
-                      your completed interviews and their results.
-                    </p>
-                  </div>
-
-                  <Separator />
-
-                  <div>
-                    <h4 className="font-semibold mb-2">
-                      How do I update my profile?
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      Go to your Profile page and click "Edit Profile" to update
-                      your information, role, and experience level.
-                    </p>
-                  </div>
-
-                  <Separator />
-
-                  <div>
-                    <h4 className="font-semibold mb-2">Is my data secure?</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Yes, we use industry-standard encryption and security
-                      measures to protect your personal information and
-                      interview data.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quick Contact</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">support@grantguide.com</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      We typically respond within 24 hours during business days.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <HelpCircle className="h-5 w-5" />
+                Frequently Asked Questions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {faqData.map((faq) => (
+                  <Collapsible
+                    key={faq.id}
+                    open={openItems.includes(faq.id)}
+                    onOpenChange={() => toggleItem(faq.id)}
+                  >
+                    <CollapsibleTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="flex w-full justify-between p-4 text-left hover:bg-muted/50"
+                      >
+                        <span className="font-semibold">{faq.question}</span>
+                        {openItems.includes(faq.id) ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-4 pb-4">
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {faq.answer}
+                      </p>
+                    </CollapsibleContent>
+                  </Collapsible>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

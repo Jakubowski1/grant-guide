@@ -280,211 +280,206 @@ export default function ConfigurePage() {
     },
   ];
 
-  const technologies = [
-    // Frontend
-    "HTML",
-    "CSS",
-    "JavaScript",
-    "TypeScript",
-    "React",
-    "Angular",
-    "Vue.js",
-    "Svelte",
-    "jQuery",
-    "Backbone.js",
-    "Sass",
-    "Less",
-    "Tailwind CSS",
-    "Bootstrap",
-    "Material UI",
-    "Webpack",
-    "Rollup",
-    "Parcel",
-    "Vite",
-    "Redux",
-    "MobX",
-    "Zustand",
-    "Vuex",
-    "Pinia",
+  const technologyGroups = {
+    Frontend: [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "TypeScript",
+      "React",
+      "Angular",
+      "Vue.js",
+      "Svelte",
+      "jQuery",
+      "Backbone.js",
+      "Sass",
+      "Less",
+      "Tailwind CSS",
+      "Bootstrap",
+      "Material UI",
+      "Webpack",
+      "Rollup",
+      "Parcel",
+      "Vite",
+      "Redux",
+      "MobX",
+      "Zustand",
+      "Vuex",
+      "Pinia",
+    ],
+    "Backend Languages": [
+      "Java",
+      "Python",
+      "Node.js",
+      "C#",
+      "Go",
+      "PHP",
+      "Ruby",
+      "Kotlin",
+      "Rust",
+      "Swift",
+      "Objective-C",
+      "Dart",
+      "Assembly",
+    ],
+    "Backend Frameworks": [
+      "Express.js",
+      "NestJS",
+      "Django",
+      "Flask",
+      "Spring Boot",
+      "Ruby on Rails",
+      "Laravel",
+      "ASP.NET",
+    ],
+    Databases: [
+      "MySQL",
+      "PostgreSQL",
+      "MongoDB",
+      "Redis",
+      "Cassandra",
+      "Oracle",
+      "Firebase",
+      "DynamoDB",
+      "SQLite",
+      "Realm",
+    ],
+    "Mobile Development": [
+      "Xcode",
+      "UIKit",
+      "SwiftUI",
+      "Android Studio",
+      "Jetpack Compose",
+      "Flutter",
+      "React Native",
+      "Xamarin",
+      "Ionic",
+    ],
+    "DevOps & Cloud": [
+      "Jenkins",
+      "GitLab CI",
+      "GitHub Actions",
+      "CircleCI",
+      "Docker",
+      "Kubernetes",
+      "Helm",
+      "OpenShift",
+      "AWS",
+      "Azure",
+      "GCP",
+      "DigitalOcean",
+      "Terraform",
+      "Ansible",
+      "Pulumi",
+      "CloudFormation",
+      "Prometheus",
+      "Grafana",
+      "ELK stack",
+      "Datadog",
+    ],
+    "Data & ML": [
+      "Hadoop",
+      "Spark",
+      "Flink",
+      "Airflow",
+      "Beam",
+      "Talend",
+      "Informatica",
+      "dbt",
+      "Scikit-learn",
+      "Keras",
+      "TensorFlow",
+      "PyTorch",
+      "XGBoost",
+      "LightGBM",
+      "Pandas",
+      "NumPy",
+      "Matplotlib",
+      "Seaborn",
+      "MLflow",
+      "Sagemaker",
+      "TensorFlow Serving",
+    ],
+    Testing: [
+      "Jest",
+      "Mocha",
+      "Cypress",
+      "Selenium",
+      "Testing Library",
+      "JUnit",
+      "pytest",
+      "Chai",
+      "XCTest",
+      "Espresso",
+      "Detox",
+      "Appium",
+    ],
+    "APIs & Integration": [
+      "Git",
+      "GitHub",
+      "GitLab",
+      "Bitbucket",
+      "AJAX",
+      "Fetch API",
+      "GraphQL",
+      "REST",
+      "WebSockets",
+      "OAuth2",
+      "JWT",
+      "OpenID Connect",
+      "SAML",
+      "RabbitMQ",
+      "Kafka",
+      "Webhooks",
+      "Apigee",
+      "Kong",
+      "Postman",
+      "Swagger",
+    ],
+    "Game Development": [
+      "Unity",
+      "Unreal Engine",
+      "Godot",
+      "CryEngine",
+      "OpenGL",
+      "DirectX",
+      "Vulkan",
+      "WebGL",
+      "Metal",
+      "Blender",
+      "Maya",
+      "Photoshop",
+      "Substance Painter",
+      "Photon",
+      "Mirror",
+      "Steamworks SDK",
+    ],
+    "Serverless & Functions": [
+      "AWS Lambda",
+      "Azure Functions",
+      "Cloudflare Workers",
+    ],
+    "AR/VR": ["Unity XR", "ARKit", "ARCore", "Vuforia"],
+    "Embedded & Security": [
+      "Keil",
+      "PlatformIO",
+      "OpenOCD",
+      "GDB",
+      "I2C",
+      "SPI",
+      "UART",
+      "CAN",
+      "Wireshark",
+      "Metasploit",
+      "Burp Suite",
+      "Nessus",
+      "OpenSSL",
+    ],
+    Architecture: ["LAMP stack", "JAMstack", "MEAN stack"],
+  };
 
-    // Testing
-    "Jest",
-    "Mocha",
-    "Cypress",
-    "Selenium",
-    "Testing Library",
-    "JUnit",
-    "pytest",
-    "Chai",
-    "XCTest",
-    "Espresso",
-    "Detox",
-    "Appium",
-
-    // Version Control & APIs
-    "Git",
-    "GitHub",
-    "GitLab",
-    "Bitbucket",
-    "AJAX",
-    "Fetch API",
-    "GraphQL",
-    "REST",
-    "WebSockets",
-    "OAuth2",
-    "JWT",
-    "OpenID Connect",
-    "SAML",
-    "RabbitMQ",
-    "Kafka",
-    "Webhooks",
-
-    // Backend Languages
-    "Java",
-    "Python",
-    "Node.js",
-    "C#",
-    "Go",
-    "PHP",
-    "Ruby",
-    "Kotlin",
-    "Rust",
-    "Swift",
-    "Objective-C",
-    "Dart",
-    "Assembly",
-
-    // Backend Frameworks
-    "Express.js",
-    "NestJS",
-    "Django",
-    "Flask",
-    "Spring Boot",
-    "Ruby on Rails",
-    "Laravel",
-    "ASP.NET",
-
-    // Databases
-    "MySQL",
-    "PostgreSQL",
-    "MongoDB",
-    "Redis",
-    "Cassandra",
-    "Oracle",
-    "Firebase",
-    "DynamoDB",
-    "SQLite",
-    "Realm",
-
-    // Architecture
-    "LAMP stack",
-    "JAMstack",
-    "MEAN stack",
-
-    // Mobile Development
-    "Xcode",
-    "UIKit",
-    "SwiftUI",
-    "Android Studio",
-    "Jetpack Compose",
-    "Flutter",
-    "React Native",
-    "Xamarin",
-    "Ionic",
-
-    // Game Development
-    "Unity",
-    "Unreal Engine",
-    "Godot",
-    "CryEngine",
-    "OpenGL",
-    "DirectX",
-    "Vulkan",
-    "WebGL",
-    "Metal",
-    "Blender",
-    "Maya",
-    "Photoshop",
-    "Substance Painter",
-    "Photon",
-    "Mirror",
-    "Steamworks SDK",
-
-    // Data & ML
-    "Hadoop",
-    "Spark",
-    "Flink",
-    "Airflow",
-    "Beam",
-    "Talend",
-    "Informatica",
-    "dbt",
-    "Scikit-learn",
-    "Keras",
-    "TensorFlow",
-    "PyTorch",
-    "XGBoost",
-    "LightGBM",
-    "Pandas",
-    "NumPy",
-    "Matplotlib",
-    "Seaborn",
-    "MLflow",
-    "Sagemaker",
-    "TensorFlow Serving",
-
-    // DevOps & Cloud
-    "Jenkins",
-    "GitLab CI",
-    "GitHub Actions",
-    "CircleCI",
-    "Docker",
-    "Kubernetes",
-    "Helm",
-    "OpenShift",
-    "AWS",
-    "Azure",
-    "GCP",
-    "DigitalOcean",
-    "Terraform",
-    "Ansible",
-    "Pulumi",
-    "CloudFormation",
-    "Prometheus",
-    "Grafana",
-    "ELK stack",
-    "Datadog",
-
-    // Embedded & Security
-    "Keil",
-    "PlatformIO",
-    "OpenOCD",
-    "GDB",
-    "I2C",
-    "SPI",
-    "UART",
-    "CAN",
-    "Wireshark",
-    "Metasploit",
-    "Burp Suite",
-    "Nessus",
-    "OpenSSL",
-
-    // API & Serverless
-    "Apigee",
-    "Kong",
-    "Postman",
-    "Swagger",
-    "AWS Lambda",
-    "Azure Functions",
-    "Cloudflare Workers",
-
-    // AR/VR
-    "Unity XR",
-    "ARKit",
-    "ARCore",
-    "Vuforia",
-  ];
+  // Flatten for backward compatibility
+  const _technologies = Object.values(technologyGroups).flat();
 
   const interviewTypes = [
     {
@@ -667,33 +662,88 @@ export default function ConfigurePage() {
             interview. This helps us tailor questions to your tech stack.
           </p>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-96 overflow-y-auto">
-          {technologies.map((tech) => (
-            <button
-              key={tech}
-              type="button"
-              className={`p-3 rounded-lg border cursor-pointer transition-all hover:scale-105 text-left ${
-                config.technologies.includes(tech)
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-card hover:bg-accent"
-              }`}
-              onClick={() => {
-                setConfig((prev) => ({
-                  ...prev,
-                  technologies: prev.technologies.includes(tech)
-                    ? prev.technologies.filter((t) => t !== tech)
-                    : [...prev.technologies, tech],
-                }));
-              }}
-            >
-              <span className="text-sm font-medium">{tech}</span>
-            </button>
+
+        <div className="max-h-96 overflow-y-auto space-y-6 pr-2">
+          {Object.entries(technologyGroups).map(([groupName, groupTechs]) => (
+            <div key={groupName} className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-semibold text-primary flex items-center gap-2">
+                  {groupName}
+                  <span className="text-xs text-muted-foreground font-normal">
+                    (
+                    {
+                      groupTechs.filter((tech) =>
+                        config.technologies.includes(tech),
+                      ).length
+                    }
+                    /{groupTechs.length})
+                  </span>
+                </h4>
+                <div className="flex gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-xs"
+                    onClick={() => {
+                      const newTechs = groupTechs.filter(
+                        (tech) => !config.technologies.includes(tech),
+                      );
+                      setConfig((prev) => ({
+                        ...prev,
+                        technologies: [...prev.technologies, ...newTechs],
+                      }));
+                    }}
+                  >
+                    All
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-xs"
+                    onClick={() => {
+                      setConfig((prev) => ({
+                        ...prev,
+                        technologies: prev.technologies.filter(
+                          (tech) => !groupTechs.includes(tech),
+                        ),
+                      }));
+                    }}
+                  >
+                    Clear
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                {groupTechs.map((tech) => (
+                  <button
+                    key={tech}
+                    type="button"
+                    className={`p-2 rounded-md border cursor-pointer transition-all hover:scale-105 text-left text-xs ${
+                      config.technologies.includes(tech)
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-card hover:bg-accent border-border"
+                    }`}
+                    onClick={() => {
+                      setConfig((prev) => ({
+                        ...prev,
+                        technologies: prev.technologies.includes(tech)
+                          ? prev.technologies.filter((t) => t !== tech)
+                          : [...prev.technologies, tech],
+                      }));
+                    }}
+                  >
+                    <span className="font-medium">{tech}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
+
         {config.technologies.length > 0 && (
-          <div className="mt-4">
-            <p className="text-sm text-muted-foreground mb-2">
-              Selected ({config.technologies.length}):
+          <div className="mt-6 p-4 bg-accent/50 rounded-lg">
+            <p className="text-sm font-medium text-foreground mb-3">
+              Selected Technologies ({config.technologies.length}):
             </p>
             <div className="flex flex-wrap gap-2">
               {config.technologies.map((tech) => (
@@ -702,7 +752,7 @@ export default function ConfigurePage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="ml-1 h-auto p-0 text-xs"
+                    className="ml-1 h-auto p-0 text-xs hover:text-destructive"
                     onClick={() => {
                       setConfig((prev) => ({
                         ...prev,
@@ -1000,7 +1050,7 @@ export default function ConfigurePage() {
             </Link>
 
             <Link
-              href="/help"
+              href="/support"
               className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
             >
               <HelpCircle className="h-5 w-5" />
