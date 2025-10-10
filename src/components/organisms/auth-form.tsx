@@ -327,7 +327,8 @@ export default function AuthForm({
         return (
           formData.password &&
           formData.confirmPassword &&
-          formData.password === formData.confirmPassword
+          formData.password === formData.confirmPassword &&
+          formData.password.length >= 6
         );
       case 4:
         return formData.role;
@@ -342,7 +343,7 @@ export default function AuthForm({
 
   const getStepTitle = () => {
     if (currentMode === "login") {
-      return "Welcome Back";
+      return "Welcome";
     }
 
     switch (currentStep) {
@@ -577,11 +578,10 @@ export default function AuthForm({
                 ].map((role) => (
                   <button
                     key={role.value}
-                    className={`cursor-pointer p-2 transition-all duration-200 border-2 text-center rounded-md hover:shadow-md ${
-                      formData.role === role.value
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/50"
-                    }`}
+                    className={`cursor-pointer p-2 transition-all duration-200 border-2 text-center rounded-md hover:shadow-md ${formData.role === role.value
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:border-primary/50"
+                      }`}
                     onClick={() => handleInputChange("role", role.value)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
@@ -614,11 +614,10 @@ export default function AuthForm({
                 ].map((exp) => (
                   <button
                     key={exp.value}
-                    className={`cursor-pointer transition-all rounded-md duration-200 border-2 hover:shadow-md ${
-                      formData.experience === exp.value
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/50"
-                    }`}
+                    className={`cursor-pointer transition-all rounded-md duration-200 border-2 hover:shadow-md ${formData.experience === exp.value
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:border-primary/50"
+                      }`}
                     onClick={() => handleInputChange("experience", exp.value)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
@@ -664,11 +663,10 @@ export default function AuthForm({
                 ].map((source) => (
                   <button
                     key={source.value}
-                    className={`cursor-pointer transition-all rounded-md duration-200 border-2 hover:shadow-md ${
-                      formData.howDidYouHear === source.value
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/50"
-                    }`}
+                    className={`cursor-pointer transition-all rounded-md duration-200 border-2 hover:shadow-md ${formData.howDidYouHear === source.value
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:border-primary/50"
+                      }`}
                     onClick={() =>
                       handleInputChange("howDidYouHear", source.value)
                     }
@@ -702,7 +700,7 @@ export default function AuthForm({
       <Button
         type="button"
         variant="outline"
-        className="w-full bg-transparent"
+        className="bg-transparent border border-border text-foreground hover:bg-accent/10 hover:text-foreground transition-colors"
         onClick={handleGithubLogin}
         disabled={isLoading}
       >
@@ -712,7 +710,7 @@ export default function AuthForm({
       <Button
         type="button"
         variant="outline"
-        className="w-full bg-transparent"
+        className="bg-transparent border border-border text-foreground hover:bg-accent/10 hover:text-foreground transition-colors"
         onClick={handleGoogleLogin}
         disabled={isLoading}
       >
@@ -728,11 +726,10 @@ export default function AuthForm({
         <Card className="border-border bg-card w-full max-w-md">
           <CardHeader className="text-center">
             <div
-              className={`transition-all duration-500 ease-in-out ${
-                isTransitioning
-                  ? "opacity-0 transform translate-y-2 scale-95"
-                  : "opacity-100 transform translate-y-0 scale-100"
-              }`}
+              className={`transition-all duration-500 ease-in-out ${isTransitioning
+                ? "opacity-0 transform translate-y-2 scale-95"
+                : "opacity-100 transform translate-y-0 scale-100"
+                }`}
             >
               <CardTitle className="text-2xl">{getStepTitle()}</CardTitle>
               <CardDescription>{getStepDescription()}</CardDescription>
@@ -747,11 +744,10 @@ export default function AuthForm({
 
             <div className="relative overflow-hidden">
               <div
-                className={`transition-all duration-500 ease-in-out ${
-                  isTransitioning
-                    ? "opacity-0 transform translate-x-4 scale-95"
-                    : "opacity-100 transform translate-x-0 scale-100"
-                }`}
+                className={`transition-all duration-500 ease-in-out ${isTransitioning
+                  ? "opacity-0 transform translate-x-4 scale-95"
+                  : "opacity-100 transform translate-x-0 scale-100"
+                  }`}
               >
                 {currentMode === "login" ? (
                   <>
@@ -798,7 +794,7 @@ export default function AuthForm({
                         disabled={
                           currentStep === 1 || isLoading || isCheckingEmail
                         }
-                        className="bg-transparent border-border hover:bg-accent"
+                        className="bg-transparent border border-border text-foreground hover:bg-accent/10 hover:text-foreground transition-colors"
                       >
                         Previous
                       </Button>
@@ -898,20 +894,18 @@ export default function AuthForm({
         <Card className="p-6 bg-transparent shadow-none">
           <div className="w-full max-w-6xl flex flex-col md:flex-row gap-8 items-center flex-1 relative overflow-hidden">
             <div
-              className={`min-w-1/2 max-w-1/2 transition-all duration-700 ease-in-out z-10 transform ${
-                currentMode === "login"
-                  ? "md:translate-x-[calc(100%-2rem)]"
-                  : "md:translate-x-0"
-              }`}
+              className={`min-w-1/2 max-w-1/2 transition-all duration-700 ease-in-out z-10 transform ${currentMode === "login"
+                ? "md:translate-x-[calc(100%)]"
+                : "md:translate-x-0"
+                }`}
             >
               <Card className="border-border bg-card w-full">
                 <CardHeader className="text-center">
                   <div
-                    className={`transition-all duration-500 ease-in-out ${
-                      isTransitioning
-                        ? "opacity-0 transform translate-y-2 scale-95"
-                        : "opacity-100 transform translate-y-0 scale-100"
-                    }`}
+                    className={`transition-all duration-500 ease-in-out ${isTransitioning
+                      ? "opacity-0 transform translate-y-2 scale-95"
+                      : "opacity-100 transform translate-y-0 scale-100"
+                      }`}
                   >
                     <CardTitle className="text-2xl">{getStepTitle()}</CardTitle>
                     <CardDescription>{getStepDescription()}</CardDescription>
@@ -926,11 +920,10 @@ export default function AuthForm({
 
                   <div className="relative overflow-hidden">
                     <div
-                      className={`transition-all duration-500 ease-in-out ${
-                        isTransitioning
-                          ? "opacity-0 transform translate-x-4 scale-95"
-                          : "opacity-100 transform translate-x-0 scale-100"
-                      }`}
+                      className={`transition-all duration-500 ease-in-out ${isTransitioning
+                        ? "opacity-0 transform translate-x-4 scale-95"
+                        : "opacity-100 transform translate-x-0 scale-100"
+                        }`}
                     >
                       {currentMode === "login" ? (
                         <>
@@ -980,7 +973,7 @@ export default function AuthForm({
                                 isLoading ||
                                 isCheckingEmail
                               }
-                              className="bg-transparent border-border hover:bg-accent"
+                              className="bg-transparent border border-border text-foreground hover:bg-accent/10 hover:text-foreground transition-colors"
                             >
                               Previous
                             </Button>
@@ -1081,11 +1074,10 @@ export default function AuthForm({
             </div>
 
             <div
-              className={`transition-all duration-700 ease-in-out transform z-2 ${
-                currentMode === "login"
-                  ? "md:-translate-x-[calc(100%+5rem)]"
-                  : "md:translate-x-0"
-              }`}
+              className={`transition-all duration-700 ease-in-out transform z-2 ${currentMode === "login"
+                ? "md:-translate-x-[calc(100%+5rem)]"
+                : "md:translate-x-0"
+                }`}
             >
               <Logo size="xxl" variant="default" />
             </div>
