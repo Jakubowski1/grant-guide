@@ -24,7 +24,7 @@ import { db } from "@/lib/firebase";
 import { useAuth } from "@/providers/auth-provider";
 
 export default function ProfilePage() {
-  const { user, userData, loading, refreshUserData, signOut } = useAuth();
+  const { user, userData, loading, refreshUserData } = useAuth();
   const { loading: authLoading } = useAuthGuard();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -56,10 +56,6 @@ export default function ProfilePage() {
       setSelectedIcon("");
     }
   }, [userData, user]);
-
-  const handleSignOut = async () => {
-    await signOut();
-  };
 
   const handleIconSelect = async (iconId: string) => {
     if (!user || !db) return;
@@ -171,7 +167,7 @@ export default function ProfilePage() {
 
       {/* Main Content */}
       <div className="flex-1 lg:ml-0 flex flex-col overflow-hidden">
-        <DashboardNavbar onSignOut={handleSignOut} />
+        <DashboardNavbar setSidebarOpen={setSidebarOpen} />
 
         {/* Scrollable Content Area */}
         <main className="flex-1 overflow-y-auto">

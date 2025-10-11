@@ -44,7 +44,6 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
-import { useAuth } from "@/providers/auth-provider";
 
 interface InterviewConfig {
   position: string;
@@ -104,7 +103,6 @@ const STEPS: ConfigStep[] = [
 ];
 
 export default function ConfigurePage() {
-  const { signOut } = useAuth();
   const { loading: authLoading } = useAuthGuard();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -123,10 +121,6 @@ export default function ConfigurePage() {
   if (authLoading) {
     return <LoadingPage message="Setting up your interview configuration..." />;
   }
-
-  const handleSignOut = async () => {
-    await signOut();
-  };
 
   const positions = [
     {
@@ -979,7 +973,7 @@ export default function ConfigurePage() {
 
       {/* Main Content */}
       <div className="flex-1 lg:ml-0 flex flex-col overflow-hidden">
-        <DashboardNavbar onSignOut={handleSignOut} />
+        <DashboardNavbar setSidebarOpen={setSidebarOpen} />
 
         {/* Scrollable Content Area */}
         <main className="flex-1 overflow-y-auto">

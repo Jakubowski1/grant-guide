@@ -52,20 +52,12 @@ const calmingMessages = [
 
 export default function ResultsPage() {
   const router = useRouter();
-  const { user, loading: authLoading, signOut } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [isAnalyzing, setIsAnalyzing] = useState(true);
   const [results, setResults] = useState<InterviewResults | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
-  };
 
   useEffect(() => {
     if (!isAnalyzing) return;
@@ -196,7 +188,8 @@ export default function ResultsPage() {
           setSidebarOpen={setSidebarOpen}
         />
         <div className="flex-1 flex flex-col overflow-hidden">
-          <DashboardNavbar onSignOut={handleSignOut} />
+          <DashboardNavbar setSidebarOpen={setSidebarOpen} />
+
           <main className="flex-1 overflow-auto flex items-center justify-center">
             <Card className="w-full max-w-md text-center">
               <CardContent className="pt-6">
@@ -229,7 +222,8 @@ export default function ResultsPage() {
           setSidebarOpen={setSidebarOpen}
         />
         <div className="flex-1 flex flex-col overflow-hidden">
-          <DashboardNavbar onSignOut={handleSignOut} />
+          <DashboardNavbar setSidebarOpen={setSidebarOpen} />
+
           <main className="flex-1 overflow-auto flex items-center justify-center">
             <Card className="w-full max-w-md text-center">
               <CardContent className="pt-6">
@@ -255,7 +249,8 @@ export default function ResultsPage() {
           setSidebarOpen={setSidebarOpen}
         />
         <div className="flex-1 flex flex-col overflow-hidden">
-          <DashboardNavbar onSignOut={handleSignOut} />
+          <DashboardNavbar setSidebarOpen={setSidebarOpen} />
+
           <main className="flex-1 overflow-auto flex items-center justify-center">
             <Card className="w-full max-w-md text-center">
               <CardContent className="pt-6">
@@ -281,7 +276,8 @@ export default function ResultsPage() {
         setSidebarOpen={setSidebarOpen}
       />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <DashboardNavbar onSignOut={handleSignOut} />
+        <DashboardNavbar setSidebarOpen={setSidebarOpen} />
+
         <main className="flex-1 overflow-auto">
           <div className="max-w-6xl mx-auto p-4 space-y-6">
             {/* Overall Score */}

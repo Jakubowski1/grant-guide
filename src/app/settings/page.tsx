@@ -20,7 +20,7 @@ interface CookieSettings {
 }
 
 export default function SettingsPage() {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [cookieSettings, setCookieSettings] = useState<CookieSettings>({
@@ -29,14 +29,6 @@ export default function SettingsPage() {
     marketing: false,
     preferences: false,
   });
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
-  };
 
   useEffect(() => {
     const savedSettings = localStorage.getItem("cookieSettings");
@@ -157,7 +149,7 @@ export default function SettingsPage() {
         setSidebarOpen={setSidebarOpen}
       />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <DashboardNavbar onSignOut={handleSignOut} />
+        <DashboardNavbar setSidebarOpen={setSidebarOpen} />
         <main className="flex-1 overflow-auto">
           <div className="container mx-auto px-6 py-8 max-w-4xl">
             <div className="space-y-8">

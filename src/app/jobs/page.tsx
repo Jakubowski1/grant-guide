@@ -10,7 +10,6 @@ import {
   DollarSign,
   ExternalLink,
   MapPin,
-  Menu,
   RefreshCw,
   Search,
 } from "lucide-react";
@@ -143,14 +142,6 @@ export default function JobMarketPage() {
     "contract",
   ];
 
-  // Auto-search with default values on component mount
-  // Empty dependency array means this runs once on mount
-
-  const handleSignOut = () => {
-    // TODO: Implement sign out logic
-    console.log("Sign out clicked");
-  };
-
   const handleSearch = useCallback(() => {
     if (!filters.query.trim()) {
       alert("Please enter a search term");
@@ -255,20 +246,7 @@ export default function JobMarketPage() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Navbar */}
-        <DashboardNavbar onSignOut={handleSignOut} />
-
-        {/* Mobile sidebar toggle */}
-        <div className="lg:hidden px-4 sm:px-6 py-2 border-b">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setSidebarOpen(true)}
-            className="flex items-center gap-2"
-          >
-            <Menu className="h-4 w-4" />
-            Menu
-          </Button>
-        </div>
+        <DashboardNavbar setSidebarOpen={setSidebarOpen} />
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto">

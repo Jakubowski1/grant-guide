@@ -47,7 +47,7 @@ import { useDashboardData } from "@/hooks/useDashboardData";
 import { useAuth } from "@/providers/auth-provider";
 
 export default function DashboardPage() {
-  const { user, userData, signOut } = useAuth();
+  const { user, userData } = useAuth();
   const { loading: authLoading } = useAuthGuard();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -72,10 +72,6 @@ export default function DashboardPage() {
       </div>
     );
   }
-
-  const handleSignOut = async () => {
-    await signOut();
-  };
 
   // Use real data from the dashboard hook
   const { recentSessions, stats, skills } = dashboardData;
@@ -164,7 +160,7 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <div className="flex-1 lg:ml-0 flex flex-col overflow-hidden">
-        <DashboardNavbar onSignOut={handleSignOut} />
+        <DashboardNavbar setSidebarOpen={setSidebarOpen} />
 
         {/* Scrollable Content Area */}
         <main className="flex-1 overflow-y-auto">

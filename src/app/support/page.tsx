@@ -78,17 +78,9 @@ const faqData = [
 ];
 
 export default function SupportPage() {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [openItems, setOpenItems] = useState<string[]>([]);
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
-  };
 
   const toggleItem = (itemId: string) => {
     setOpenItems((prev) =>
@@ -113,7 +105,7 @@ export default function SupportPage() {
         setSidebarOpen={setSidebarOpen}
       />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <DashboardNavbar onSignOut={handleSignOut} />
+        <DashboardNavbar setSidebarOpen={setSidebarOpen} />
         <main className="flex-1 overflow-auto">
           <div className="container mx-auto px-6 py-8 max-w-4xl">
             <Card>

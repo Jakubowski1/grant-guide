@@ -30,7 +30,7 @@ import { useAuth } from "@/providers/auth-provider";
 import type { InterviewSession } from "@/types/firestore";
 
 export default function InterviewHistoryPage() {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const { loading: authLoading } = useAuthGuard();
   const [sessions, setSessions] = useState<InterviewSession[]>([]);
   const [filteredSessions, setFilteredSessions] = useState<InterviewSession[]>(
@@ -41,10 +41,6 @@ export default function InterviewHistoryPage() {
   const [filterType, setFilterType] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("date");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const handleSignOut = async () => {
-    await signOut();
-  };
 
   const loadSessions = useCallback(async () => {
     if (!user?.uid) return;
@@ -190,7 +186,7 @@ export default function InterviewHistoryPage() {
 
       {/* Main Content */}
       <div className="flex-1 lg:ml-0 flex flex-col overflow-hidden">
-        <DashboardNavbar onSignOut={handleSignOut} />
+        <DashboardNavbar setSidebarOpen={setSidebarOpen} />
 
         {/* Scrollable Content Area */}
         <main className="flex-1 overflow-y-auto">

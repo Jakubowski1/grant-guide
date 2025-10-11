@@ -61,7 +61,7 @@ interface InterviewSession {
 }
 
 export default function InterviewPage() {
-  const { user, loading: authLoading, signOut } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [config, setConfig] = useState({
@@ -75,14 +75,6 @@ export default function InterviewPage() {
     duration: "30",
     isDemoMode: false,
   });
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
-  };
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -534,7 +526,7 @@ export default function InterviewPage() {
           setSidebarOpen={setSidebarOpen}
         />
         <div className="flex-1 flex flex-col overflow-hidden">
-          <DashboardNavbar onSignOut={handleSignOut} />
+          <DashboardNavbar setSidebarOpen={setSidebarOpen} />
           <main className="flex-1 overflow-auto flex items-center justify-center p-4">
             <Card className="w-full max-w-2xl">
               <CardHeader className="text-center">

@@ -35,21 +35,13 @@ import type { InterviewSession } from "@/types/firestore";
 
 export default function SessionDetailsPage() {
   const params = useParams();
-  const { user, loading: authLoading, signOut } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [session, setSession] = useState<InterviewSession | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const sessionId = params.sessionId as string;
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
-  };
 
   useEffect(() => {
     const loadSession = async () => {
@@ -131,7 +123,7 @@ export default function SessionDetailsPage() {
           setSidebarOpen={setSidebarOpen}
         />
         <div className="flex-1 flex flex-col overflow-hidden">
-          <DashboardNavbar onSignOut={handleSignOut} />
+          <DashboardNavbar setSidebarOpen={setSidebarOpen} />
           <main className="flex-1 overflow-auto">
             <div className="container mx-auto px-6 py-8">
               <div className="text-center py-12">
@@ -159,7 +151,7 @@ export default function SessionDetailsPage() {
         setSidebarOpen={setSidebarOpen}
       />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <DashboardNavbar onSignOut={handleSignOut} />
+        <DashboardNavbar setSidebarOpen={setSidebarOpen} />
         <main className="flex-1 overflow-auto">
           <div className="container mx-auto px-6 py-8">
             {/* Header */}

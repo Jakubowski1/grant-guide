@@ -52,7 +52,7 @@ interface ExtendedQuestion extends Question {
 }
 
 export default function PracticePage() {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading } = useAuth();
   const { loading: authLoading } = useAuthGuard();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -192,14 +192,6 @@ export default function PracticePage() {
     );
   }, [tagSearch, allTags]);
 
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
-  };
-
   const toggleCategory = (categoryId: string) => {
     setSelectedCategories((prev) =>
       prev.includes(categoryId)
@@ -281,7 +273,7 @@ export default function PracticePage() {
 
       {/* Main Content */}
       <div className="flex-1 lg:ml-0 flex flex-col overflow-hidden">
-        <DashboardNavbar onSignOut={handleSignOut} />
+        <DashboardNavbar setSidebarOpen={setSidebarOpen} />
 
         {/* Scrollable Content Area */}
         <main className="flex-1 overflow-y-auto">
