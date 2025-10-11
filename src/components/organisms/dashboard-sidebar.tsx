@@ -1,7 +1,8 @@
 "use client";
 
-import { BookOpen, History, Home, Plus, X } from "lucide-react";
+import { BookOpen, Briefcase, History, Home, Plus, X } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Logo from "@/components/atoms/logo-the-mockr";
 import { Button } from "@/components/ui/button";
 
@@ -14,6 +15,12 @@ export default function DashboardSidebar({
   sidebarOpen,
   setSidebarOpen,
 }: DashboardSidebarProps) {
+  const pathname = usePathname();
+
+  const isActive = (path: string) => {
+    return pathname === path;
+  };
+
   return (
     <>
       {/* Sidebar */}
@@ -40,34 +47,72 @@ export default function DashboardSidebar({
         <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
           <Link
             href="/dashboard"
-            className="flex items-center space-x-3 px-3 py-2 rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
+            className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
+              isActive("/dashboard")
+                ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            }`}
           >
             <Home className="h-5 w-5" />
-            <span className="font-medium">Dashboard</span>
+            <span className={isActive("/dashboard") ? "font-medium" : ""}>
+              Dashboard
+            </span>
           </Link>
 
           <Link
             href="/configure"
-            className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
+              isActive("/configure")
+                ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            }`}
           >
             <Plus className="h-5 w-5" />
-            <span>New Interview</span>
+            <span className={isActive("/configure") ? "font-medium" : ""}>
+              New Interview
+            </span>
           </Link>
 
           <Link
             href="/history"
-            className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
+              isActive("/history")
+                ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            }`}
           >
             <History className="h-5 w-5" />
-            <span>Interview History</span>
+            <span className={isActive("/history") ? "font-medium" : ""}>
+              Interview History
+            </span>
           </Link>
 
           <Link
             href="/practice"
-            className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
+              isActive("/practice")
+                ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            }`}
           >
             <BookOpen className="h-5 w-5" />
-            <span>Practice Library</span>
+            <span className={isActive("/practice") ? "font-medium" : ""}>
+              Practice Library
+            </span>
+          </Link>
+
+          <Link
+            href="/jobs"
+            className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
+              isActive("/jobs")
+                ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            }`}
+          >
+            <Briefcase className="h-5 w-5" />
+            <span className={isActive("/jobs") ? "font-medium" : ""}>
+              Job Listings
+            </span>
           </Link>
         </nav>
 
