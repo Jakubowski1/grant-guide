@@ -83,17 +83,58 @@ export interface JobSearchRequestBody {
 }
 
 /**
- * Execute the Python job scraper script
+ * Execute the job scraper via Python API or local script
  */
 async function executeJobScraper(params: JobSearchRequest): Promise<JobData[]> {
+  // In production (Vercel), use the Python API endpoint
+  if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+    try {
+      // Get the base URL for the current deployment
+      const baseUrl = process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : process.env.NEXT_PUBLIC_SITE_URL || "https://grant-guide.vercel.app";
+
+      const apiUrl = `${baseUrl}/api`;
+
+      console.log("Calling Python API at:", apiUrl);
+
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(params),
+        // Add timeout for serverless function
+        signal: AbortSignal.timeout(55000), // 55 seconds timeout
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `Python API responded with status: ${response.status}, body: ${errorText}`,
+        );
+      }
+
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        return result.data.jobs || [];
+      } else {
+        throw new Error(result.error?.message || "Python API returned error");
+      }
+    } catch (error) {
+      console.error("Python API error:", error);
+      throw new Error(
+        `Failed to call Python API: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
+    }
+  }
+
+  // In development, use local Python script
   return new Promise((resolve, reject) => {
-    // Use environment variable, or fallback to appropriate python path
     const pythonPath =
       process.env.PYTHON_PATH ||
-      (process.env.VERCEL
-        ? "python3" // Use system python on Vercel
-        : path.join(process.cwd(), ".venv", "bin", "python")); // Use local venv in development
-
+      path.join(process.cwd(), ".venv", "bin", "python");
     const scriptPath = path.join(
       process.cwd(),
       "scripts",
@@ -139,10 +180,6 @@ async function executeJobScraper(params: JobSearchRequest): Promise<JobData[]> {
         scriptPath,
         error: error.message,
         cwd: process.cwd(),
-        env: {
-          VERCEL: process.env.VERCEL,
-          PYTHON_PATH: process.env.PYTHON_PATH,
-        },
       });
       reject(new Error(`Failed to spawn Python process: ${error.message}`));
     });

@@ -1,0 +1,18 @@
+# Core job scraping dependency
+jobspy==1.10.83
+
+# Data processing
+pandas>=1.5.0
+
+# Environment and configuration
+python-dotenv>=0.19.0
+
+# HTTP requests
+requests>=2.28.0
+
+# HTML parsing
+beautifulsoup4>=4.11.0
+lxml>=4.9.0
+
+# For caching (optional)
+pickle5>=0.0.12
