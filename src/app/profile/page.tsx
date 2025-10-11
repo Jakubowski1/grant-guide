@@ -2,33 +2,16 @@
 
 import { updateProfile } from "firebase/auth";
 import { doc, setDoc, updateDoc } from "firebase/firestore";
-import {
-  BookOpen,
-  Briefcase,
-  Calendar,
-  Clock,
-  HelpCircle,
-  History,
-  Home,
-  LogOut,
-  Mail,
-  Menu,
-  Plus,
-  Save,
-  Settings,
-  User,
-  X,
-} from "lucide-react";
-import Link from "next/link";
+import { Briefcase, Calendar, Clock, Mail, Save, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import LoadingPage from "@/components/atoms/loading-page";
-import Logo from "@/components/atoms/logo-the-mockr";
-import { ThemeToggle } from "@/components/atoms/theme-toggle";
 import {
   AvatarIconDisplay,
   AvatarIconSelector,
 } from "@/components/molecules/avatar-icon-selector";
+import DashboardNavbar from "@/components/organisms/dashboard-navbar";
+import DashboardSidebar from "@/components/organisms/dashboard-sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,11 +19,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/providers/auth-provider";
 
 export default function ProfilePage() {
-  const { user, userData, loading, refreshUserData } = useAuth();
+  const { user, userData, loading, refreshUserData, signOut } = useAuth();
+  const { loading: authLoading } = useAuthGuard();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -71,6 +56,10 @@ export default function ProfilePage() {
       setSelectedIcon("");
     }
   }, [userData, user]);
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   const handleIconSelect = async (iconId: string) => {
     if (!user || !db) return;
@@ -165,7 +154,7 @@ export default function ProfilePage() {
     }).format(date);
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return <LoadingPage />;
   }
 
@@ -174,372 +163,253 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
-      <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}
-      >
-        <div className="flex items-center justify-between h-16 px-6 border-b border-sidebar-border">
-          <Logo />
+    <div className="h-screen bg-background flex overflow-hidden">
+      <DashboardSidebar
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+      />
 
-          <Button
-            variant="ghost"
-            size="sm"
-            className="lg:hidden text-sidebar-foreground hover:bg-sidebar-accent"
-            onClick={() => setSidebarOpen(false)}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
+      {/* Main Content */}
+      <div className="flex-1 lg:ml-0 flex flex-col overflow-hidden">
+        <DashboardNavbar onSignOut={handleSignOut} />
 
-        <nav className="flex-1 px-4 py-6 space-y-2">
-          <Link
-            href="/dashboard"
-            className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-          >
-            <Home className="h-5 w-5" />
-            <span className="font-medium">Dashboard</span>
-          </Link>
-
-          <Link
-            href="/configure"
-            className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-          >
-            <Plus className="h-5 w-5" />
-            <span>New Interview</span>
-          </Link>
-
-          <Link
-            href="/history"
-            className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-          >
-            <History className="h-5 w-5" />
-            <span>Interview History</span>
-          </Link>
-
-          <Link
-            href="/practice"
-            className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-          >
-            <BookOpen className="h-5 w-5" />
-            <span>Practice Library</span>
-          </Link>
-
-          <div className="pt-4 border-t border-sidebar-border">
-            <Link
-              href="/profile"
-              className="flex items-center space-x-3 px-3 py-2 rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
-            >
-              <User className="h-5 w-5" />
-              <span>Profile</span>
-            </Link>
-
-            <Link
-              href="/settings"
-              className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-            >
-              <Settings className="h-5 w-5" />
-              <span>Settings</span>
-            </Link>
-
-            <Link
-              href="/support"
-              className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-            >
-              <HelpCircle className="h-5 w-5" />
-              <span>Help & Support</span>
-            </Link>
-          </div>
-
-          <div className="pt-4 border-t border-sidebar-border">
-            <button
-              type="button"
-              onClick={() => {
-                router.push("/auth");
-              }}
-              className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors w-full text-left"
-            >
-              <LogOut className="h-5 w-5" />
-              <span>Logout</span>
-            </button>
-          </div>
-        </nav>
-      </div>
-
-      {sidebarOpen && (
-        <button
-          type="button"
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") {
-              setSidebarOpen(false);
-            }
-          }}
-          aria-label="Close sidebar"
-        />
-      )}
-      <div className="flex-1 lg:ml-0">
-        <nav className="border-b border-border bg-card/50 backdrop-blur-sm">
-          <div className="px-4 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="lg:hidden text-foreground hover:bg-accent"
-                  onClick={() => setSidebarOpen(true)}
-                >
-                  <Menu className="h-5 w-5" />
-                </Button>
-                <h1 className="text-2xl font-bold text-foreground">
-                  Profile Settings
-                </h1>
-              </div>
-              <div className="flex items-center space-x-4">
-                <ThemeToggle />
-                <Link href="/configure">
-                  <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                    New Interview
-                    <Plus className="size-4" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </nav>
-
-        <div className="container mx-auto px-6 py-8 max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <Card className="lg:col-span-1">
-              <CardHeader className="text-center">
-                <div className="relative mx-auto w-32 h-32 mb-4">
-                  {userData?.avatarIcon ? (
-                    <div className="w-32 h-32 border-4 border-primary/20 rounded-full flex items-center justify-center">
-                      <AvatarIconDisplay
-                        iconId={userData.avatarIcon}
-                        size="xl"
-                        className="w-24 h-24"
-                      />
-                    </div>
-                  ) : (
-                    <Avatar className="w-32 h-32 border-4 border-primary/20">
-                      <AvatarFallback className="text-2xl font-bold bg-primary/10">
-                        {getInitials(userData?.displayName || user.displayName)}
-                      </AvatarFallback>
-                    </Avatar>
-                  )}
-                </div>
-                <CardTitle className="text-xl">
-                  {userData?.displayName || user.displayName || "User"}
-                </CardTitle>
-                <p className="text-muted-foreground">{user.email}</p>
-                {(userData?.role || editData.role) && (
-                  <Badge variant="secondary" className="mt-2">
-                    {userData?.role || editData.role}
-                  </Badge>
-                )}
-              </CardHeader>
-            </Card>
-
-            <Card className="lg:col-span-3">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Avatar Settings
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Choose an icon to represent your profile
-                </p>
-              </CardHeader>
-              <CardContent>
-                <AvatarIconSelector
-                  selectedIcon={selectedIcon}
-                  onSelectIcon={handleIconSelect}
-                />
-              </CardContent>
-            </Card>
-
-            <Card className="lg:col-span-2">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Profile Details
-                </CardTitle>
-                <Button
-                  variant={isEditing ? "outline" : "default"}
-                  onClick={() => {
-                    if (isEditing) {
-                      setIsEditing(false);
-                      setEditData({
-                        displayName: userData?.displayName || "",
-                        role: userData?.role || "",
-                        experience: userData?.experience || "",
-                      });
-                    } else {
-                      setIsEditing(true);
-                    }
-                  }}
-                >
-                  {isEditing ? "Cancel" : "Edit Profile"}
-                </Button>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="displayName">Display Name</Label>
-                  {isEditing ? (
-                    <Input
-                      id="displayName"
-                      value={editData.displayName}
-                      onChange={(e) =>
-                        setEditData((prev) => ({
-                          ...prev,
-                          displayName: e.target.value,
-                        }))
-                      }
-                      placeholder="Enter your display name"
-                    />
-                  ) : (
-                    <p className="text-sm bg-muted rounded-md p-3">
-                      {userData?.displayName || user.displayName || "Not set"}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="flex items-center gap-2">
-                    <Mail className="h-4 w-4" />
-                    Email Address
-                  </Label>
-                  <p className="text-sm bg-muted rounded-md p-3 text-muted-foreground">
-                    {user.email}
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="role" className="flex items-center gap-2">
-                    <Briefcase className="h-4 w-4" />
-                    Role/Position
-                  </Label>
-                  {isEditing ? (
-                    <Input
-                      id="role"
-                      value={editData.role}
-                      onChange={(e) =>
-                        setEditData((prev) => ({
-                          ...prev,
-                          role: e.target.value,
-                        }))
-                      }
-                      placeholder="Enter your role or position"
-                    />
-                  ) : (
-                    <p className="text-sm bg-muted rounded-md p-3">
-                      {userData?.role || "Not set"}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="experience">Experience Level</Label>
-                  {isEditing ? (
-                    <Input
-                      id="experience"
-                      value={editData.experience}
-                      onChange={(e) =>
-                        setEditData((prev) => ({
-                          ...prev,
-                          experience: e.target.value,
-                        }))
-                      }
-                      placeholder="Enter your experience level"
-                    />
-                  ) : (
-                    <p className="text-sm bg-muted rounded-md p-3">
-                      {userData?.experience || "Not set"}
-                    </p>
-                  )}
-                </div>
-
-                {isEditing && (
-                  <div className="flex justify-end">
-                    <Button
-                      onClick={handleSaveProfile}
-                      disabled={saving}
-                      className="flex items-center gap-2"
-                      type="button"
-                    >
-                      {saving ? (
-                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <Save className="h-4 w-4" />
-                      )}
-                      Save Changes
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card className="lg:col-span-1">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  Account Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2 text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      Member Since
-                    </Label>
-                    <p className="font-medium">
-                      {userData?.createdAt
-                        ? formatDate(userData.createdAt)
-                        : "Unknown"}
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2 text-muted-foreground">
-                      <Clock className="h-4 w-4" />
-                      Last Login
-                    </Label>
-                    <p className="font-medium">
-                      {userData?.lastLoginAt
-                        ? formatDate(userData.lastLoginAt)
-                        : "Unknown"}
-                    </p>
-                  </div>
-                </div>
-
-                <Separator className="my-6" />
-
-                <div className="space-y-4">
-                  <h4 className="font-semibold">Additional Information</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-muted-foreground">User ID</Label>
-                      <p className="font-mono text-sm bg-muted rounded p-2 break-all">
-                        {user.uid}
-                      </p>
-                    </div>
-                    {userData?.howDidYouHear && (
-                      <div className="space-y-2">
-                        <Label className="text-muted-foreground">
-                          How did you hear about us?
-                        </Label>
-                        <p className="text-sm bg-muted rounded p-2">
-                          {userData.howDidYouHear}
-                        </p>
+        {/* Scrollable Content Area */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="container mx-auto px-6 py-8 max-w-6xl">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <Card className="lg:col-span-1">
+                <CardHeader className="text-center">
+                  <div className="relative mx-auto w-32 h-32 mb-4">
+                    {userData?.avatarIcon ? (
+                      <div className="w-32 h-32 border-4 border-primary/20 rounded-full flex items-center justify-center">
+                        <AvatarIconDisplay
+                          iconId={userData.avatarIcon}
+                          size="xl"
+                          className="w-24 h-24"
+                        />
                       </div>
+                    ) : (
+                      <Avatar className="w-32 h-32 border-4 border-primary/20">
+                        <AvatarFallback className="text-2xl font-bold bg-primary/10">
+                          {getInitials(
+                            userData?.displayName || user.displayName,
+                          )}
+                        </AvatarFallback>
+                      </Avatar>
                     )}
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                  <CardTitle className="text-xl">
+                    {userData?.displayName || user.displayName || "User"}
+                  </CardTitle>
+                  <p className="text-muted-foreground">{user.email}</p>
+                  {(userData?.role || editData.role) && (
+                    <Badge variant="secondary" className="mt-2">
+                      {userData?.role || editData.role}
+                    </Badge>
+                  )}
+                </CardHeader>
+              </Card>
+
+              <Card className="lg:col-span-3">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Avatar Settings
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Choose an icon to represent your profile
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <AvatarIconSelector
+                    selectedIcon={selectedIcon}
+                    onSelectIcon={handleIconSelect}
+                  />
+                </CardContent>
+              </Card>
+
+              <Card className="lg:col-span-2">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Profile Details
+                  </CardTitle>
+                  <Button
+                    variant={isEditing ? "outline" : "default"}
+                    onClick={() => {
+                      if (isEditing) {
+                        setIsEditing(false);
+                        setEditData({
+                          displayName: userData?.displayName || "",
+                          role: userData?.role || "",
+                          experience: userData?.experience || "",
+                        });
+                      } else {
+                        setIsEditing(true);
+                      }
+                    }}
+                  >
+                    {isEditing ? "Cancel" : "Edit Profile"}
+                  </Button>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="displayName">Display Name</Label>
+                    {isEditing ? (
+                      <Input
+                        id="displayName"
+                        value={editData.displayName}
+                        onChange={(e) =>
+                          setEditData((prev) => ({
+                            ...prev,
+                            displayName: e.target.value,
+                          }))
+                        }
+                        placeholder="Enter your display name"
+                      />
+                    ) : (
+                      <p className="text-sm bg-muted rounded-md p-3">
+                        {userData?.displayName || user.displayName || "Not set"}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="flex items-center gap-2">
+                      <Mail className="h-4 w-4" />
+                      Email Address
+                    </Label>
+                    <p className="text-sm bg-muted rounded-md p-3 text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="role" className="flex items-center gap-2">
+                      <Briefcase className="h-4 w-4" />
+                      Role/Position
+                    </Label>
+                    {isEditing ? (
+                      <Input
+                        id="role"
+                        value={editData.role}
+                        onChange={(e) =>
+                          setEditData((prev) => ({
+                            ...prev,
+                            role: e.target.value,
+                          }))
+                        }
+                        placeholder="Enter your role or position"
+                      />
+                    ) : (
+                      <p className="text-sm bg-muted rounded-md p-3">
+                        {userData?.role || "Not set"}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="experience">Experience Level</Label>
+                    {isEditing ? (
+                      <Input
+                        id="experience"
+                        value={editData.experience}
+                        onChange={(e) =>
+                          setEditData((prev) => ({
+                            ...prev,
+                            experience: e.target.value,
+                          }))
+                        }
+                        placeholder="Enter your experience level"
+                      />
+                    ) : (
+                      <p className="text-sm bg-muted rounded-md p-3">
+                        {userData?.experience || "Not set"}
+                      </p>
+                    )}
+                  </div>
+
+                  {isEditing && (
+                    <div className="flex justify-end">
+                      <Button
+                        onClick={handleSaveProfile}
+                        disabled={saving}
+                        className="flex items-center gap-2"
+                        type="button"
+                      >
+                        {saving ? (
+                          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Save className="h-4 w-4" />
+                        )}
+                        Save Changes
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="lg:col-span-1">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5" />
+                    Account Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2 text-muted-foreground">
+                        <Calendar className="h-4 w-4" />
+                        Member Since
+                      </Label>
+                      <p className="font-medium">
+                        {userData?.createdAt
+                          ? formatDate(userData.createdAt)
+                          : "Unknown"}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2 text-muted-foreground">
+                        <Clock className="h-4 w-4" />
+                        Last Login
+                      </Label>
+                      <p className="font-medium">
+                        {userData?.lastLoginAt
+                          ? formatDate(userData.lastLoginAt)
+                          : "Unknown"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <Separator className="my-6" />
+
+                  <div className="space-y-4">
+                    <h4 className="font-semibold">Additional Information</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-muted-foreground">User ID</Label>
+                        <p className="font-mono text-sm bg-muted rounded p-2 break-all">
+                          {user.uid}
+                        </p>
+                      </div>
+                      {userData?.howDidYouHear && (
+                        <div className="space-y-2">
+                          <Label className="text-muted-foreground">
+                            How did you hear about us?
+                          </Label>
+                          <p className="text-sm bg-muted rounded p-2">
+                            {userData.howDidYouHear}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );

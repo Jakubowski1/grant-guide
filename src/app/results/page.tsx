@@ -3,9 +3,7 @@
 import {
   AlertTriangle,
   BookOpen,
-  Brain,
   CheckCircle,
-  Download,
   Lightbulb,
   MessageSquare,
   RotateCcw,
@@ -16,7 +14,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ThemeToggle } from "@/components/atoms/theme-toggle";
+import LoadingPage from "@/components/atoms/loading-page";
+import DashboardNavbar from "@/components/organisms/dashboard-navbar";
+import DashboardSidebar from "@/components/organisms/dashboard-sidebar";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -52,11 +52,20 @@ const calmingMessages = [
 
 export default function ResultsPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
   const [isAnalyzing, setIsAnalyzing] = useState(true);
   const [results, setResults] = useState<InterviewResults | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
 
   useEffect(() => {
     if (!isAnalyzing) return;
@@ -177,238 +186,260 @@ export default function ResultsPage() {
     return "bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800";
   };
 
-  if (isAnalyzing) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="w-full max-w-md text-center">
-          <CardContent className="pt-6">
-            <div className="flex justify-center mb-4">
-              <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-            </div>
-            <h3 className="text-lg font-semibold mb-2">
-              Analyzing Your Interview
-            </h3>
-            <p className="text-muted-foreground min-h-[1.5rem] transition-opacity duration-300">
-              {calmingMessages[currentMessageIndex]}
-            </p>
-          </CardContent>
-        </Card>
+  if (authLoading || isAnalyzing) {
+    return authLoading ? (
+      <LoadingPage />
+    ) : (
+      <div className="h-screen flex overflow-hidden">
+        <DashboardSidebar
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+        />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <DashboardNavbar onSignOut={handleSignOut} />
+          <main className="flex-1 overflow-auto flex items-center justify-center">
+            <Card className="w-full max-w-md text-center">
+              <CardContent className="pt-6">
+                <div className="flex justify-center mb-4">
+                  <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                </div>
+                <h3 className="text-lg font-semibold mb-2">
+                  Analyzing Your Interview
+                </h3>
+                <p className="text-muted-foreground min-h-[1.5rem] transition-opacity duration-300">
+                  {calmingMessages[currentMessageIndex]}
+                </p>
+              </CardContent>
+            </Card>
+          </main>
+        </div>
       </div>
     );
   }
 
+  if (!user) {
+    return null;
+  }
+
   if (error) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="w-full max-w-md text-center">
-          <CardContent className="pt-6">
-            <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Analysis Failed</h3>
-            <p className="text-muted-foreground mb-4">{error}</p>
-            <Button onClick={() => router.push("/dashboard")}>
-              Return to Dashboard
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="h-screen flex overflow-hidden">
+        <DashboardSidebar
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+        />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <DashboardNavbar onSignOut={handleSignOut} />
+          <main className="flex-1 overflow-auto flex items-center justify-center">
+            <Card className="w-full max-w-md text-center">
+              <CardContent className="pt-6">
+                <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Analysis Failed</h3>
+                <p className="text-muted-foreground mb-4">{error}</p>
+                <Button onClick={() => router.push("/dashboard")}>
+                  Return to Dashboard
+                </Button>
+              </CardContent>
+            </Card>
+          </main>
+        </div>
       </div>
     );
   }
 
   if (!results) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="w-full max-w-md text-center">
-          <CardContent className="pt-6">
-            <h3 className="text-lg font-semibold mb-2">No Results Found</h3>
-            <p className="text-muted-foreground mb-4">
-              Please complete an interview to see your results.
-            </p>
-            <Button onClick={() => router.push("/configure")}>
-              Start New Interview
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="h-screen flex overflow-hidden">
+        <DashboardSidebar
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+        />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <DashboardNavbar onSignOut={handleSignOut} />
+          <main className="flex-1 overflow-auto flex items-center justify-center">
+            <Card className="w-full max-w-md text-center">
+              <CardContent className="pt-6">
+                <h3 className="text-lg font-semibold mb-2">No Results Found</h3>
+                <p className="text-muted-foreground mb-4">
+                  Please complete an interview to see your results.
+                </p>
+                <Button onClick={() => router.push("/configure")}>
+                  Start New Interview
+                </Button>
+              </CardContent>
+            </Card>
+          </main>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
-                <Brain className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold">Interview Results</h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  AI-powered analysis and feedback
-                </p>
-              </div>
+    <div className="h-screen flex overflow-hidden">
+      <DashboardSidebar
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+      />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <DashboardNavbar onSignOut={handleSignOut} />
+        <main className="flex-1 overflow-auto">
+          <div className="max-w-6xl mx-auto p-4 space-y-6">
+            {/* Overall Score */}
+            <Card className={`${getScoreBgColor(results.score)} border-2`}>
+              <CardHeader className="text-center">
+                <div className="flex justify-center mb-4">
+                  <div className="relative">
+                    <div className="w-24 h-24 rounded-full border-8 border-gray-200 dark:border-gray-700"></div>
+                    <div
+                      className={`absolute inset-0 w-24 h-24 rounded-full border-8 border-transparent ${getScoreColor(results.score).replace("text-", "border-")}`}
+                      style={{
+                        borderTopColor: "currentColor",
+                        borderRightColor: "currentColor",
+                        transform: `rotate(${(results.score / 100) * 360}deg)`,
+                      }}
+                    ></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span
+                        className={`text-2xl font-bold ${getScoreColor(results.score)}`}
+                      >
+                        {results.score}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <CardTitle className="text-3xl font-bold">
+                  Overall Performance
+                </CardTitle>
+                <CardDescription className="text-lg prose prose-gray dark:prose-invert max-w-none">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {results.overallScore}
+                  </ReactMarkdown>
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            {/* Strengths and Areas for Improvement */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card className="border-green-200 bg-green-50 dark:bg-green-900/20 dark:border-green-800">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-green-700 dark:text-green-300">
+                    <CheckCircle className="h-5 w-5 mr-2" />
+                    Key Strengths
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {results.strengths.map((strength) => (
+                      <li key={strength} className="flex items-start">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                        <span className="text-green-800 dark:text-green-200">
+                          {strength}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Card className="border-orange-200 bg-orange-50 dark:bg-orange-900/20 dark:border-orange-800">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-orange-700 dark:text-orange-300">
+                    <Target className="h-5 w-5 mr-2" />
+                    Areas for Improvement
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {results.improvements.map((improvement) => (
+                      <li key={improvement} className="flex items-start">
+                        <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                        <span className="text-orange-800 dark:text-orange-200">
+                          {improvement}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
             </div>
-            <div className="flex items-center space-x-2">
-              <ThemeToggle />
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Export Report
+
+            {/* Detailed Analysis */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <MessageSquare className="h-5 w-5 mr-2" />
+                  Detailed Analysis
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose dark:prose-invert max-w-none">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {results.detailedAnalysis}
+                  </ReactMarkdown>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Recommendations */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Lightbulb className="h-5 w-5 mr-2" />
+                  Recommendations
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose dark:prose-invert max-w-none">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {results.recommendations}
+                  </ReactMarkdown>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Next Steps */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <TrendingUp className="h-5 w-5 mr-2" />
+                  Next Steps
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose dark:prose-invert max-w-none">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {results.nextSteps}
+                  </ReactMarkdown>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                onClick={() => router.push("/configure")}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Start New Interview
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => router.push("/dashboard")}
+              >
+                <Target className="h-4 w-4 mr-2" />
+                Return to Dashboard
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => router.push("/practice")}
+              >
+                <BookOpen className="h-4 w-4 mr-2" />
+                Practice More
               </Button>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div className="max-w-6xl mx-auto p-4 space-y-6">
-        {/* Overall Score */}
-        <Card className={`${getScoreBgColor(results.score)} border-2`}>
-          <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
-              <div className="relative">
-                <div className="w-24 h-24 rounded-full border-8 border-gray-200 dark:border-gray-700"></div>
-                <div
-                  className={`absolute inset-0 w-24 h-24 rounded-full border-8 border-transparent ${getScoreColor(results.score).replace("text-", "border-")}`}
-                  style={{
-                    borderTopColor: "currentColor",
-                    borderRightColor: "currentColor",
-                    transform: `rotate(${(results.score / 100) * 360}deg)`,
-                  }}
-                ></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span
-                    className={`text-2xl font-bold ${getScoreColor(results.score)}`}
-                  >
-                    {results.score}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <CardTitle className="text-3xl font-bold">
-              Overall Performance
-            </CardTitle>
-            <CardDescription className="text-lg prose prose-gray dark:prose-invert max-w-none">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {results.overallScore}
-              </ReactMarkdown>
-            </CardDescription>
-          </CardHeader>
-        </Card>
-
-        {/* Strengths and Areas for Improvement */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <Card className="border-green-200 bg-green-50 dark:bg-green-900/20 dark:border-green-800">
-            <CardHeader>
-              <CardTitle className="flex items-center text-green-700 dark:text-green-300">
-                <CheckCircle className="h-5 w-5 mr-2" />
-                Key Strengths
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
-                {results.strengths.map((strength) => (
-                  <li key={strength} className="flex items-start">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                    <span className="text-green-800 dark:text-green-200">
-                      {strength}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-
-          <Card className="border-orange-200 bg-orange-50 dark:bg-orange-900/20 dark:border-orange-800">
-            <CardHeader>
-              <CardTitle className="flex items-center text-orange-700 dark:text-orange-300">
-                <Target className="h-5 w-5 mr-2" />
-                Areas for Improvement
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
-                {results.improvements.map((improvement) => (
-                  <li key={improvement} className="flex items-start">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                    <span className="text-orange-800 dark:text-orange-200">
-                      {improvement}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Detailed Analysis */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <MessageSquare className="h-5 w-5 mr-2" />
-              Detailed Analysis
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="prose dark:prose-invert max-w-none">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {results.detailedAnalysis}
-              </ReactMarkdown>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Recommendations */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Lightbulb className="h-5 w-5 mr-2" />
-              Recommendations
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="prose dark:prose-invert max-w-none">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {results.recommendations}
-              </ReactMarkdown>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Next Steps */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <TrendingUp className="h-5 w-5 mr-2" />
-              Next Steps
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="prose dark:prose-invert max-w-none">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {results.nextSteps}
-              </ReactMarkdown>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button
-            onClick={() => router.push("/configure")}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            <RotateCcw className="h-4 w-4 mr-2" />
-            Start New Interview
-          </Button>
-          <Button variant="outline" onClick={() => router.push("/dashboard")}>
-            <Target className="h-4 w-4 mr-2" />
-            Return to Dashboard
-          </Button>
-          <Button variant="outline" onClick={() => router.push("/practice")}>
-            <BookOpen className="h-4 w-4 mr-2" />
-            Practice More
-          </Button>
-        </div>
+        </main>
       </div>
     </div>
   );

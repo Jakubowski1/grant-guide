@@ -3,7 +3,6 @@
 import {
   ArrowLeft,
   ArrowRight,
-  BookOpen,
   Brain,
   Briefcase,
   Building,
@@ -11,28 +10,19 @@ import {
   Cloud,
   Code,
   Database,
-  HelpCircle,
-  History,
-  Home,
-  LogOut,
-  Menu,
-  Plus,
   Server,
-  Settings,
   Smartphone,
   Target,
   Timer,
-  User,
   Users,
-  X,
   Zap,
 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import { FaGoogle, FaMicrosoft } from "react-icons/fa";
 import { SiAmazon, SiApple, SiMeta, SiNetflix } from "react-icons/si";
 import LoadingPage from "@/components/atoms/loading-page";
-import Logo from "@/components/atoms/logo-the-mockr";
+import DashboardNavbar from "@/components/organisms/dashboard-navbar";
+import DashboardSidebar from "@/components/organisms/dashboard-sidebar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -118,7 +108,6 @@ export default function ConfigurePage() {
   const { loading: authLoading } = useAuthGuard();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-
   const [config, setConfig] = useState<InterviewConfig>({
     position: "",
     seniority: "",
@@ -982,317 +971,208 @@ export default function ConfigurePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
-      {/* Sidebar */}
-      <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}
-      >
-        <div className="flex items-center justify-between h-16 px-6 border-b border-sidebar-border">
-          <Logo />
-          <Button
-            variant="ghost"
-            size="sm"
-            className="lg:hidden text-sidebar-foreground hover:bg-sidebar-accent"
-            onClick={() => setSidebarOpen(false)}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <nav className="flex-1 px-4 py-6 space-y-2">
-          <Link
-            href="/dashboard"
-            className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-          >
-            <Home className="h-5 w-5" />
-            <span className="font-medium">Dashboard</span>
-          </Link>
-
-          <Link
-            href="/configure"
-            className="flex items-center space-x-3 px-3 py-2 rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
-          >
-            <Plus className="h-5 w-5" />
-            <span>New Interview</span>
-          </Link>
-
-          <Link
-            href="/history"
-            className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-          >
-            <History className="h-5 w-5" />
-            <span>Interview History</span>
-          </Link>
-
-          <Link
-            href="/practice"
-            className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-          >
-            <BookOpen className="h-5 w-5" />
-            <span>Practice Library</span>
-          </Link>
-
-          <div className="pt-4 border-t border-sidebar-border">
-            <Link
-              href="/profile"
-              className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-            >
-              <User className="h-5 w-5" />
-              <span>Profile</span>
-            </Link>
-
-            <Link
-              href="/settings"
-              className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-            >
-              <Settings className="h-5 w-5" />
-              <span>Settings</span>
-            </Link>
-
-            <Link
-              href="/support"
-              className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-            >
-              <HelpCircle className="h-5 w-5" />
-              <span>Help & Support</span>
-            </Link>
-          </div>
-        </nav>
-
-        <div className="p-4 border-t border-sidebar-border">
-          <Button
-            variant="ghost"
-            className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-            onClick={handleSignOut}
-          >
-            <LogOut className="h-5 w-5 mr-3" />
-            Sign Out
-          </Button>
-        </div>
-      </div>
-
-      {/* Overlay for mobile sidebar */}
-      {sidebarOpen && (
-        <button
-          type="button"
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden border-0 p-0 w-full h-full"
-          onClick={() => setSidebarOpen(false)}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") {
-              setSidebarOpen(false);
-            }
-          }}
-          aria-label="Close sidebar"
-        />
-      )}
+    <div className="h-screen bg-background flex overflow-hidden">
+      <DashboardSidebar
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+      />
 
       {/* Main Content */}
-      <div className="flex-1 lg:ml-0">
-        {/* Navigation */}
-        <nav className="border-b border-border bg-card/50 backdrop-blur-sm">
-          <div className="px-4 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="lg:hidden text-foreground hover:bg-accent"
-                  onClick={() => setSidebarOpen(true)}
-                >
-                  <Menu className="h-5 w-5" />
-                </Button>
-                <h1 className="text-2xl font-bold text-foreground lg:block hidden">
-                  Configure Interview
-                </h1>
+      <div className="flex-1 lg:ml-0 flex flex-col overflow-hidden">
+        <DashboardNavbar onSignOut={handleSignOut} />
+
+        {/* Scrollable Content Area */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="container mx-auto px-6 py-8 max-w-4xl">
+            {/* Progress Indicator */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold">
+                  Step {currentStep + 1} of {STEPS.length}
+                </h2>
+                <span className="text-sm text-muted-foreground">
+                  {Math.round(getStepProgress())}% complete
+                </span>
               </div>
-            </div>
-          </div>
-        </nav>
+              <Progress value={getStepProgress()} className="w-full" />
 
-        {/* Configuration Content */}
-        <div className="p-6 max-w-4xl mx-auto">
-          {/* Progress Indicator */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">
-                Step {currentStep + 1} of {STEPS.length}
-              </h2>
-              <span className="text-sm text-muted-foreground">
-                {Math.round(getStepProgress())}% complete
-              </span>
-            </div>
-            <Progress value={getStepProgress()} className="w-full" />
+              {/* Step Navigation Breadcrumb */}
+              <div className="flex items-center mt-4 space-x-2 overflow-x-auto pb-2">
+                {STEPS.map((step, index) => {
+                  const StepIcon = step.icon;
+                  const isActive = index === currentStep;
+                  const isCompleted = index < currentStep;
 
-            {/* Step Navigation Breadcrumb */}
-            <div className="flex items-center mt-4 space-x-2 overflow-x-auto pb-2">
-              {STEPS.map((step, index) => {
-                const StepIcon = step.icon;
-                const isActive = index === currentStep;
-                const isCompleted = index < currentStep;
-
-                return (
-                  <div key={step.id} className="flex items-center">
-                    <div
-                      className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors whitespace-nowrap ${
-                        isActive
-                          ? "bg-primary text-primary-foreground"
-                          : isCompleted
-                            ? "bg-primary/20 text-primary"
-                            : "bg-muted text-muted-foreground"
-                      }`}
-                    >
-                      <StepIcon className="h-4 w-4" />
-                      <span className="text-sm font-medium">{step.title}</span>
+                  return (
+                    <div key={step.id} className="flex items-center">
+                      <div
+                        className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors whitespace-nowrap ${
+                          isActive
+                            ? "bg-primary text-primary-foreground"
+                            : isCompleted
+                              ? "bg-primary/20 text-primary"
+                              : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        <StepIcon className="h-4 w-4" />
+                        <span className="text-sm font-medium">
+                          {step.title}
+                        </span>
+                      </div>
+                      {index < STEPS.length - 1 && (
+                        <ChevronRight className="h-4 w-4 mx-2 text-muted-foreground" />
+                      )}
                     </div>
-                    {index < STEPS.length - 1 && (
-                      <ChevronRight className="h-4 w-4 mx-2 text-muted-foreground" />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Main Configuration Card */}
-          <Card className="border-border bg-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                {(() => {
-                  const StepIcon = STEPS[currentStep].icon;
-                  return <StepIcon className="h-5 w-5 text-primary" />;
-                })()}
-                {STEPS[currentStep].title}
-              </CardTitle>
-              <CardDescription>
-                {STEPS[currentStep].description}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="min-h-[400px] relative overflow-hidden">
-              <div
-                key={currentStep}
-                className="animate-in slide-in-from-right-4 fade-in duration-300 py-2"
-              >
-                {renderStepContent()}
+                  );
+                })}
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Navigation Controls */}
-          <div className="flex items-center justify-between mt-6">
-            <Button
-              variant="outline"
-              onClick={handlePrevious}
-              disabled={currentStep === 0}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Previous
-            </Button>
-
-            <div className="flex items-center gap-3">
-              {currentStep === STEPS.length - 1 ? (
-                <Button
-                  onClick={handleStartInterview}
-                  disabled={!isConfigComplete}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
-                >
-                  Start Interview
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleNext}
-                  disabled={!canGoNext()}
-                  className="flex items-center gap-2"
-                >
-                  Next
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              )}
             </div>
-          </div>
 
-          {/* Configuration Summary */}
-          {isConfigComplete && (
-            <Card className="border-primary/20 bg-primary/5 mt-6">
+            {/* Main Configuration Card */}
+            <Card className="border-border bg-card">
               <CardHeader>
-                <CardTitle className="text-primary">
-                  Configuration Summary
+                <CardTitle className="flex items-center gap-2">
+                  {(() => {
+                    const StepIcon = STEPS[currentStep].icon;
+                    return <StepIcon className="h-5 w-5 text-primary" />;
+                  })()}
+                  {STEPS[currentStep].title}
                 </CardTitle>
+                <CardDescription>
+                  {STEPS[currentStep].description}
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  <Badge
-                    variant="secondary"
-                    className="bg-primary/20 text-primary"
-                  >
-                    {positions.find((p) => p.value === config.position)?.label}
-                  </Badge>
-                  <Badge
-                    variant="secondary"
-                    className="bg-primary/20 text-primary"
-                  >
-                    {
-                      seniorityLevels.find((s) => s.value === config.seniority)
-                        ?.label
-                    }
-                  </Badge>
-                  {config.specificCompany ? (
-                    <Badge
-                      variant="secondary"
-                      className="bg-primary/20 text-primary"
-                    >
-                      {
-                        specificCompanies.find(
-                          (c) => c.value === config.specificCompany,
-                        )?.label
-                      }
-                    </Badge>
-                  ) : (
-                    <Badge
-                      variant="secondary"
-                      className="bg-primary/20 text-primary"
-                    >
-                      {
-                        companyProfiles.find(
-                          (c) => c.value === config.companyProfile,
-                        )?.label
-                      }
-                    </Badge>
-                  )}
-                  <Badge
-                    variant="secondary"
-                    className="bg-primary/20 text-primary"
-                  >
-                    {
-                      interviewTypes.find(
-                        (t) => t.value === config.interviewType,
-                      )?.label
-                    }
-                  </Badge>
-                  <Badge
-                    variant="secondary"
-                    className="bg-primary/20 text-primary"
-                  >
-                    {
-                      interviewModes.find(
-                        (m) => m.value === config.interviewMode,
-                      )?.label
-                    }
-                  </Badge>
-                  {config.interviewMode === "timed" && (
-                    <Badge
-                      variant="secondary"
-                      className="bg-primary/20 text-primary"
-                    >
-                      {config.duration} minutes
-                    </Badge>
-                  )}
+              <CardContent className="min-h-[400px] relative overflow-hidden">
+                <div
+                  key={currentStep}
+                  className="animate-in slide-in-from-right-4 fade-in duration-300 py-2"
+                >
+                  {renderStepContent()}
                 </div>
               </CardContent>
             </Card>
-          )}
-        </div>
+
+            {/* Navigation Controls */}
+            <div className="flex items-center justify-between mt-6">
+              <Button
+                variant="outline"
+                onClick={handlePrevious}
+                disabled={currentStep === 0}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Previous
+              </Button>
+
+              <div className="flex items-center gap-3">
+                {currentStep === STEPS.length - 1 ? (
+                  <Button
+                    onClick={handleStartInterview}
+                    disabled={!isConfigComplete}
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
+                  >
+                    Start Interview
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleNext}
+                    disabled={!canGoNext()}
+                    className="flex items-center gap-2"
+                  >
+                    Next
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Configuration Summary */}
+            {isConfigComplete && (
+              <Card className="border-primary/20 bg-primary/5 mt-6">
+                <CardHeader>
+                  <CardTitle className="text-primary">
+                    Configuration Summary
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge
+                      variant="secondary"
+                      className="bg-primary/20 text-primary"
+                    >
+                      {
+                        positions.find((p) => p.value === config.position)
+                          ?.label
+                      }
+                    </Badge>
+                    <Badge
+                      variant="secondary"
+                      className="bg-primary/20 text-primary"
+                    >
+                      {
+                        seniorityLevels.find(
+                          (s) => s.value === config.seniority,
+                        )?.label
+                      }
+                    </Badge>
+                    {config.specificCompany ? (
+                      <Badge
+                        variant="secondary"
+                        className="bg-primary/20 text-primary"
+                      >
+                        {
+                          specificCompanies.find(
+                            (c) => c.value === config.specificCompany,
+                          )?.label
+                        }
+                      </Badge>
+                    ) : (
+                      <Badge
+                        variant="secondary"
+                        className="bg-primary/20 text-primary"
+                      >
+                        {
+                          companyProfiles.find(
+                            (c) => c.value === config.companyProfile,
+                          )?.label
+                        }
+                      </Badge>
+                    )}
+                    <Badge
+                      variant="secondary"
+                      className="bg-primary/20 text-primary"
+                    >
+                      {
+                        interviewTypes.find(
+                          (t) => t.value === config.interviewType,
+                        )?.label
+                      }
+                    </Badge>
+                    <Badge
+                      variant="secondary"
+                      className="bg-primary/20 text-primary"
+                    >
+                      {
+                        interviewModes.find(
+                          (m) => m.value === config.interviewMode,
+                        )?.label
+                      }
+                    </Badge>
+                    {config.interviewMode === "timed" && (
+                      <Badge
+                        variant="secondary"
+                        className="bg-primary/20 text-primary"
+                      >
+                        {config.duration} minutes
+                      </Badge>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </main>
       </div>
     </div>
   );

@@ -22,7 +22,6 @@ interface NavbarProps {
 
 export default function Navbar({ scrollThreshold = 100 }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const { user, userData, signOut, loading } = useAuth();
 
   const getInitials = (name: string | null) => {
@@ -69,16 +68,7 @@ export default function Navbar({ scrollThreshold = 100 }: NavbarProps) {
       clearTimeout(timeoutId);
     };
   }, [scrollThreshold]);
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 640);
-    };
 
-    window.addEventListener("resize", handleResize);
-    handleResize(); // Initial check
-
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -89,13 +79,7 @@ export default function Navbar({ scrollThreshold = 100 }: NavbarProps) {
     >
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          {!isScrolled && !isMobile ? (
-            <span className="font-stretch-extra-expanded font-extrabold">
-              the<span className="text-primary">:</span>mockr
-            </span>
-          ) : (
-            <Logo />
-          )}
+          <Logo />
 
           <div className="flex items-center space-x-4">
             <ThemeToggle />

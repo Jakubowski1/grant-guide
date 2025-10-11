@@ -7,8 +7,8 @@ import { Card } from "../ui/card";
 
 export default function CTASection() {
   return (
-    <div className=" bg-background flex flex-col items-center justify-center p-4 my-20">
-      <Card className="p-6 bg-transparent shadow-none">
+    <div className="flex flex-col items-center justify-center p-4 my-20">
+      <Card className="p-6 bg-white shadow-none dark:bg-transparent">
         <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center flex-1">
           <Logo variant="stacked" />
 

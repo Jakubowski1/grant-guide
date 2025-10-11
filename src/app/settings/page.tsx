@@ -1,24 +1,10 @@
 "use client";
 
-import {
-  BookOpen,
-  Cookie,
-  HelpCircle,
-  History,
-  Home,
-  LogOut,
-  Menu,
-  Plus,
-  Save,
-  Settings as SettingsIcon,
-  User,
-  X,
-} from "lucide-react";
-import Link from "next/link";
+import { Cookie, Save } from "lucide-react";
 import { useEffect, useState } from "react";
 import LoadingPage from "@/components/atoms/loading-page";
-import Logo from "@/components/atoms/logo-the-mockr";
-import { ThemeToggle } from "@/components/atoms/theme-toggle";
+import DashboardNavbar from "@/components/organisms/dashboard-navbar";
+import DashboardSidebar from "@/components/organisms/dashboard-sidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -34,7 +20,7 @@ interface CookieSettings {
 }
 
 export default function SettingsPage() {
-  const { user, loading } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [cookieSettings, setCookieSettings] = useState<CookieSettings>({
@@ -43,6 +29,14 @@ export default function SettingsPage() {
     marketing: false,
     preferences: false,
   });
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
 
   useEffect(() => {
     const savedSettings = localStorage.getItem("cookieSettings");
@@ -157,319 +151,193 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
-      {/* Sidebar */}
-      <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}
-      >
-        <div className="flex items-center justify-between h-16 px-6 border-b border-sidebar-border">
-          <Logo variant="minimal" />
+    <div className="h-screen flex overflow-hidden">
+      <DashboardSidebar
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+      />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <DashboardNavbar onSignOut={handleSignOut} />
+        <main className="flex-1 overflow-auto">
+          <div className="container mx-auto px-6 py-8 max-w-4xl">
+            <div className="space-y-8">
+              {/* Cookie Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Cookie className="h-5 w-5" />
+                    Cookie Settings
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Manage your cookie preferences for this application.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Essential Cookies */}
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <Label className="text-base font-medium">
+                        Essential Cookies
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Required for the website to function properly. Cannot be
+                        disabled.
+                      </p>
+                    </div>
+                    <Switch
+                      checked={cookieSettings.essential}
+                      disabled={true}
+                      aria-label="Essential cookies (always enabled)"
+                    />
+                  </div>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            className="lg:hidden text-sidebar-foreground hover:bg-sidebar-accent"
-            onClick={() => setSidebarOpen(false)}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
+                  <Separator />
 
-        <nav className="flex-1 px-4 py-6 space-y-2">
-          <Link
-            href="/dashboard"
-            className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-          >
-            <Home className="h-5 w-5" />
-            <span className="font-medium">Dashboard</span>
-          </Link>
+                  {/* Analytics Cookies */}
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <Label className="text-base font-medium">
+                        Analytics Cookies
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Help us understand how you use our application to
+                        improve your experience.
+                      </p>
+                    </div>
+                    <Switch
+                      checked={cookieSettings.analytics}
+                      onCheckedChange={(checked: boolean) =>
+                        handleCookieSettingChange("analytics", checked)
+                      }
+                    />
+                  </div>
 
-          <Link
-            href="/configure"
-            className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-          >
-            <Plus className="h-5 w-5" />
-            <span>New Interview</span>
-          </Link>
+                  <Separator />
 
-          <Link
-            href="/history"
-            className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-          >
-            <History className="h-5 w-5" />
-            <span>Interview History</span>
-          </Link>
+                  {/* Marketing Cookies */}
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <Label className="text-base font-medium">
+                        Marketing Cookies
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Used to show you relevant advertisements and track
+                        campaign performance.
+                      </p>
+                    </div>
+                    <Switch
+                      checked={cookieSettings.marketing}
+                      onCheckedChange={(checked: boolean) =>
+                        handleCookieSettingChange("marketing", checked)
+                      }
+                    />
+                  </div>
 
-          <Link
-            href="/practice"
-            className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-          >
-            <BookOpen className="h-5 w-5" />
-            <span>Practice Library</span>
-          </Link>
+                  <Separator />
 
-          <div className="pt-4 border-t border-sidebar-border">
-            <Link
-              href="/profile"
-              className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-            >
-              <User className="h-5 w-5" />
-              <span>Profile</span>
-            </Link>
+                  {/* Preferences Cookies */}
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <Label className="text-base font-medium">
+                        Preferences Cookies
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Remember your settings and preferences for a better
+                        experience.
+                      </p>
+                    </div>
+                    <Switch
+                      checked={cookieSettings.preferences}
+                      onCheckedChange={(checked: boolean) =>
+                        handleCookieSettingChange("preferences", checked)
+                      }
+                    />
+                  </div>
 
-            <Link
-              href="/settings"
-              className="flex items-center space-x-3 px-3 py-2 rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
-            >
-              <SettingsIcon className="h-5 w-5" />
-              <span>Settings</span>
-            </Link>
+                  <Separator />
 
-            <Link
-              href="/support"
-              className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-            >
-              <HelpCircle className="h-5 w-5" />
-              <span>Help & Support</span>
-            </Link>
-          </div>
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                    <Button
+                      onClick={handleSaveSettings}
+                      disabled={saving}
+                      className="flex items-center gap-2"
+                    >
+                      {saving ? (
+                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Save className="h-4 w-4" />
+                      )}
+                      Save Settings
+                    </Button>
 
-          <div className="pt-4 border-t border-sidebar-border">
-            <button
-              type="button"
-              onClick={() => {
-                window.location.href = "/auth";
-              }}
-              className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors w-full text-left"
-            >
-              <LogOut className="h-5 w-5" />
-              <span>Logout</span>
-            </button>
-          </div>
-        </nav>
-      </div>
+                    <Button
+                      variant="outline"
+                      onClick={clearAllCookies}
+                      className="flex items-center gap-2"
+                    >
+                      <Cookie className="h-4 w-4" />
+                      Clear All Cookies
+                    </Button>
+                  </div>
 
-      {/* Mobile overlay */}
-      {sidebarOpen && (
-        <button
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") {
-              setSidebarOpen(false);
-            }
-          }}
-          type="button"
-        />
-      )}
+                  {/* Cookie Information */}
+                  <div className="bg-muted/50 rounded-lg p-4 mt-6">
+                    <h4 className="font-medium mb-2">Current Cookie Status</h4>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="font-medium">Essential:</span>
+                        <span className="ml-2 text-green-600">
+                          Always Active
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-medium">Analytics:</span>
+                        <span
+                          className={`ml-2 ${cookieSettings.analytics ? "text-green-600" : "text-red-600"}`}
+                        >
+                          {cookieSettings.analytics ? "Active" : "Inactive"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-medium">Marketing:</span>
+                        <span
+                          className={`ml-2 ${cookieSettings.marketing ? "text-green-600" : "text-red-600"}`}
+                        >
+                          {cookieSettings.marketing ? "Active" : "Inactive"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-medium">Preferences:</span>
+                        <span
+                          className={`ml-2 ${cookieSettings.preferences ? "text-green-600" : "text-red-600"}`}
+                        >
+                          {cookieSettings.preferences ? "Active" : "Inactive"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-      {/* Main Content */}
-      <div className="flex-1 lg:ml-0">
-        {/* Navigation */}
-        <nav className="border-b border-border bg-card/50 backdrop-blur-sm">
-          <div className="px-4 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="lg:hidden text-foreground hover:bg-accent"
-                  onClick={() => setSidebarOpen(true)}
-                >
-                  <Menu className="h-5 w-5" />
-                </Button>
-                <h1 className="text-2xl font-bold text-foreground">Settings</h1>
-              </div>
-              <div className="flex items-center space-x-4">
-                <ThemeToggle />
-                <Link href="/configure">
-                  <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                    New Interview
-                    <Plus className="size-4" />
-                  </Button>
-                </Link>
-              </div>
+              {/* Additional Settings Placeholder */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Additional Settings</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    More settings will be available here in future updates.
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Coming soon: Notification preferences, data export options,
+                    and more.
+                  </p>
+                </CardContent>
+              </Card>
             </div>
           </div>
-        </nav>
-
-        {/* Settings Content */}
-        <div className="container mx-auto px-6 py-8 max-w-4xl">
-          <div className="space-y-8">
-            {/* Cookie Settings */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Cookie className="h-5 w-5" />
-                  Cookie Settings
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Manage your cookie preferences for this application.
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Essential Cookies */}
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <Label className="text-base font-medium">
-                      Essential Cookies
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Required for the website to function properly. Cannot be
-                      disabled.
-                    </p>
-                  </div>
-                  <Switch
-                    checked={cookieSettings.essential}
-                    disabled={true}
-                    aria-label="Essential cookies (always enabled)"
-                  />
-                </div>
-
-                <Separator />
-
-                {/* Analytics Cookies */}
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <Label className="text-base font-medium">
-                      Analytics Cookies
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Help us understand how you use our application to improve
-                      your experience.
-                    </p>
-                  </div>
-                  <Switch
-                    checked={cookieSettings.analytics}
-                    onCheckedChange={(checked: boolean) =>
-                      handleCookieSettingChange("analytics", checked)
-                    }
-                  />
-                </div>
-
-                <Separator />
-
-                {/* Marketing Cookies */}
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <Label className="text-base font-medium">
-                      Marketing Cookies
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Used to show you relevant advertisements and track
-                      campaign performance.
-                    </p>
-                  </div>
-                  <Switch
-                    checked={cookieSettings.marketing}
-                    onCheckedChange={(checked: boolean) =>
-                      handleCookieSettingChange("marketing", checked)
-                    }
-                  />
-                </div>
-
-                <Separator />
-
-                {/* Preferences Cookies */}
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <Label className="text-base font-medium">
-                      Preferences Cookies
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Remember your settings and preferences for a better
-                      experience.
-                    </p>
-                  </div>
-                  <Switch
-                    checked={cookieSettings.preferences}
-                    onCheckedChange={(checked: boolean) =>
-                      handleCookieSettingChange("preferences", checked)
-                    }
-                  />
-                </div>
-
-                <Separator />
-
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                  <Button
-                    onClick={handleSaveSettings}
-                    disabled={saving}
-                    className="flex items-center gap-2"
-                  >
-                    {saving ? (
-                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <Save className="h-4 w-4" />
-                    )}
-                    Save Settings
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    onClick={clearAllCookies}
-                    className="flex items-center gap-2"
-                  >
-                    <Cookie className="h-4 w-4" />
-                    Clear All Cookies
-                  </Button>
-                </div>
-
-                {/* Cookie Information */}
-                <div className="bg-muted/50 rounded-lg p-4 mt-6">
-                  <h4 className="font-medium mb-2">Current Cookie Status</h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="font-medium">Essential:</span>
-                      <span className="ml-2 text-green-600">Always Active</span>
-                    </div>
-                    <div>
-                      <span className="font-medium">Analytics:</span>
-                      <span
-                        className={`ml-2 ${cookieSettings.analytics ? "text-green-600" : "text-red-600"}`}
-                      >
-                        {cookieSettings.analytics ? "Active" : "Inactive"}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="font-medium">Marketing:</span>
-                      <span
-                        className={`ml-2 ${cookieSettings.marketing ? "text-green-600" : "text-red-600"}`}
-                      >
-                        {cookieSettings.marketing ? "Active" : "Inactive"}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="font-medium">Preferences:</span>
-                      <span
-                        className={`ml-2 ${cookieSettings.preferences ? "text-green-600" : "text-red-600"}`}
-                      >
-                        {cookieSettings.preferences ? "Active" : "Inactive"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Additional Settings Placeholder */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Additional Settings</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  More settings will be available here in future updates.
-                </p>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Coming soon: Notification preferences, data export options,
-                  and more.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+        </main>
       </div>
     </div>
   );

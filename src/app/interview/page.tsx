@@ -23,6 +23,9 @@ import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import LoadingPage from "@/components/atoms/loading-page";
+import DashboardNavbar from "@/components/organisms/dashboard-navbar";
+import DashboardSidebar from "@/components/organisms/dashboard-sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -58,8 +61,9 @@ interface InterviewSession {
 }
 
 export default function InterviewPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
   const [mounted, setMounted] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [config, setConfig] = useState({
     position: "Frontend Engineer",
     seniority: "mid",
@@ -71,6 +75,14 @@ export default function InterviewPage() {
     duration: "30",
     isDemoMode: false,
   });
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -506,119 +518,150 @@ export default function InterviewPage() {
     }
   };
 
+  if (authLoading) {
+    return <LoadingPage />;
+  }
+
+  if (!user) {
+    return null;
+  }
+
   if (!isInterviewStarted) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="w-full max-w-2xl">
-          <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
-              <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
-                <Brain className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-              </div>
-            </div>
-            <CardTitle className="text-2xl font-bold">
-              {!mounted
-                ? "Ready to Start?"
-                : config.isDemoMode
-                  ? "Try the Demo!"
-                  : "Ready to Start?"}
-            </CardTitle>
-            <CardDescription className="text-lg">
-              {!mounted ? (
-                <>
-                  Your AI-powered technical interview for{" "}
-                  <span className="font-semibold">Frontend Engineer</span>
-                </>
-              ) : mounted && config.isDemoMode ? (
-                "Experience our AI interview system with a quick, no-pressure demo"
-              ) : mounted ? (
-                <>
-                  Your AI-powered {config.interviewType} interview for{" "}
-                  <span className="font-semibold">{config.position}</span>
-                </>
-              ) : (
-                "Loading interview configuration..."
-              )}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {mounted && !config.isDemoMode && (
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="space-y-2">
-                  <Badge variant="outline" className="w-full justify-center">
-                    <Clock className="h-3 w-3 mr-1" />
-                    {config.interviewMode === "untimed"
-                      ? "Untimed"
-                      : `${config.duration} minutes`}
-                  </Badge>
-                  <Badge variant="outline" className="w-full justify-center">
-                    <Target className="h-3 w-3 mr-1" />
-                    {config.seniority} Level
-                  </Badge>
+      <div className="h-screen flex overflow-hidden">
+        <DashboardSidebar
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+        />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <DashboardNavbar onSignOut={handleSignOut} />
+          <main className="flex-1 overflow-auto flex items-center justify-center p-4">
+            <Card className="w-full max-w-2xl">
+              <CardHeader className="text-center">
+                <div className="flex justify-center mb-4">
+                  <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
+                    <Brain className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Badge variant="outline" className="w-full justify-center">
-                    <Code className="h-3 w-3 mr-1" />
-                    {config.interviewType}
-                  </Badge>
-                  {config.specificCompany && (
-                    <Badge variant="outline" className="w-full justify-center">
-                      <Building className="h-3 w-3 mr-1" />
-                      {config.specificCompany}
-                    </Badge>
+                <CardTitle className="text-2xl font-bold">
+                  {!mounted
+                    ? "Ready to Start?"
+                    : config.isDemoMode
+                      ? "Try the Demo!"
+                      : "Ready to Start?"}
+                </CardTitle>
+                <CardDescription className="text-lg">
+                  {!mounted ? (
+                    <>
+                      Your AI-powered technical interview for{" "}
+                      <span className="font-semibold">Frontend Engineer</span>
+                    </>
+                  ) : mounted && config.isDemoMode ? (
+                    "Experience our AI interview system with a quick, no-pressure demo"
+                  ) : mounted ? (
+                    <>
+                      Your AI-powered {config.interviewType} interview for{" "}
+                      <span className="font-semibold">{config.position}</span>
+                    </>
+                  ) : (
+                    "Loading interview configuration..."
                   )}
-                </div>
-              </div>
-            )}
-
-            {mounted && config.isDemoMode && (
-              <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-                <Badge variant="outline" className="mb-3">
-                  Demo Mode
-                </Badge>
-                <h3 className="font-semibold text-green-900 dark:text-green-100 mb-2">
-                  What to Expect:
-                </h3>
-                <ul className="text-sm text-green-700 dark:text-green-300 space-y-1">
-                  <li>• Just 2-3 casual practice questions</li>
-                  <li>• No scoring or recording</li>
-                  <li>• Try voice input and chat features</li>
-                  <li>• Get comfortable with the interface</li>
-                </ul>
-              </div>
-            )}
-
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-              <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
-                {config.isDemoMode ? "Demo Tips:" : "Interview Tips:"}
-              </h3>
-              <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                {config.isDemoMode ? (
-                  <>
-                    <li>• Relax and explore - this is just practice!</li>
-                    <li>• Try the voice recording feature</li>
-                    <li>• Ask questions to see how the AI responds</li>
-                    <li>• Check out the pause/stop controls</li>
-                  </>
-                ) : (
-                  <>
-                    <li>
-                      • Think out loud to show your problem-solving process
-                    </li>
-                    <li>• Ask clarifying questions when needed</li>
-                    <li>• Use specific examples from your experience</li>
-                    <li>• Take your time to understand each question fully</li>
-                  </>
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {mounted && !config.isDemoMode && (
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="space-y-2">
+                      <Badge
+                        variant="outline"
+                        className="w-full justify-center"
+                      >
+                        <Clock className="h-3 w-3 mr-1" />
+                        {config.interviewMode === "untimed"
+                          ? "Untimed"
+                          : `${config.duration} minutes`}
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className="w-full justify-center"
+                      >
+                        <Target className="h-3 w-3 mr-1" />
+                        {config.seniority} Level
+                      </Badge>
+                    </div>
+                    <div className="space-y-2">
+                      <Badge
+                        variant="outline"
+                        className="w-full justify-center"
+                      >
+                        <Code className="h-3 w-3 mr-1" />
+                        {config.interviewType}
+                      </Badge>
+                      {config.specificCompany && (
+                        <Badge
+                          variant="outline"
+                          className="w-full justify-center"
+                        >
+                          <Building className="h-3 w-3 mr-1" />
+                          {config.specificCompany}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
                 )}
-              </ul>
-            </div>
 
-            <Button onClick={startInterview} className="w-full " size="lg">
-              <Play className="h-4 w-4 mr-2" />
-              {config.isDemoMode ? "Start Demo" : "Start Interview"}
-            </Button>
-          </CardContent>
-        </Card>
+                {mounted && config.isDemoMode && (
+                  <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                    <Badge variant="outline" className="mb-3">
+                      Demo Mode
+                    </Badge>
+                    <h3 className="font-semibold text-green-900 dark:text-green-100 mb-2">
+                      What to Expect:
+                    </h3>
+                    <ul className="text-sm text-green-700 dark:text-green-300 space-y-1">
+                      <li>• Just 2-3 casual practice questions</li>
+                      <li>• No scoring or recording</li>
+                      <li>• Try voice input and chat features</li>
+                      <li>• Get comfortable with the interface</li>
+                    </ul>
+                  </div>
+                )}
+
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                  <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                    {config.isDemoMode ? "Demo Tips:" : "Interview Tips:"}
+                  </h3>
+                  <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                    {config.isDemoMode ? (
+                      <>
+                        <li>• Relax and explore - this is just practice!</li>
+                        <li>• Try the voice recording feature</li>
+                        <li>• Ask questions to see how the AI responds</li>
+                        <li>• Check out the pause/stop controls</li>
+                      </>
+                    ) : (
+                      <>
+                        <li>
+                          • Think out loud to show your problem-solving process
+                        </li>
+                        <li>• Ask clarifying questions when needed</li>
+                        <li>• Use specific examples from your experience</li>
+                        <li>
+                          • Take your time to understand each question fully
+                        </li>
+                      </>
+                    )}
+                  </ul>
+                </div>
+
+                <Button onClick={startInterview} className="w-full " size="lg">
+                  <Play className="h-4 w-4 mr-2" />
+                  {config.isDemoMode ? "Start Demo" : "Start Interview"}
+                </Button>
+              </CardContent>
+            </Card>
+          </main>
+        </div>
       </div>
     );
   }

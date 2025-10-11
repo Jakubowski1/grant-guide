@@ -4,7 +4,7 @@ import FeaturesGrid from "@/components/molecules/features-grid";
 import CTASection from "@/components/organisms/cta-section";
 import Footer from "@/components/organisms/footer";
 import HeroSection from "@/components/organisms/hero-section";
-import Navbar from "@/components/organisms/navbar";
+import Navbar from "@/components/organisms/landing-page-navbar";
 
 export default function HomePage() {
   const scrollThreshold = 500;
