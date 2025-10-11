@@ -12,6 +12,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import useIsMobile from "@/hooks/useIsMobile";
 import { useAuth } from "@/providers/auth-provider";
 
 interface DashboardNavbarProps {
@@ -22,6 +23,7 @@ export default function DashboardNavbar({
   setSidebarOpen,
 }: DashboardNavbarProps) {
   const { user, userData, signOut } = useAuth();
+  const { isMobile } = useIsMobile();
 
   const getInitials = (name: string | null) => {
     if (!name) return "U";
@@ -47,32 +49,30 @@ export default function DashboardNavbar({
         <div className="px-4 h-16 flex items-center">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center space-x-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSidebarOpen(true)}
-                className="flex items-center gap-2"
-              >
-                <Menu className="h-4 w-4" />
-                Menu
-              </Button>
-              <ThemeToggle />
+              {isMobile && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setSidebarOpen(true)}
+                  className="bg-transparent border border-border/80 text-foreground hover:bg-muted/60 hover:text-foreground transition-colors"
+                >
+                  <Menu className="size-4" />
+                </Button>
+              )}
 
-              {/* User Actions */}
-              <div className="flex items-center space-x-2">
-                {/* Avatar - Profile Link */}
+              <div className="flex items-start space-x-2">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Link href="/profile">
-                      <div className="w-8 h-8 rounded-full hover:ring-2 hover:ring-primary/20 transition-all cursor-pointer">
+                      <div className="size-8 rounded-full hover:ring-2 hover:ring-primary/20 transition-all cursor-pointer">
                         {userData?.avatarIcon ? (
                           <AvatarIconDisplay
                             iconId={userData.avatarIcon}
-                            size="md"
-                            className="w-8 h-8"
+                            size="sm"
+                            className="size-8"
                           />
                         ) : (
-                          <Avatar className="w-8 h-8 border-2 border-primary/20">
+                          <Avatar className="size-8 border-2 border-primary/20">
                             <AvatarImage
                               src={user?.photoURL || userData?.photoURL}
                               alt={
@@ -98,58 +98,62 @@ export default function DashboardNavbar({
                   </TooltipContent>
                 </Tooltip>
 
-                {/* Settings */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link href="/settings">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-foreground hover:bg-accent"
-                      >
-                        <Settings className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Settings</p>
-                  </TooltipContent>
-                </Tooltip>
+                <div>
+                  <ThemeToggle />
 
-                {/* Help & Support */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link href="/support">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-foreground hover:bg-accent"
-                      >
-                        <HelpCircle className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Help & Support</p>
-                  </TooltipContent>
-                </Tooltip>
+                  {/* Settings */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Link href="/settings">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="bg-transparent border border-border/80 text-foreground hover:bg-muted/60 hover:text-foreground transition-colors"
+                        >
+                          <Settings className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Settings</p>
+                    </TooltipContent>
+                  </Tooltip>
 
-                {/* Sign Out */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-foreground hover:bg-accent"
-                      onClick={handleSignOut}
-                    >
-                      <LogOut className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Sign Out</p>
-                  </TooltipContent>
-                </Tooltip>
+                  {/* Help & Support */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Link href="/support">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="bg-transparent border border-border/80 text-foreground hover:bg-muted/60 hover:text-foreground transition-colors"
+                        >
+                          <HelpCircle className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Help & Support</p>
+                    </TooltipContent>
+                  </Tooltip>
+
+                  {/* Sign Out */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="border border-border/80 text-foreground hover:bg-muted/60 hover:text-foreground transition-colors"
+                        onClick={handleSignOut}
+                      >
+                        <LogOut className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Sign Out</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
               </div>
             </div>
           </div>

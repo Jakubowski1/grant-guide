@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/providers/auth-provider";
+import { AvatarIconDisplay } from "../molecules/avatar-icon-selector";
 
 interface NavbarProps {
   scrollThreshold?: number;
@@ -90,15 +91,33 @@ export default function Navbar({ scrollThreshold = 100 }: NavbarProps) {
                     variant="ghost"
                     className="relative h-10 w-10 rounded-full p-0"
                   >
-                    <Avatar className="h-10 w-10 border-2 border-primary/20">
-                      <AvatarImage
-                        src={user.photoURL || userData?.photoURL}
-                        alt={userData?.displayName || "User"}
-                      />
-                      <AvatarFallback className="bg-primary/10">
-                        {getInitials(userData?.displayName || user.displayName)}
-                      </AvatarFallback>
-                    </Avatar>
+                    <div className="w-8 h-8 rounded-full hover:ring-2 hover:ring-primary/20 transition-all cursor-pointer">
+                      {userData?.avatarIcon ? (
+                        <AvatarIconDisplay
+                          iconId={userData.avatarIcon}
+                          size="sm"
+                          className="w-8 h-8"
+                        />
+                      ) : (
+                        <Avatar className="w-8 h-8 border-2 border-primary/20">
+                          <AvatarImage
+                            src={user?.photoURL || userData?.photoURL}
+                            alt={
+                              userData?.displayName ||
+                              user?.displayName ||
+                              "User"
+                            }
+                          />
+                          <AvatarFallback className="bg-primary/10 text-primary">
+                            {getInitials(
+                              userData?.displayName ||
+                                user?.displayName ||
+                                null,
+                            )}
+                          </AvatarFallback>
+                        </Avatar>
+                      )}
+                    </div>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
