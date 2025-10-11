@@ -61,11 +61,39 @@ export interface JobSearchResponse {
 }
 
 /**
+ * Interface for the raw request body from the client
+ * All fields are optional strings/primitives as they come from JSON
+ */
+export interface JobSearchRequestBody {
+  search_term?: string;
+  location?: string;
+  site_names?: string[];
+  results_wanted?: string | number;
+  job_type?: string;
+  is_remote?: boolean;
+  hours_old?: string | number;
+  distance?: string | number;
+  country_indeed?: string;
+  easy_apply?: boolean;
+  linkedin_fetch_description?: boolean;
+  google_search_term?: string;
+  description_format?: string;
+  offset?: string | number;
+  enforce_annual_salary?: boolean;
+}
+
+/**
  * Execute the Python job scraper script
  */
 async function executeJobScraper(params: JobSearchRequest): Promise<JobData[]> {
   return new Promise((resolve, reject) => {
-    const pythonPath = path.join(process.cwd(), ".venv", "bin", "python");
+    // Use environment variable, or fallback to appropriate python path
+    const pythonPath =
+      process.env.PYTHON_PATH ||
+      (process.env.VERCEL
+        ? "python3" // Use system python on Vercel
+        : path.join(process.cwd(), ".venv", "bin", "python")); // Use local venv in development
+
     const scriptPath = path.join(
       process.cwd(),
       "scripts",
@@ -106,6 +134,16 @@ async function executeJobScraper(params: JobSearchRequest): Promise<JobData[]> {
     });
 
     child.on("error", (error) => {
+      console.error("Python spawn error:", {
+        pythonPath,
+        scriptPath,
+        error: error.message,
+        cwd: process.cwd(),
+        env: {
+          VERCEL: process.env.VERCEL,
+          PYTHON_PATH: process.env.PYTHON_PATH,
+        },
+      });
       reject(new Error(`Failed to spawn Python process: ${error.message}`));
     });
   });
@@ -115,13 +153,18 @@ async function executeJobScraper(params: JobSearchRequest): Promise<JobData[]> {
  * Validate job search request parameters
  */
 function validateJobSearchRequest(
-  body: Record<string, any>,
+  body: JobSearchRequestBody,
 ): JobSearchRequest | null {
   if (!body.search_term || typeof body.search_term !== "string") {
     return null;
   }
 
-  const validJobTypes = ["fulltime", "parttime", "internship", "contract"];
+  const validJobTypes = [
+    "fulltime",
+    "parttime",
+    "internship",
+    "contract",
+  ] as const;
   const validSites = [
     "indeed",
     "linkedin",
@@ -132,7 +175,39 @@ function validateJobSearchRequest(
     "naukri",
     "bdjobs",
   ];
-  const validDescriptionFormats = ["markdown", "html"];
+  const validDescriptionFormats = ["markdown", "html"] as const;
+
+  // Helper function to safely parse integers
+  const safeParseInt = (
+    value: string | number | undefined,
+    defaultValue: number,
+  ): number => {
+    if (typeof value === "number") return value;
+    if (typeof value === "string") {
+      const parsed = parseInt(value, 10);
+      return Number.isNaN(parsed) ? defaultValue : parsed;
+    }
+    return defaultValue;
+  };
+
+  // Helper function to check if job type is valid
+  const isValidJobType = (
+    type: string | undefined,
+  ): type is "fulltime" | "parttime" | "internship" | "contract" => {
+    return (
+      type !== undefined && (validJobTypes as readonly string[]).includes(type)
+    );
+  };
+
+  // Helper function to check if description format is valid
+  const isValidDescriptionFormat = (
+    format: string | undefined,
+  ): format is "markdown" | "html" => {
+    return (
+      format !== undefined &&
+      (validDescriptionFormats as readonly string[]).includes(format)
+    );
+  };
 
   return {
     search_term: body.search_term,
@@ -141,15 +216,15 @@ function validateJobSearchRequest(
       ? body.site_names.filter((site: string) => validSites.includes(site))
       : ["indeed", "linkedin", "zip_recruiter"],
     results_wanted: Math.min(
-      Math.max(1, parseInt(body.results_wanted, 10) || 20),
+      Math.max(1, safeParseInt(body.results_wanted, 20)),
       100,
     ), // Limit to 100
-    job_type: validJobTypes.includes(body.job_type) ? body.job_type : undefined,
+    job_type: isValidJobType(body.job_type) ? body.job_type : undefined,
     is_remote: typeof body.is_remote === "boolean" ? body.is_remote : undefined,
     hours_old: body.hours_old
-      ? Math.max(1, parseInt(body.hours_old, 10))
+      ? Math.max(1, safeParseInt(body.hours_old, 0))
       : undefined,
-    distance: Math.max(1, parseInt(body.distance, 10) || 50),
+    distance: Math.max(1, safeParseInt(body.distance, 50)),
     country_indeed: body.country_indeed || "USA",
     easy_apply:
       typeof body.easy_apply === "boolean" ? body.easy_apply : undefined,
@@ -158,12 +233,10 @@ function validateJobSearchRequest(
         ? body.linkedin_fetch_description
         : false,
     google_search_term: body.google_search_term || undefined,
-    description_format: validDescriptionFormats.includes(
-      body.description_format,
-    )
+    description_format: isValidDescriptionFormat(body.description_format)
       ? body.description_format
       : "markdown",
-    offset: Math.max(0, parseInt(body.offset, 10) || 0),
+    offset: Math.max(0, safeParseInt(body.offset, 0)),
     enforce_annual_salary:
       typeof body.enforce_annual_salary === "boolean"
         ? body.enforce_annual_salary

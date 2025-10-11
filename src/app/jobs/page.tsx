@@ -258,7 +258,7 @@ export default function JobMarketPage() {
         <DashboardNavbar onSignOut={handleSignOut} />
 
         {/* Mobile sidebar toggle */}
-        <div className="lg:hidden p-4">
+        <div className="lg:hidden px-4 sm:px-6 py-2 border-b">
           <Button
             variant="outline"
             size="sm"
@@ -272,11 +272,13 @@ export default function JobMarketPage() {
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto">
-          <div className="container mx-auto py-6 space-y-6">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6">
             {/* Header */}
             <div className="space-y-2">
-              <h1 className="text-3xl font-bold tracking-tight">Job Market</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                Job Market
+              </h1>
+              <p className="text-sm sm:text-base text-muted-foreground">
                 Search for jobs across multiple platforms using our powerful job
                 scraping engine
               </p>
@@ -294,9 +296,9 @@ export default function JobMarketPage() {
                   more
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 sm:space-y-6">
                 {/* Primary Search */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="search-query">Job Title or Keywords</Label>
                     <Input
@@ -321,7 +323,7 @@ export default function JobMarketPage() {
                       onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 sm:col-span-2 lg:col-span-1">
                     <Label>&nbsp;</Label>
                     <Button
                       onClick={handleSearch}
@@ -345,7 +347,7 @@ export default function JobMarketPage() {
 
                 {/* Advanced Filters */}
                 <Tabs defaultValue="sites" className="w-full">
-                  <TabsList className="grid w-full grid-cols-4">
+                  <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
                     <TabsTrigger value="sites">Job Sites</TabsTrigger>
                     <TabsTrigger value="types">Job Types</TabsTrigger>
                     <TabsTrigger value="salary">Salary & Remote</TabsTrigger>
@@ -354,7 +356,7 @@ export default function JobMarketPage() {
 
                   <TabsContent value="sites" className="space-y-3">
                     <Label>Select Job Sites to Search</Label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                       {jobSites.map((site) => (
                         <div key={site} className="flex items-center space-x-2">
                           <Checkbox
@@ -386,7 +388,7 @@ export default function JobMarketPage() {
 
                   <TabsContent value="types" className="space-y-3">
                     <Label>Job Types</Label>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                       {jobTypes.map((type) => (
                         <div key={type} className="flex items-center space-x-2">
                           <Checkbox
@@ -421,7 +423,7 @@ export default function JobMarketPage() {
                   </TabsContent>
 
                   <TabsContent value="salary" className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="salary-min">Minimum Salary</Label>
                         <Input
@@ -575,10 +577,10 @@ export default function JobMarketPage() {
                       <CardContent className="pt-6">
                         <div className="space-y-4">
                           {/* Job Header */}
-                          <div className="flex justify-between items-start">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4">
                             <div className="space-y-2 flex-1">
-                              <div className="flex items-center gap-2">
-                                <h3 className="text-xl font-semibold text-primary hover:underline">
+                              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                <h3 className="text-lg sm:text-xl font-semibold text-primary hover:underline">
                                   {job.job_url ? (
                                     <a
                                       href={job.job_url}
@@ -600,7 +602,7 @@ export default function JobMarketPage() {
                                 </Badge>
                               </div>
 
-                              <div className="flex items-center gap-4 text-muted-foreground">
+                              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-muted-foreground text-sm sm:text-base">
                                 <div className="flex items-center gap-1">
                                   <Building className="h-4 w-4" />
                                   <span>{job.company}</span>
@@ -608,86 +610,101 @@ export default function JobMarketPage() {
                                 {job.location.full_location && (
                                   <div className="flex items-center gap-1">
                                     <MapPin className="h-4 w-4" />
-                                    <span>{job.location.full_location}</span>
+                                    <span className="truncate">
+                                      {job.location.full_location}
+                                    </span>
                                   </div>
                                 )}
                                 {job.is_remote && (
-                                  <Badge variant="secondary">Remote</Badge>
+                                  <Badge
+                                    variant="secondary"
+                                    className="self-start"
+                                  >
+                                    Remote
+                                  </Badge>
                                 )}
                               </div>
                             </div>
 
-                            <Button variant="outline" size="sm">
-                              <Bookmark className="h-4 w-4" />
-                            </Button>
-                          </div>
-
-                          {/* Job Details */}
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                            <div className="flex items-center gap-2">
-                              <Briefcase className="h-4 w-4 text-muted-foreground" />
-                              <span>
-                                {job.job_type
-                                  ? job.job_type.charAt(0).toUpperCase() +
-                                    job.job_type.slice(1)
-                                  : "Not specified"}
-                              </span>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                              <DollarSign className="h-4 w-4 text-muted-foreground" />
-                              <span>{formatSalary(job)}</span>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                              <Calendar className="h-4 w-4 text-muted-foreground" />
-                              <span>
-                                {getTimeAgo(job.date_posted || job.scraped_at)}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Job Description Preview */}
-                          {job.description && (
-                            <div className="space-y-2">
-                              <p className="text-sm text-muted-foreground line-clamp-3">
-                                {job.description
-                                  .replace(/[#*`]/g, "")
-                                  .substring(0, 200)}
-                                ...
-                              </p>
+                            <div className="flex sm:flex-col gap-2">
                               <Button
-                                variant="ghost"
+                                variant="outline"
                                 size="sm"
-                                onClick={() => {
-                                  setSelectedJob(job);
-                                  setShowJobDetails(true);
-                                }}
+                                className="flex-1 sm:flex-none"
                               >
-                                View Details
+                                <Bookmark className="h-4 w-4" />
                               </Button>
                             </div>
-                          )}
 
-                          {/* Skills/Tags */}
-                          {job.skills && job.skills.length > 0 && (
-                            <div className="flex flex-wrap gap-2">
-                              {job.skills.slice(0, 5).map((skill) => (
-                                <Badge
-                                  key={skill}
-                                  variant="outline"
-                                  className="text-xs"
-                                >
-                                  {skill}
-                                </Badge>
-                              ))}
-                              {job.skills.length > 5 && (
-                                <Badge variant="outline" className="text-xs">
-                                  +{job.skills.length - 5} more
-                                </Badge>
-                              )}
+                            {/* Job Details */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 text-sm">
+                              <div className="flex items-center gap-2">
+                                <Briefcase className="h-4 w-4 text-muted-foreground" />
+                                <span>
+                                  {job.job_type
+                                    ? job.job_type.charAt(0).toUpperCase() +
+                                      job.job_type.slice(1)
+                                    : "Not specified"}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <DollarSign className="h-4 w-4 text-muted-foreground" />
+                                <span>{formatSalary(job)}</span>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <Calendar className="h-4 w-4 text-muted-foreground" />
+                                <span>
+                                  {getTimeAgo(
+                                    job.date_posted || job.scraped_at,
+                                  )}
+                                </span>
+                              </div>
                             </div>
-                          )}
+
+                            {/* Job Description Preview */}
+                            {job.description && (
+                              <div className="space-y-2">
+                                <p className="text-sm text-muted-foreground line-clamp-3">
+                                  {job.description
+                                    .replace(/[#*`]/g, "")
+                                    .substring(0, 200)}
+                                  ...
+                                </p>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedJob(job);
+                                    setShowJobDetails(true);
+                                  }}
+                                >
+                                  View Details
+                                </Button>
+                              </div>
+                            )}
+
+                            {/* Skills/Tags */}
+                            {job.skills && job.skills.length > 0 && (
+                              <div className="flex flex-wrap gap-2">
+                                {job.skills.slice(0, 3).map((skill) => (
+                                  <Badge
+                                    key={skill}
+                                    variant="outline"
+                                    className="text-xs truncate max-w-24"
+                                  >
+                                    {skill}
+                                  </Badge>
+                                ))}
+                                {job.skills.length > 3 && (
+                                  <Badge variant="outline" className="text-xs">
+                                    +{job.skills.length - 3} more
+                                  </Badge>
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </CardContent>
                     </Card>

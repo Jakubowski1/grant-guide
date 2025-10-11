@@ -1,0 +1,13 @@
+{
+  "functions": {
+    "src/app/api/jobs/scrape/route.ts": {
+      "maxDuration": 60
+    }
+  },
+  "builds": [
+    {
+      "src": "requirements.txt",
+      "use": "@vercel/python"
+    }
+  ]
+}
