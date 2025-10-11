@@ -2,7 +2,7 @@
 
 ## Overview
 
-Grant Guide uses Firebase Firestore as its primary database. The schema is designed to be scalable, efficient, and supports real-time updates. All collections follow a consistent naming convention and include proper indexing for optimal performance.
+Themockr uses Firebase Firestore as its primary database. The schema is designed to be scalable, efficient, and supports real-time updates. All collections follow a consistent naming convention and include proper indexing for optimal performance.
 
 ## Collections Structure
 

@@ -3,7 +3,7 @@
 import { LogOut, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import Logo from "@/components/atoms/logo-grant-guide";
+import Logo from "@/components/atoms/logo-the-mockr";
 import { ThemeToggle } from "@/components/atoms/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -90,9 +90,11 @@ export default function Navbar({ scrollThreshold = 100 }: NavbarProps) {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {!isScrolled && !isMobile ? (
-            <Logo size="lg" variant="default" />
+            <span className="font-stretch-extra-expanded font-extrabold">
+              the<span className="text-primary">:</span>mockr
+            </span>
           ) : (
-            <Logo size="sm" variant="minimal" />
+            <Logo />
           )}
 
           <div className="flex items-center space-x-4">

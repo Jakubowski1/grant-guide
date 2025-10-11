@@ -50,7 +50,7 @@ export default function NotFound() {
           <p>
             If you believe this is an error, please{" "}
             <Link
-              href="mailto:grant-guide-support@gmail.com"
+              href="mailto:the-mockr-support@gmail.com"
               className="text-primary hover:text-primary/80 underline underline-offset-4 transition-colors"
             >
               contact support

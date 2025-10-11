@@ -17,7 +17,7 @@ import {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import LoadingPage from "@/components/atoms/loading-page";
-import Logo from "@/components/atoms/logo-grant-guide";
+import Logo from "@/components/atoms/logo-the-mockr";
 import { ThemeToggle } from "@/components/atoms/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,20 +38,19 @@ export default function SettingsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [cookieSettings, setCookieSettings] = useState<CookieSettings>({
-    essential: true, // Always true, cannot be disabled
+    essential: true,
     analytics: false,
     marketing: false,
     preferences: false,
   });
 
-  // Load cookie settings from localStorage on mount
   useEffect(() => {
     const savedSettings = localStorage.getItem("cookieSettings");
     if (savedSettings) {
       try {
         const parsed = JSON.parse(savedSettings);
         setCookieSettings({
-          essential: true, // Always force essential cookies to true
+          essential: true,
           analytics: parsed.analytics || false,
           marketing: parsed.marketing || false,
           preferences: parsed.preferences || false,
@@ -74,7 +73,7 @@ export default function SettingsPage() {
     key: keyof CookieSettings,
     value: boolean,
   ) => {
-    if (key === "essential") return; // Cannot change essential cookies
+    if (key === "essential") return;
 
     setCookieSettings((prev) => ({
       ...prev,
@@ -85,11 +84,7 @@ export default function SettingsPage() {
   const handleSaveSettings = async () => {
     setSaving(true);
     try {
-      // Save to localStorage
       localStorage.setItem("cookieSettings", JSON.stringify(cookieSettings));
-
-      // You could also save to your backend/database here
-      // await DatabaseService.updateUserSettings(user.uid, { cookieSettings });
 
       alert("Settings saved successfully!");
     } catch (error) {
@@ -106,7 +101,6 @@ export default function SettingsPage() {
         "Are you sure you want to clear all cookies? This will reset your preferences.",
       )
     ) {
-      // Clear all cookies except essential ones
       const cookies = document.cookie.split(";");
       const essentialCookies = ["auth-token", "session", "csrf"];
 
@@ -115,13 +109,11 @@ export default function SettingsPage() {
         const name =
           eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
 
-        // Don't clear essential cookies
         const isEssential = essentialCookies.some((essential) =>
           name.includes(essential),
         );
 
         if (!isEssential && name) {
-          // Clear cookie using a safer approach
           try {
             const clearCookie = (cookieName: string) => {
               const paths = ["/", `${window.location.pathname}`];
@@ -130,8 +122,18 @@ export default function SettingsPage() {
               paths.forEach((path) => {
                 domains.forEach((domain) => {
                   const domainPart = domain ? `; domain=${domain}` : "";
-                  // biome-ignore lint/suspicious/noDocumentCookie: Legacy browser support required for cookie clearing
-                  document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${path}${domainPart}`;
+                  const cookieString = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${path}${domainPart}`;
+
+                  // Use the cookie manipulation in a more controlled way
+                  try {
+                    // biome-ignore lint/suspicious/noDocumentCookie: Legacy cookie clearing requires direct manipulation
+                    document.cookie = cookieString;
+                  } catch (error) {
+                    console.warn(
+                      `Failed to clear cookie ${cookieName}:`,
+                      error,
+                    );
+                  }
                 });
               });
             };
@@ -143,7 +145,6 @@ export default function SettingsPage() {
         }
       });
 
-      // Reset cookie settings
       setCookieSettings({
         essential: true,
         analytics: false,
@@ -162,7 +163,7 @@ export default function SettingsPage() {
         className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}
       >
         <div className="flex items-center justify-between h-16 px-6 border-b border-sidebar-border">
-          <Logo size="md" />
+          <Logo variant="minimal" />
 
           <Button
             variant="ghost"
@@ -237,7 +238,6 @@ export default function SettingsPage() {
             <button
               type="button"
               onClick={() => {
-                // Add logout functionality
                 window.location.href = "/auth";
               }}
               className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors w-full text-left"

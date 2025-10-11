@@ -40,7 +40,7 @@ import {
   YAxis,
 } from "recharts";
 import LoadingPage from "@/components/atoms/loading-page";
-import Logo from "@/components/atoms/logo-grant-guide";
+import Logo from "@/components/atoms/logo-the-mockr";
 import { ThemeToggle } from "@/components/atoms/theme-toggle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -115,7 +115,12 @@ export default function DashboardPage() {
 
   // Performance over time data from real sessions
   const performanceData = recentSessions
-    .filter((session) => session.status === "completed" && session.scores)
+    .filter(
+      (session) =>
+        session.status === "completed" &&
+        session.scores &&
+        session.scores.overall > 0,
+    )
     .slice(-7) // Last 7 sessions
     .map((session, index) => ({
       date: session.createdAt
@@ -174,10 +179,10 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sky-50 border-r border-sidebar-border transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}
       >
         <div className="flex items-center justify-between h-16 px-6 border-b border-sidebar-border">
-          <Logo size="md" />
+          <Logo />
 
           <Button
             variant="ghost"
@@ -320,16 +325,6 @@ export default function DashboardPage() {
         </nav>
 
         <div className="px-4 py-8">
-          {/* Header */}
-          <div className="mb-8 lg:hidden">
-            <h1 className="text-4xl font-bold mb-2">
-              Welcome back,{" "}
-              {userData?.displayName || user?.displayName || "User"}!
-            </h1>
-            <p className="text-xl text-muted-foreground">
-              Track your interview preparation progress and insights
-            </p>
-          </div>
           <div className="mb-8 hidden lg:block">
             <h1 className="text-4xl font-bold mb-2">
               Welcome back,{" "}
@@ -415,7 +410,7 @@ export default function DashboardPage() {
             </Card>
           </div>
 
-          <Tabs defaultValue="overview" className="space-y-6">
+          <Tabs defaultValue="activity" className="space-y-6">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="performance">Performance</TabsTrigger>

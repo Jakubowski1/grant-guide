@@ -4,6 +4,8 @@ import {
   Award,
   BookOpen,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   ChevronUp,
   ExternalLink,
   Filter,
@@ -22,9 +24,9 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import LoadingPage from "@/components/atoms/loading-page";
-import Logo from "@/components/atoms/logo-grant-guide";
+import Logo from "@/components/atoms/logo-the-mockr";
 import { ThemeToggle } from "@/components/atoms/theme-toggle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -67,8 +69,14 @@ export default function PracticePage() {
   const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const questionsPerPage = 10;
 
-  // Get all unique tags for the tag filter
+  // Search states for filter sections
+  const [languageSearch, setLanguageSearch] = useState("");
+  const [companySearch, setCompanySearch] = useState("");
+  const [tagSearch, setTagSearch] = useState("");
+
   const allTags = useMemo(() => {
     const tagSet = new Set<string>();
     practiceData.categories.forEach((category: Category) => {
@@ -81,11 +89,9 @@ export default function PracticePage() {
     return Array.from(tagSet).sort();
   }, []);
 
-  // Filter questions based on search and filters - moved before conditional returns
   const filteredQuestions = useMemo(() => {
     const allQuestions: ExtendedQuestion[] = [];
 
-    // Flatten all questions from all categories
     practiceData.categories.forEach((category: Category) => {
       category.questions.forEach((question: Question) => {
         allQuestions.push({
@@ -96,7 +102,6 @@ export default function PracticePage() {
       });
     });
 
-    // Apply filters
     return allQuestions.filter((question: ExtendedQuestion) => {
       const matchesSearch =
         searchQuery === "" ||
@@ -139,6 +144,23 @@ export default function PracticePage() {
     selectedCompanies,
     selectedLanguages,
   ]);
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredQuestions.length / questionsPerPage);
+  const paginatedQuestions = useMemo(() => {
+    const startIndex = (currentPage - 1) * questionsPerPage;
+    const endIndex = startIndex + questionsPerPage;
+    return filteredQuestions.slice(startIndex, endIndex);
+  }, [filteredQuestions, currentPage]);
+
+  // Reset pagination when question count changes
+  const _questionCount = filteredQuestions.length;
+  useEffect(() => {
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    }
+  }, [currentPage]);
+
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case "beginner":
@@ -154,6 +176,27 @@ export default function PracticePage() {
     }
   };
 
+  // Filtered data for search functionality
+  const filteredLanguages = useMemo(() => {
+    return practiceData.languages.filter((language: Language) =>
+      language.name.toLowerCase().includes(languageSearch.toLowerCase()),
+    );
+  }, [languageSearch]);
+
+  const filteredCompanies = useMemo(() => {
+    return practiceData.companies.filter(
+      (company: Company) =>
+        company.name.toLowerCase().includes(companySearch.toLowerCase()) ||
+        company.industry.toLowerCase().includes(companySearch.toLowerCase()),
+    );
+  }, [companySearch]);
+
+  const filteredTags = useMemo(() => {
+    return allTags.filter((tag: string) =>
+      tag.toLowerCase().replace(/-/g, " ").includes(tagSearch.toLowerCase()),
+    );
+  }, [tagSearch, allTags]);
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -162,7 +205,6 @@ export default function PracticePage() {
     }
   };
 
-  // Helper functions for multi-select filters
   const toggleCategory = (categoryId: string) => {
     setSelectedCategories((prev) =>
       prev.includes(categoryId)
@@ -218,22 +260,18 @@ export default function PracticePage() {
     selectedLanguages.length > 0 ||
     searchQuery !== "";
 
-  // Get company info helper
   const getCompanyInfo = (companyId: string): Company | undefined => {
     return practiceData.companies.find((c: Company) => c.id === companyId);
   };
 
-  // Get language info helper
   const getLanguageInfo = (languageId: string): Language | undefined => {
     return practiceData.languages.find((l: Language) => l.id === languageId);
   };
 
-  // Conditional returns after all hooks
   if (loading) {
     return <LoadingPage />;
   }
 
-  // Redirect to auth if not authenticated
   if (!user) {
     window.location.href = "/auth";
     return <LoadingPage />;
@@ -246,7 +284,7 @@ export default function PracticePage() {
         className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}
       >
         <div className="flex items-center justify-between h-16 px-6 border-b border-sidebar-border">
-          <Logo size="md" />
+          <Logo />
 
           <Button
             variant="ghost"
@@ -380,8 +418,8 @@ export default function PracticePage() {
         {/* Content */}
         <div className="p-6">
           {/* Header and Statistics */}
-          <div className="mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="flex flex-col mb-8 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
@@ -448,7 +486,7 @@ export default function PracticePage() {
             </div>
 
             {/* Search Bar */}
-            <div className="relative mb-4">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 placeholder="Search questions, topics, or tags..."
@@ -459,17 +497,26 @@ export default function PracticePage() {
             </div>
 
             {/* Quick Start Filters */}
-            <Card className="shadow-sm border-slate-200 dark:border-slate-800">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
-                  Quick Start
+            <Card className="shadow-sm border-slate-200 dark:border-slate-800/50 backdrop-blur-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-lg font-semibold flex items-center gap-3">
+                  <div className="relative flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 shadow-sm"></div>
+                    <span className="text-foreground">Quick Start</span>
+                    {/* Advanced Filter State Indicator */}
+                    {hasActiveFilters && (
+                      <div className="relative">
+                        <div className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary animate-pulse shadow-sm" />
+                        <div className="h-1.5 w-1.5 rounded-full bg-primary/60" />
+                      </div>
+                    )}
+                  </div>
                 </CardTitle>
-                <p className="text-sm text-muted-foreground">
+                <CardDescription className="text-sm text-muted-foreground font-normal">
                   Popular filter combinations to get you started
-                </p>
+                </CardDescription>
               </CardHeader>
-              <CardContent className="pt-0">
+              <CardContent className="pt-0 space-y-3">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <Button
                     variant="outline"
@@ -480,10 +527,10 @@ export default function PracticePage() {
                       setSelectedLanguages([]);
                       setSelectedCompanies([]);
                     }}
-                    className="h-12 flex flex-col items-center gap-1 hover:bg-emerald-50 hover:border-emerald-300 dark:hover:bg-emerald-950 transition-colors bg-transparent"
+                    className="h-12 flex items-center justify-start gap-3 px-4 hover:bg-emerald-50/80 hover:border-emerald-300 hover:text-emerald-700 dark:hover:bg-emerald-950/50 dark:hover:border-emerald-700 dark:hover:text-emerald-300 transition-all duration-200 bg-background/50 backdrop-blur-sm font-medium text-sm"
                   >
-                    <div className="h-3 w-3 rounded-full bg-emerald-500"></div>
-                    <span className="text-xs font-medium text-center leading-tight">
+                    <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-sm flex-shrink-0" />
+                    <span className="text-center leading-tight truncate">
                       Beginner Friendly
                     </span>
                   </Button>
@@ -496,10 +543,10 @@ export default function PracticePage() {
                       setSelectedLanguages([]);
                       setSelectedCompanies([]);
                     }}
-                    className="h-12 flex flex-col items-center gap-1 hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-950 transition-colors bg-transparent"
+                    className="h-12 flex items-center justify-start gap-3 px-4 hover:bg-blue-50/80 hover:border-blue-300 hover:text-blue-700 dark:hover:bg-blue-950/50 dark:hover:border-blue-700 dark:hover:text-blue-300 transition-all duration-200 bg-background/50 backdrop-blur-sm font-medium text-sm"
                   >
-                    <div className="h-3 w-3 rounded-full bg-blue-500"></div>
-                    <span className="text-xs font-medium text-center leading-tight">
+                    <div className="h-2 w-2 rounded-full bg-blue-500 shadow-sm flex-shrink-0" />
+                    <span className="text-center leading-tight truncate">
                       Coding Challenges
                     </span>
                   </Button>
@@ -512,10 +559,10 @@ export default function PracticePage() {
                       setSelectedLanguages([]);
                       setSelectedCompanies([]);
                     }}
-                    className="h-12 flex flex-col items-center gap-1 hover:bg-orange-50 hover:border-orange-300 dark:hover:bg-orange-950 transition-colors bg-transparent"
+                    className="h-12 flex items-center justify-start gap-3 px-4 hover:bg-orange-50/80 hover:border-orange-300 hover:text-orange-700 dark:hover:bg-orange-950/50 dark:hover:border-orange-700 dark:hover:text-orange-300 transition-all duration-200 bg-background/50 backdrop-blur-sm font-medium text-sm"
                   >
-                    <div className="h-3 w-3 rounded-full bg-orange-500"></div>
-                    <span className="text-xs font-medium text-center leading-tight">
+                    <div className="h-2 w-2 rounded-full bg-orange-500 shadow-sm flex-shrink-0" />
+                    <span className="text-center leading-tight truncate">
                       System Design
                     </span>
                   </Button>
@@ -534,10 +581,10 @@ export default function PracticePage() {
                       setSelectedTags([]);
                       setSelectedLanguages([]);
                     }}
-                    className="h-12 flex flex-col items-center gap-1 hover:bg-purple-50 hover:border-purple-300 dark:hover:bg-purple-950 transition-colors bg-transparent"
+                    className="h-12 flex items-center justify-start gap-3 px-4 hover:bg-purple-50/80 hover:border-purple-300 hover:text-purple-700 dark:hover:bg-purple-950/50 dark:hover:border-purple-700 dark:hover:text-purple-300 transition-all duration-200 bg-background/50 backdrop-blur-sm font-medium text-sm"
                   >
-                    <div className="h-3 w-3 rounded-full bg-purple-500"></div>
-                    <span className="text-xs font-medium text-center leading-tight">
+                    <div className="h-2 w-2 rounded-full bg-purple-500 shadow-sm flex-shrink-0" />
+                    <span className="text-center leading-tight truncate">
                       FAANG Companies
                     </span>
                   </Button>
@@ -547,32 +594,37 @@ export default function PracticePage() {
 
             {/* Active Filters Display */}
             {hasActiveFilters && (
-              <Card className="shadow-sm border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 dark:border-blue-800">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <Filter className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                      <span className="font-medium text-blue-900 dark:text-blue-100">
-                        Active Filters (
-                        {selectedCategories.length +
-                          selectedDifficulties.length +
-                          selectedTags.length +
-                          selectedCompanies.length +
-                          selectedLanguages.length}
-                        )
-                      </span>
+              <Card className="shadow-sm border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/15 dark:border-primary/30 backdrop-blur-sm">
+                <CardContent className="p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-1.5 rounded-lg bg-primary/10 dark:bg-primary/20">
+                        <Filter className="h-4 w-4 text-primary" />
+                      </div>
+                      <div>
+                        <span className="font-semibold text-primary dark:text-primary-foreground text-sm">
+                          Active Filters
+                        </span>
+                        <span className="ml-2 text-xs px-2 py-1 rounded-full bg-primary/20 text-primary font-medium">
+                          {selectedCategories.length +
+                            selectedDifficulties.length +
+                            selectedTags.length +
+                            selectedCompanies.length +
+                            selectedLanguages.length}
+                        </span>
+                      </div>
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={clearAllFilters}
-                      className="text-blue-700 hover:text-blue-900 hover:bg-blue-100 dark:text-blue-300 dark:hover:text-blue-100 dark:hover:bg-blue-900"
+                      className="text-primary hover:text-primary hover:bg-primary/20 dark:text-primary-foreground dark:hover:text-primary-foreground dark:hover:bg-primary/20 font-medium transition-all duration-200"
                     >
-                      <FilterX className="h-4 w-4 mr-1" />
+                      <FilterX className="h-4 w-4 mr-2" />
                       Clear All
                     </Button>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2.5">
                     {selectedCategories.map((categoryId) => {
                       const category = practiceData.categories.find(
                         (c: Category) => c.id === categoryId,
@@ -581,13 +633,11 @@ export default function PracticePage() {
                         <Badge
                           key={categoryId}
                           variant="secondary"
-                          className="bg-white border-blue-200 text-blue-800 dark:bg-slate-800 dark:border-blue-600 dark:text-blue-200"
+                          className="bg-background/80 border-primary/30 text-foreground hover:bg-background/90 dark:bg-background/60 dark:border-primary/40 dark:text-foreground shadow-sm font-medium transition-all duration-200 cursor-pointer group"
+                          onClick={() => toggleCategory(categoryId)}
                         >
                           {category?.name}
-                          <X
-                            className="h-3 w-3 ml-1 cursor-pointer"
-                            onClick={() => toggleCategory(categoryId)}
-                          />
+                          <X className="h-3 w-3 ml-2 opacity-60 group-hover:opacity-100 transition-opacity" />
                         </Badge>
                       );
                     })}
@@ -595,13 +645,11 @@ export default function PracticePage() {
                       <Badge
                         key={difficulty}
                         variant="secondary"
-                        className="bg-white border-blue-200 text-blue-800 dark:bg-slate-800 dark:border-blue-600 dark:text-blue-200 capitalize"
+                        className="bg-background/80 border-primary/30 text-foreground hover:bg-background/90 dark:bg-background/60 dark:border-primary/40 dark:text-foreground capitalize shadow-sm font-medium transition-all duration-200 cursor-pointer group"
+                        onClick={() => toggleDifficulty(difficulty)}
                       >
                         {difficulty}
-                        <X
-                          className="h-3 w-3 ml-1 cursor-pointer"
-                          onClick={() => toggleDifficulty(difficulty)}
-                        />
+                        <X className="h-3 w-3 ml-2 opacity-60 group-hover:opacity-100 transition-opacity" />
                       </Badge>
                     ))}
                     {selectedLanguages.map((languageId) => {
@@ -610,19 +658,17 @@ export default function PracticePage() {
                         <Badge
                           key={languageId}
                           variant="secondary"
-                          className="bg-white border-blue-200 text-blue-800 dark:bg-slate-800 dark:border-blue-600 dark:text-blue-200 flex items-center"
+                          className="bg-background/80 border-primary/30 text-foreground hover:bg-background/90 dark:bg-background/60 dark:border-primary/40 dark:text-foreground flex items-center shadow-sm font-medium transition-all duration-200 cursor-pointer group"
+                          onClick={() => toggleLanguage(languageId)}
                         >
                           <div
-                            className="h-2 w-2 mr-1 rounded-full"
+                            className="h-2 w-2 mr-2 rounded-full shadow-sm"
                             style={{
                               backgroundColor: language?.color || "#6b7280",
                             }}
                           />
                           {language?.name || languageId}
-                          <X
-                            className="h-3 w-3 ml-1 cursor-pointer"
-                            onClick={() => toggleLanguage(languageId)}
-                          />
+                          <X className="h-3 w-3 ml-2 opacity-60 group-hover:opacity-100 transition-opacity" />
                         </Badge>
                       );
                     })}
@@ -632,7 +678,8 @@ export default function PracticePage() {
                         <Badge
                           key={companyId}
                           variant="secondary"
-                          className="bg-white border-blue-200 text-blue-800 dark:bg-slate-800 dark:border-blue-600 dark:text-blue-200 flex items-center"
+                          className="bg-background/80 border-primary/30 text-foreground hover:bg-background/90 dark:bg-background/60 dark:border-primary/40 dark:text-foreground flex items-center shadow-sm font-medium transition-all duration-200 cursor-pointer group"
+                          onClick={() => toggleCompany(companyId)}
                         >
                           {company && (
                             <Image
@@ -640,14 +687,11 @@ export default function PracticePage() {
                               alt={company.name}
                               width={12}
                               height={12}
-                              className="h-3 w-3 mr-1 rounded"
+                              className="h-3 w-3 mr-2 rounded shadow-sm"
                             />
                           )}
                           {company?.name || companyId}
-                          <X
-                            className="h-3 w-3 ml-1 cursor-pointer"
-                            onClick={() => toggleCompany(companyId)}
-                          />
+                          <X className="h-3 w-3 ml-2 opacity-60 group-hover:opacity-100 transition-opacity" />
                         </Badge>
                       );
                     })}
@@ -655,19 +699,17 @@ export default function PracticePage() {
                       <Badge
                         key={tag}
                         variant="secondary"
-                        className="bg-white border-blue-200 text-blue-800 dark:bg-slate-800 dark:border-blue-600 dark:text-blue-200"
+                        className="bg-background/80 border-primary/30 text-foreground hover:bg-background/90 dark:bg-background/60 dark:border-primary/40 dark:text-foreground shadow-sm font-medium transition-all duration-200 cursor-pointer group"
+                        onClick={() => toggleTag(tag)}
                       >
                         {tag.replace(/-/g, " ")}
-                        <X
-                          className="h-3 w-3 ml-1 cursor-pointer"
-                          onClick={() => toggleTag(tag)}
-                        />
+                        <X className="h-3 w-3 ml-2 opacity-60 group-hover:opacity-100 transition-opacity" />
                       </Badge>
                     ))}
                     {selectedTags.length > 3 && (
                       <Badge
                         variant="secondary"
-                        className="bg-white border-blue-200 text-blue-800 dark:bg-slate-800 dark:border-blue-600 dark:text-blue-200"
+                        className="bg-background/80 border-primary/30 text-foreground dark:bg-background/60 dark:border-primary/40 dark:text-foreground shadow-sm font-medium"
                       >
                         +{selectedTags.length - 3} more tags
                       </Badge>
@@ -680,184 +722,227 @@ export default function PracticePage() {
             {/* Advanced Filters */}
             <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
               <CollapsibleTrigger asChild>
-                <Card className="shadow-sm cursor-pointer hover:shadow-md transition-shadow border-slate-200 dark:border-slate-800">
-                  <CardContent className="p-4">
+                <Card className="shadow-sm cursor-pointer hover:shadow-lg transition-all duration-300 border-slate-200/60 dark:border-slate-800/60 backdrop-blur-sm bg-background/95 hover:bg-background">
+                  <CardContent className="p-5">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Filter className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                      <div className="flex items-center gap-4">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900">
+                          <Filter className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                        </div>
                         <div>
-                          <h3 className="font-semibold text-slate-900 dark:text-slate-100">
+                          <h3 className="font-semibold text-lg text-foreground leading-tight">
                             Advanced Filters
                           </h3>
-                          <p className="text-sm text-slate-600 dark:text-slate-400">
-                            Customize your search criteria
+                          <p className="text-sm text-muted-foreground font-normal mt-1">
+                            Customize your search criteria with detailed options
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
                         {hasActiveFilters && (
-                          <Badge className="bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700">
-                            {selectedCategories.length +
-                              selectedDifficulties.length +
-                              selectedTags.length +
-                              selectedCompanies.length +
-                              selectedLanguages.length}{" "}
-                            active
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                            <Badge className="bg-primary/10 text-primary border-primary/20 dark:bg-primary/20 dark:text-primary-foreground dark:border-primary/30 font-medium text-xs">
+                              {selectedCategories.length +
+                                selectedDifficulties.length +
+                                selectedTags.length +
+                                selectedCompanies.length +
+                                selectedLanguages.length}{" "}
+                              active
+                            </Badge>
+                          </div>
                         )}
-                        {filtersOpen ? (
-                          <ChevronUp className="h-5 w-5" />
-                        ) : (
-                          <ChevronDown className="h-5 w-5" />
-                        )}
+                        <div className="p-1 rounded transition-colors">
+                          {filtersOpen ? (
+                            <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                          ) : (
+                            <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                          )}
+                        </div>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               </CollapsibleTrigger>
 
-              <CollapsibleContent className="space-y-4 mt-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <CollapsibleContent className="space-y-6 pt-4">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                   {/* Categories Card */}
-                  <Card className="shadow-sm border-slate-200 dark:border-slate-800">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <div className="h-3 w-3 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500"></div>
+                  <Card className="shadow-sm border-border/40 bg-card/50 backdrop-blur-sm">
+                    <CardHeader className="pb-4 border-b border-border/20">
+                      <CardTitle className="text-lg font-semibold flex items-center gap-3">
+                        <div className="p-1.5 rounded-lg bg-blue-500/10 dark:bg-blue-500/20">
+                          <div className="h-4 w-4 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500"></div>
+                        </div>
                         Categories
                         {selectedCategories.length > 0 && (
                           <Badge
                             variant="secondary"
-                            className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                            className="text-xs font-medium bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800"
                           >
-                            {selectedCategories.length}
+                            {selectedCategories.length} selected
                           </Badge>
                         )}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="pt-0 space-y-2">
-                      {practiceData.categories.map((category: Category) => (
-                        <Button
-                          key={category.id}
-                          variant={
-                            selectedCategories.includes(category.id)
-                              ? "default"
-                              : "ghost"
-                          }
-                          size="sm"
-                          onClick={() => toggleCategory(category.id)}
-                          className={`w-full justify-start h-10 transition-all duration-200 ${
-                            selectedCategories.includes(category.id)
-                              ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-sm hover:from-blue-600 hover:to-cyan-600"
-                              : "hover:bg-blue-50 dark:hover:bg-blue-950 hover:text-blue-700 dark:hover:text-blue-300"
-                          }`}
-                        >
-                          <span className="truncate">{category.name}</span>
-                          {selectedCategories.includes(category.id) && (
-                            <X className="h-3 w-3 ml-auto flex-shrink-0" />
-                          )}
-                        </Button>
-                      ))}
+                    <CardContent className="pt-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-2">
+                        {practiceData.categories.map((category: Category) => (
+                          <Button
+                            key={category.id}
+                            variant={
+                              selectedCategories.includes(category.id)
+                                ? "default"
+                                : "outline"
+                            }
+                            size="sm"
+                            onClick={() => toggleCategory(category.id)}
+                            className={`justify-between h-10 px-3 font-medium transition-all duration-200 ${
+                              selectedCategories.includes(category.id)
+                                ? "bg-blue-500 hover:bg-blue-600 text-white shadow-sm border-blue-500"
+                                : "bg-background hover:bg-blue-50 dark:hover:bg-blue-950/30 hover:text-blue-700 dark:hover:text-blue-300 border-border/60"
+                            }`}
+                          >
+                            <span className="truncate text-sm">
+                              {category.name}
+                            </span>
+                            {selectedCategories.includes(category.id) ? (
+                              <X className="h-3.5 w-3.5 flex-shrink-0 ml-2" />
+                            ) : (
+                              <Plus className="h-3.5 w-3.5 flex-shrink-0 ml-2 opacity-40" />
+                            )}
+                          </Button>
+                        ))}
+                      </div>
                     </CardContent>
                   </Card>
 
                   {/* Difficulty Card */}
-                  <Card className="shadow-sm border-slate-200 dark:border-slate-800">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <div className="h-3 w-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-500"></div>
+                  <Card className="shadow-sm border-border/40 bg-card/50 backdrop-blur-sm">
+                    <CardHeader className="pb-4 border-b border-border/20">
+                      <CardTitle className="text-lg font-semibold flex items-center gap-3">
+                        <div className="p-1.5 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20">
+                          <div className="h-4 w-4 rounded-full bg-gradient-to-r from-emerald-500 to-green-500"></div>
+                        </div>
                         Difficulty Level
                         {selectedDifficulties.length > 0 && (
                           <Badge
                             variant="secondary"
-                            className="text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200"
+                            className="text-xs font-medium bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800"
                           >
-                            {selectedDifficulties.length}
+                            {selectedDifficulties.length} selected
                           </Badge>
                         )}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="pt-0 space-y-2">
-                      {[
-                        {
-                          id: "beginner",
-                          color: "from-emerald-500 to-green-500",
-                          label: "Beginner",
-                        },
-                        {
-                          id: "intermediate",
-                          color: "from-amber-500 to-yellow-500",
-                          label: "Intermediate",
-                        },
-                        {
-                          id: "advanced",
-                          color: "from-orange-500 to-red-500",
-                          label: "Advanced",
-                        },
-                        {
-                          id: "expert",
-                          color: "from-red-500 to-pink-500",
-                          label: "Expert",
-                        },
-                      ].map((difficulty) => (
-                        <Button
-                          key={difficulty.id}
-                          variant={
-                            selectedDifficulties.includes(difficulty.id)
-                              ? "default"
-                              : "ghost"
-                          }
-                          size="sm"
-                          onClick={() => toggleDifficulty(difficulty.id)}
-                          className={`w-full justify-start h-10 transition-all duration-200 ${
-                            selectedDifficulties.includes(difficulty.id)
-                              ? `bg-gradient-to-r ${difficulty.color} text-white shadow-sm`
-                              : "hover:bg-slate-50 dark:hover:bg-slate-900"
-                          }`}
-                        >
-                          <div
-                            className={`h-3 w-3 rounded-full mr-2 bg-gradient-to-r ${difficulty.color}`}
-                          ></div>
-                          <span className="truncate">{difficulty.label}</span>
-                          {selectedDifficulties.includes(difficulty.id) && (
-                            <X className="h-3 w-3 ml-auto flex-shrink-0" />
-                          )}
-                        </Button>
-                      ))}
+                    <CardContent className="pt-4">
+                      <div className="space-y-2">
+                        {[
+                          {
+                            id: "beginner",
+                            color: "from-emerald-500 to-green-500",
+                            bgColor: "bg-emerald-500",
+                            hoverColor: "hover:bg-emerald-600",
+                            label: "Beginner",
+                          },
+                          {
+                            id: "intermediate",
+                            color: "from-amber-500 to-yellow-500",
+                            bgColor: "bg-amber-500",
+                            hoverColor: "hover:bg-amber-600",
+                            label: "Intermediate",
+                          },
+                          {
+                            id: "advanced",
+                            color: "from-orange-500 to-red-500",
+                            bgColor: "bg-orange-500",
+                            hoverColor: "hover:bg-orange-600",
+                            label: "Advanced",
+                          },
+                          {
+                            id: "expert",
+                            color: "from-red-500 to-pink-500",
+                            bgColor: "bg-red-500",
+                            hoverColor: "hover:bg-red-600",
+                            label: "Expert",
+                          },
+                        ].map((difficulty) => (
+                          <Button
+                            key={difficulty.id}
+                            variant={
+                              selectedDifficulties.includes(difficulty.id)
+                                ? "default"
+                                : "outline"
+                            }
+                            size="sm"
+                            onClick={() => toggleDifficulty(difficulty.id)}
+                            className={`w-full justify-between h-10 px-3 font-medium transition-all duration-200 ${
+                              selectedDifficulties.includes(difficulty.id)
+                                ? `${difficulty.bgColor} ${difficulty.hoverColor} text-white shadow-sm border-transparent`
+                                : "bg-background hover:bg-accent hover:text-accent-foreground border-border/60"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <div
+                                className={`h-3 w-3 rounded-full bg-gradient-to-r ${difficulty.color}`}
+                              ></div>
+                              <span className="text-sm">
+                                {difficulty.label}
+                              </span>
+                            </div>
+                            {selectedDifficulties.includes(difficulty.id) ? (
+                              <X className="h-3.5 w-3.5 flex-shrink-0" />
+                            ) : (
+                              <Plus className="h-3.5 w-3.5 flex-shrink-0 opacity-40" />
+                            )}
+                          </Button>
+                        ))}
+                      </div>
                     </CardContent>
                   </Card>
 
                   {/* Programming Languages Card */}
-                  <Card className="shadow-sm border-slate-200 dark:border-slate-800">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <div className="h-3 w-3 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"></div>
-                        Languages
+                  <Card className="shadow-sm border-border/40 bg-card/50 backdrop-blur-sm">
+                    <CardHeader className="pb-4 border-b border-border/20">
+                      <CardTitle className="text-lg font-semibold flex items-center gap-3">
+                        <div className="p-1.5 rounded-lg bg-purple-500/10 dark:bg-purple-500/20">
+                          <div className="h-4 w-4 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"></div>
+                        </div>
+                        Programming Languages
                         {selectedLanguages.length > 0 && (
                           <Badge
                             variant="secondary"
-                            className="text-xs bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                            className="text-xs font-medium bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800"
                           >
-                            {selectedLanguages.length}
+                            {selectedLanguages.length} selected
                           </Badge>
                         )}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="pt-0">
-                      <div className="max-h-48 overflow-y-auto space-y-1">
-                        {practiceData.languages.map((language: Language) => (
+                    <CardContent className="pt-4">
+                      <div className="mb-3">
+                        <Input
+                          placeholder="Search languages..."
+                          value={languageSearch}
+                          onChange={(e) => setLanguageSearch(e.target.value)}
+                          className="h-8 text-sm"
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-2">
+                        {filteredLanguages.map((language: Language) => (
                           <Button
                             key={language.id}
                             variant={
                               selectedLanguages.includes(language.id)
                                 ? "default"
-                                : "ghost"
+                                : "outline"
                             }
                             size="sm"
                             onClick={() => toggleLanguage(language.id)}
-                            className={`w-full justify-start h-10 transition-all duration-200 ${
+                            className={`justify-between h-10 px-3 font-medium transition-all duration-200 ${
                               selectedLanguages.includes(language.id)
-                                ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-sm hover:from-purple-600 hover:to-pink-600"
-                                : "hover:bg-purple-50 dark:hover:bg-purple-950 hover:text-purple-700 dark:hover:text-purple-300"
+                                ? "bg-purple-500 hover:bg-purple-600 text-white shadow-sm border-purple-500"
+                                : "bg-background hover:bg-purple-50 dark:hover:bg-purple-950/30 hover:text-purple-700 dark:hover:text-purple-300 border-border/60"
                             }`}
                           >
                             <div className="flex items-center gap-2 min-w-0">
@@ -865,10 +950,14 @@ export default function PracticePage() {
                                 className="h-3 w-3 rounded-full flex-shrink-0"
                                 style={{ backgroundColor: language.color }}
                               />
-                              <span className="truncate">{language.name}</span>
+                              <span className="truncate text-sm">
+                                {language.name}
+                              </span>
                             </div>
-                            {selectedLanguages.includes(language.id) && (
-                              <X className="h-3 w-3 ml-auto flex-shrink-0" />
+                            {selectedLanguages.includes(language.id) ? (
+                              <X className="h-3.5 w-3.5 flex-shrink-0 ml-2" />
+                            ) : (
+                              <Plus className="h-3.5 w-3.5 flex-shrink-0 ml-2 opacity-40" />
                             )}
                           </Button>
                         ))}
@@ -877,39 +966,49 @@ export default function PracticePage() {
                   </Card>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                   {/* Companies Card */}
-                  <Card className="shadow-sm border-slate-200 dark:border-slate-800">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <div className="h-3 w-3 rounded-full bg-gradient-to-r from-orange-500 to-red-500"></div>
+                  <Card className="shadow-sm border-border/40 bg-card/50 backdrop-blur-sm">
+                    <CardHeader className="pb-4 border-b border-border/20">
+                      <CardTitle className="text-lg font-semibold flex items-center gap-3">
+                        <div className="p-1.5 rounded-lg bg-orange-500/10 dark:bg-orange-500/20">
+                          <div className="h-4 w-4 rounded-full bg-gradient-to-r from-orange-500 to-red-500"></div>
+                        </div>
                         Companies
                         {selectedCompanies.length > 0 && (
                           <Badge
                             variant="secondary"
-                            className="text-xs bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200"
+                            className="text-xs font-medium bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950 dark:text-orange-300 dark:border-orange-800"
                           >
-                            {selectedCompanies.length}
+                            {selectedCompanies.length} selected
                           </Badge>
                         )}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="pt-0">
-                      <div className="max-h-64 overflow-y-auto space-y-1">
-                        {practiceData.companies.map((company: Company) => (
+                    <CardContent className="pt-4">
+                      <div className="mb-3">
+                        <Input
+                          placeholder="Search companies..."
+                          value={companySearch}
+                          onChange={(e) => setCompanySearch(e.target.value)}
+                          className="h-8 text-sm"
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-2">
+                        {filteredCompanies.map((company: Company) => (
                           <Button
                             key={company.id}
                             variant={
                               selectedCompanies.includes(company.id)
                                 ? "default"
-                                : "ghost"
+                                : "outline"
                             }
                             size="sm"
                             onClick={() => toggleCompany(company.id)}
-                            className={`w-full justify-start h-12 transition-all duration-200 ${
+                            className={`justify-between h-12 px-3 font-medium transition-all duration-200 ${
                               selectedCompanies.includes(company.id)
-                                ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-sm hover:from-orange-600 hover:to-red-600"
-                                : "hover:bg-orange-50 dark:hover:bg-orange-950 hover:text-orange-700 dark:hover:text-orange-300"
+                                ? "bg-orange-500 hover:bg-orange-600 text-white shadow-sm border-orange-500"
+                                : "bg-background hover:bg-orange-50 dark:hover:bg-orange-950/30 hover:text-orange-700 dark:hover:text-orange-300 border-border/60"
                             }`}
                           >
                             <div className="flex items-center gap-2 min-w-0">
@@ -924,13 +1023,15 @@ export default function PracticePage() {
                                 <div className="truncate font-medium text-sm">
                                   {company.name}
                                 </div>
-                                <div className="text-[10px] opacity-70 truncate">
+                                <div className="text-xs opacity-70 truncate">
                                   {company.industry}
                                 </div>
                               </div>
                             </div>
-                            {selectedCompanies.includes(company.id) && (
-                              <X className="h-3 w-3 ml-auto flex-shrink-0" />
+                            {selectedCompanies.includes(company.id) ? (
+                              <X className="h-3.5 w-3.5 flex-shrink-0 ml-2" />
+                            ) : (
+                              <Plus className="h-3.5 w-3.5 flex-shrink-0 ml-2 opacity-40" />
                             )}
                           </Button>
                         ))}
@@ -939,25 +1040,35 @@ export default function PracticePage() {
                   </Card>
 
                   {/* Topics & Tags Card */}
-                  <Card className="shadow-sm border-slate-200 dark:border-slate-800">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <div className="h-3 w-3 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500"></div>
+                  <Card className="shadow-sm border-border/40 bg-card/50 backdrop-blur-sm">
+                    <CardHeader className="pb-4 border-b border-border/20">
+                      <CardTitle className="text-lg font-semibold flex items-center gap-3">
+                        <div className="p-1.5 rounded-lg bg-indigo-500/10 dark:bg-indigo-500/20">
+                          <div className="h-4 w-4 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500"></div>
+                        </div>
                         Topics & Tags
                         {selectedTags.length > 0 && (
                           <Badge
                             variant="secondary"
-                            className="text-xs bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200"
+                            className="text-xs font-medium bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950 dark:text-indigo-300 dark:border-indigo-800"
                           >
-                            {selectedTags.length}
+                            {selectedTags.length} selected
                           </Badge>
                         )}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="pt-0">
-                      <div className="max-h-64 overflow-y-auto">
-                        <div className="flex flex-wrap gap-1">
-                          {allTags.map((tag) => (
+                    <CardContent className="pt-4">
+                      <div className="mb-3">
+                        <Input
+                          placeholder="Search topics & tags..."
+                          value={tagSearch}
+                          onChange={(e) => setTagSearch(e.target.value)}
+                          className="h-8 text-sm"
+                        />
+                      </div>
+                      <div className="max-h-64 overflow-y-auto pr-2">
+                        <div className="flex flex-wrap gap-2">
+                          {filteredTags.map((tag) => (
                             <Button
                               key={tag}
                               variant={
@@ -967,17 +1078,19 @@ export default function PracticePage() {
                               }
                               size="sm"
                               onClick={() => toggleTag(tag)}
-                              className={`h-8 text-xs px-2 transition-all duration-200 ${
+                              className={`h-8 text-xs px-3 font-medium transition-all duration-200 ${
                                 selectedTags.includes(tag)
-                                  ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-sm hover:from-indigo-600 hover:to-purple-600 border-transparent"
-                                  : "hover:bg-indigo-50 dark:hover:bg-indigo-950 hover:text-indigo-700 dark:hover:text-indigo-300 hover:border-indigo-300 dark:hover:border-indigo-700"
+                                  ? "bg-indigo-500 hover:bg-indigo-600 text-white shadow-sm border-indigo-500"
+                                  : "bg-background hover:bg-indigo-50 dark:hover:bg-indigo-950/30 hover:text-indigo-700 dark:hover:text-indigo-300 border-border/60"
                               }`}
                             >
                               <span className="truncate max-w-[120px]">
                                 {tag.replace(/-/g, " ")}
                               </span>
-                              {selectedTags.includes(tag) && (
-                                <X className="h-2 w-2 ml-1 flex-shrink-0" />
+                              {selectedTags.includes(tag) ? (
+                                <X className="h-3 w-3 ml-2 flex-shrink-0" />
+                              ) : (
+                                <Plus className="h-3 w-3 ml-2 flex-shrink-0 opacity-40" />
                               )}
                             </Button>
                           ))}
@@ -1095,12 +1208,19 @@ export default function PracticePage() {
                 {filteredQuestions.length} Question
                 {filteredQuestions.length !== 1 ? "s" : ""} Found
               </h2>
-              {hasActiveFilters && (
-                <p className="text-sm text-muted-foreground">
-                  Filtered from {practiceData.metadata.totalQuestions} total
-                  questions
-                </p>
-              )}
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                {hasActiveFilters && (
+                  <span>
+                    Filtered from {practiceData.metadata.totalQuestions} total
+                    questions
+                  </span>
+                )}
+                {totalPages > 1 && (
+                  <span>
+                    Page {currentPage} of {totalPages}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -1126,7 +1246,7 @@ export default function PracticePage() {
                 </CardContent>
               </Card>
             ) : (
-              filteredQuestions.map((question: ExtendedQuestion) => (
+              paginatedQuestions.map((question: ExtendedQuestion) => (
                 <Card
                   key={question.id}
                   className="hover:shadow-md transition-shadow"
@@ -1250,6 +1370,101 @@ export default function PracticePage() {
               ))
             )}
           </div>
+
+          {/* Pagination */}
+          {filteredQuestions.length > 0 && totalPages > 1 && (
+            <div className="flex items-center justify-between pt-6 border-t border-border/40">
+              <div className="text-sm text-muted-foreground">
+                Showing {(currentPage - 1) * questionsPerPage + 1} to{" "}
+                {Math.min(
+                  currentPage * questionsPerPage,
+                  filteredQuestions.length,
+                )}{" "}
+                of {filteredQuestions.length} questions
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="flex items-center gap-2"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
+                </Button>
+
+                <div className="flex items-center gap-1">
+                  {/* First page */}
+                  {currentPage > 3 && (
+                    <>
+                      <Button
+                        variant={1 === currentPage ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setCurrentPage(1)}
+                        className="w-10 h-10"
+                      >
+                        1
+                      </Button>
+                      {currentPage > 4 && (
+                        <span className="px-2 text-muted-foreground">...</span>
+                      )}
+                    </>
+                  )}
+
+                  {/* Current page range */}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(
+                      (page) =>
+                        page >= Math.max(1, currentPage - 2) &&
+                        page <= Math.min(totalPages, currentPage + 2),
+                    )
+                    .map((page) => (
+                      <Button
+                        key={page}
+                        variant={page === currentPage ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setCurrentPage(page)}
+                        className="w-10 h-10"
+                      >
+                        {page}
+                      </Button>
+                    ))}
+
+                  {/* Last page */}
+                  {currentPage < totalPages - 2 && (
+                    <>
+                      {currentPage < totalPages - 3 && (
+                        <span className="px-2 text-muted-foreground">...</span>
+                      )}
+                      <Button
+                        variant={
+                          totalPages === currentPage ? "default" : "outline"
+                        }
+                        size="sm"
+                        onClick={() => setCurrentPage(totalPages)}
+                        className="w-10 h-10"
+                      >
+                        {totalPages}
+                      </Button>
+                    </>
+                  )}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center gap-2"
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

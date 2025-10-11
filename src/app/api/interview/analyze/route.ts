@@ -338,11 +338,9 @@ function getScoreColor(score: number): string {
 }
 
 function generateMockAnalysis(config: InterviewConfig): string {
-  const score = Math.floor(Math.random() * 30) + 70; // Score between 70-100
-
   return `## OVERALL SCORE
-Score: ${score}/100
-Strong performance with good technical understanding and clear communication.
+Score: 0/100
+Analysis requires AI service to be configured.
 
 ## STRENGTHS
 - Demonstrated solid understanding of core concepts

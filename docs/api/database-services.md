@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Database Services provide a comprehensive API for all database operations in Grant Guide. Built on top of Firebase Firestore, these services offer type-safe, error-resilient operations with automatic retry logic and offline support.
+The Database Services provide a comprehensive API for all database operations in Themockr. Built on top of Firebase Firestore, these services offer type-safe, error-resilient operations with automatic retry logic and offline support.
 
 ## Service Architecture
 

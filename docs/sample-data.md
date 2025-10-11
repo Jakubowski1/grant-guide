@@ -1,4 +1,4 @@
-# Sample Data Examples for Grant Guide Firestore Schema
+# Sample Data Examples for Themockr Firestore Schema
 
 This document provides examples of how data will be structured and stored in our Firestore database according to the comprehensive schema design.
 
@@ -627,4 +627,4 @@ const analytics = await DatabaseService.getUserAnalytics('user123', 'monthly', '
 const skillTrends = analytics?.skillPerformance || {};
 ```
 
-This sample data demonstrates the comprehensive nature of our schema and how it supports complex user tracking, skill assessment, and progress analytics for the Grant Guide application.
+This sample data demonstrates the comprehensive nature of our schema and how it supports complex user tracking, skill assessment, and progress analytics for the Themockr application.

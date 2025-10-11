@@ -58,7 +58,6 @@ export default function ResultsPage() {
   const [error, setError] = useState<string | null>(null);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
 
-  // Rotate calming messages while analyzing
   useEffect(() => {
     if (!isAnalyzing) return;
 
@@ -66,16 +65,14 @@ export default function ResultsPage() {
       setCurrentMessageIndex(
         (prevIndex) => (prevIndex + 1) % calmingMessages.length,
       );
-    }, 2000); // Change message every 2 seconds
+    }, 2000);
 
     return () => clearInterval(messageInterval);
   }, [isAnalyzing]);
 
-  // Load interview analysis on component mount
   useEffect(() => {
     const loadAnalysis = async () => {
       try {
-        // Get interview data from localStorage or URL params
         const interviewData = localStorage.getItem("interviewSession");
         const interviewConfig = localStorage.getItem("interviewConfig");
 
@@ -90,16 +87,14 @@ export default function ResultsPage() {
         const session = JSON.parse(interviewData);
         const config = JSON.parse(interviewConfig);
 
-        // Validate session data
         if (!session.messages || session.messages.length === 0) {
           setError("No interview responses found to analyze.");
           setIsAnalyzing(false);
           return;
         }
 
-        // Call analysis API with timeout
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
 
         const response = await fetch("/api/interview/analyze", {
           method: "POST",
@@ -125,7 +120,6 @@ export default function ResultsPage() {
         if (data.success) {
           setResults(data.feedback);
 
-          // Save to database if user is authenticated
           if (user?.uid) {
             try {
               await DatabaseService.saveInterviewResults(
@@ -137,7 +131,6 @@ export default function ResultsPage() {
               console.log("Interview results saved to database");
             } catch (dbError) {
               console.error("Error saving to database:", dbError);
-              // Don't fail the UI if database save fails
             }
           }
         } else {
@@ -184,7 +177,6 @@ export default function ResultsPage() {
     return "bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800";
   };
 
-  // Loading state
   if (isAnalyzing) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -205,7 +197,6 @@ export default function ResultsPage() {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">

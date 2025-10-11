@@ -1,12 +1,20 @@
 "use client";
 
-import { Brain, Target, TrendingUp, Users, Zap } from "lucide-react";
+import {
+  Brain,
+  MessageSquare,
+  Target,
+  TrendingUp,
+  Users,
+  Zap,
+} from "lucide-react";
 import {
   Card,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import Logo from "../atoms/logo-the-mockr";
 
 export default function FeaturesGrid() {
   const features = [
@@ -14,7 +22,7 @@ export default function FeaturesGrid() {
       icon: Brain,
       title: "AI-Generated Questions",
       description:
-        "Dynamic, role-specific questions that adapt to your experience level and target position.",
+        "Questions that adapt to your experience level and target position.",
     },
     {
       icon: Target,
@@ -41,7 +49,7 @@ export default function FeaturesGrid() {
         "Practice with text, voice recording, and whiteboard coding challenges.",
     },
     {
-      icon: Brain,
+      icon: MessageSquare,
       title: "Smart Follow-ups",
       description:
         "AI maintains context and asks intelligent follow-up questions based on your responses.",
@@ -49,27 +57,34 @@ export default function FeaturesGrid() {
   ];
 
   return (
-    <section className="container mx-auto px-4">
-      <div className="text-center mb-16">
-        <h2 className="text-4xl font-bold mb-4">Why Choose Grant Guide?</h2>
-        <p className="text-xl text-muted-foreground">
-          Advanced AI technology meets personalized learning
-        </p>
-      </div>
+    <section className="py-24 ">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-20">
+          <h2 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">
+            Why Use <Logo />
+          </h2>
+          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            Advanced AI technology meets personalized learning to transform your
+            interview preparation experience
+          </p>
+        </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {features.map((feature) => (
-          <Card
-            key={feature.title}
-            className="border-border bg-card hover:bg-card/80 transition-colors"
-          >
-            <CardHeader>
-              <feature.icon className="h-12 w-12 text-primary mb-4" />
-              <CardTitle>{feature.title}</CardTitle>
-              <CardDescription>{feature.description}</CardDescription>
-            </CardHeader>
-          </Card>
-        ))}
+        <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-4xl mx-auto">
+          {features.map((feature, index) => (
+            <Card
+              key={feature.title}
+              className="group relative border-border/50 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2"
+              style={{
+                animationDelay: `${index * 100}ms`,
+              }}
+            >
+              <CardHeader className="">
+                <CardTitle>{feature.title}</CardTitle>
+                <CardDescription>{feature.description}</CardDescription>
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
       </div>
     </section>
   );

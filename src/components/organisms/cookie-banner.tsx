@@ -52,7 +52,7 @@ interface CookieConsent {
 }
 
 const COOKIE_CONSENT_VERSION = "1.0";
-const COOKIE_NAME = "grant-guide-cookie-consent";
+const COOKIE_NAME = "Themockr-cookie-consent";
 
 export const CookieBanner = () => {
   const { user } = useAuth();
@@ -271,7 +271,7 @@ export const CookieBanner = () => {
                     We value your privacy
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    Grant Guide uses cookies to enhance your experience
+                    Themockr uses cookies to enhance your experience
                   </p>
                 </div>
               </div>

@@ -1,6 +1,6 @@
-# Grant Guide Documentation
+# Themockr Documentation
 
-Welcome to the Grant Guide documentation. This guide covers the complete architecture, data flow, and services of the Grant Guide application.
+Welcome to the Themockr documentation. This guide covers the complete architecture, data flow, and services of the Themockr application.
 
 ## 📚 Table of Contents
 

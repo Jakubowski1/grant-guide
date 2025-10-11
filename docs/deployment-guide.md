@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide covers the deployment process for the Grant Guide application, including environment setup, build processes, CI/CD pipelines, and production monitoring.
+This guide covers the deployment process for the Themockr application, including environment setup, build processes, CI/CD pipelines, and production monitoring.
 
 ## Deployment Architecture
 
@@ -63,7 +63,7 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_prod_app_id
 
 # Production settings
 NEXT_PUBLIC_NODE_ENV=production
-NEXT_PUBLIC_APP_URL=https://grantguide.com
+NEXT_PUBLIC_APP_URL=https://themockr.com
 
 # Analytics and monitoring
 NEXT_PUBLIC_ENABLE_ANALYTICS=true
@@ -72,7 +72,7 @@ NEXT_PUBLIC_VERCEL_ANALYTICS=true
 
 # Security
 NEXTAUTH_SECRET=your_nextauth_secret
-NEXTAUTH_URL=https://grantguide.com
+NEXTAUTH_URL=https://themockr.com
 ```
 
 ## Build Process
@@ -707,4 +707,4 @@ jobs:
 
 ---
 
-*This deployment guide ensures reliable, secure, and scalable deployment of the Grant Guide application with comprehensive monitoring and rollback capabilities.*
+*This deployment guide ensures reliable, secure, and scalable deployment of the Themockr application with comprehensive monitoring and rollback capabilities.*

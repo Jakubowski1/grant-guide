@@ -2,7 +2,7 @@
 
 ## Overview
 
-Grant Guide implements a unidirectional data flow architecture that ensures predictable state management, efficient data fetching, and seamless user experience. The system follows React best practices with custom hooks for data management and Firebase for backend operations.
+Themockr implements a unidirectional data flow architecture that ensures predictable state management, efficient data fetching, and seamless user experience. The system follows React best practices with custom hooks for data management and Firebase for backend operations.
 
 ## Data Flow Patterns
 
@@ -566,4 +566,4 @@ const withRetry = async <T>(
 
 ---
 
-*This data flow architecture ensures predictable, performant, and resilient data management throughout the Grant Guide application.*
+*This data flow architecture ensures predictable, performant, and resilient data management throughout the Themockr application.*

@@ -234,10 +234,10 @@ export async function saveInterviewResults(
         responses.push({
           questionId,
           response: userMessage.content,
-          duration: 180, // Default 3 minutes in seconds
-          confidence: 7, // Default confidence
-          score: Math.floor(Math.random() * 30) + 70, // Random score 70-100 for now
-          feedback: "Response analyzed by AI",
+          duration: 180,
+          confidence: 7,
+          score: 0, // No score without real analysis
+          feedback: "Analysis pending",
           keyPoints: [],
           missedPoints: [],
         });
@@ -271,12 +271,15 @@ export async function saveInterviewResults(
                 60000,
             )
           : config.duration,
-      scores: {
-        overall: analysis.score,
-        technical: analysis.score,
-        communication: Math.min(analysis.score + 5, 100),
-        problemSolving: Math.max(analysis.score - 5, 0),
-      },
+      scores:
+        analysis.score > 0
+          ? {
+              overall: analysis.score,
+              technical: analysis.score,
+              communication: analysis.score,
+              problemSolving: analysis.score,
+            }
+          : undefined,
       questions,
       responses,
       analysis: {

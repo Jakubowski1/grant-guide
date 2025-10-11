@@ -2,7 +2,7 @@
 
 ## Overview
 
-Grant Guide is a modern web application built with Next.js and Firebase that helps users prepare for job interviews. The system follows a modular, service-oriented architecture with clear separation of concerns.
+Themockr is a modern web application built with Next.js and Firebase that helps users prepare for job interviews. The system follows a modular, service-oriented architecture with clear separation of concerns.
 
 ## High-Level Architecture
 

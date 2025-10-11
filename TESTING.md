@@ -2,7 +2,7 @@
 
 ## Available Test Commands
 
-The Grant Guide project now includes comprehensive testing capabilities with the following npm scripts:
+The Themockr project now includes comprehensive testing capabilities with the following npm scripts:
 
 ### 🧪 Basic Testing Commands
 

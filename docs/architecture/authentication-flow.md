@@ -2,7 +2,7 @@
 
 ## Overview
 
-Grant Guide implements a comprehensive authentication system using Firebase Authentication. The system supports multiple authentication methods, automatic user profile creation, and secure session management.
+Themockr implements a comprehensive authentication system using Firebase Authentication. The system supports multiple authentication methods, automatic user profile creation, and secure session management.
 
 ## Authentication Architecture
 

@@ -27,23 +27,12 @@ export default function HomePage() {
         </div>
 
         <div className="min-h-screen bg-transparent relative z-10">
-          {/* Navigation */}
           <Navbar scrollThreshold={scrollThreshold} />
-
-          {/* Main content with top padding to account for fixed navbar */}
           <div className="pt-24">
-            {/* Hero Section */}
             <HeroSection />
-
-            {/* Company Logos Carousel */}
             <CompanyLogos />
             <CTASection />
-            {/* Features Grid */}
             <FeaturesGrid />
-
-            {/* CTA Section */}
-
-            {/* Footer */}
           </div>
         </div>
       </div>

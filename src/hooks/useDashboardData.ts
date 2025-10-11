@@ -132,15 +132,17 @@ const calculateStats = (sessions: InterviewSession[]): DashboardStats => {
   // Calculate total sessions
   const totalSessions = sessions.length;
 
-  // Calculate average score
-  const completedSessions = sessions.filter((s) => s.status === "completed");
+  // Calculate average score (only for sessions with real scores)
+  const completedSessionsWithScores = sessions.filter(
+    (s) => s.status === "completed" && s.scores && s.scores.overall > 0,
+  );
   const averageScore =
-    completedSessions.length > 0
+    completedSessionsWithScores.length > 0
       ? Math.round(
-          completedSessions.reduce(
+          completedSessionsWithScores.reduce(
             (sum, session) => sum + (session.scores?.overall || 0),
             0,
-          ) / completedSessions.length,
+          ) / completedSessionsWithScores.length,
         )
       : 0;
 
@@ -158,16 +160,16 @@ const calculateStats = (sessions: InterviewSession[]): DashboardStats => {
 
   // Calculate improvement rate (comparing first half vs second half of sessions)
   let improvementRate = 0;
-  if (completedSessions.length >= 2) {
-    const halfPoint = Math.floor(completedSessions.length / 2);
-    const firstHalf = completedSessions.slice(0, halfPoint);
-    const secondHalf = completedSessions.slice(halfPoint);
+  if (completedSessionsWithScores.length >= 2) {
+    const halfPoint = Math.floor(completedSessionsWithScores.length / 2);
+    const firstHalf = completedSessionsWithScores.slice(0, halfPoint);
+    const secondHalf = completedSessionsWithScores.slice(halfPoint);
 
     const firstHalfAvg =
-      firstHalf.reduce((sum, s) => sum + (s.scores?.overall || 0), 0) /
+      firstHalf.reduce((sum: number, s) => sum + (s.scores?.overall || 0), 0) /
       firstHalf.length;
     const secondHalfAvg =
-      secondHalf.reduce((sum, s) => sum + (s.scores?.overall || 0), 0) /
+      secondHalf.reduce((sum: number, s) => sum + (s.scores?.overall || 0), 0) /
       secondHalf.length;
 
     if (firstHalfAvg > 0) {

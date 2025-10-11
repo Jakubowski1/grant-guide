@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { type ReactNode, useState } from "react";
-import Logo from "@/components/atoms/logo-grant-guide";
+import Logo from "@/components/atoms/logo-the-mockr";
 import { ThemeToggle } from "@/components/atoms/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/providers/auth-provider";
@@ -113,7 +113,7 @@ export default function AppLayout({
           <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
             <div className="flex items-center space-x-2">
               <Logo />
-              <span className="font-bold text-lg">Grant Guide</span>
+              <span className="font-bold text-lg">Themockr</span>
             </div>
             <Button
               variant="ghost"

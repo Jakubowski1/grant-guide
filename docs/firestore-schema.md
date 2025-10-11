@@ -1,7 +1,7 @@
-# Grant Guide - Firestore Schema Design
+# Themockr - Firestore Schema Design
 
 ## Overview
-This document outlines the complete Firestore database schema for the Grant Guide application, designed to handle user profiles, interview sessions, progress tracking, skills analysis, and performance metrics.
+This document outlines the complete Firestore database schema for the Themockr application, designed to handle user profiles, interview sessions, progress tracking, skills analysis, and performance metrics.
 
 ## Collection Structure
 

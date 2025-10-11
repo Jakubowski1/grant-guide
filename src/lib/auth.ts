@@ -33,6 +33,7 @@ export interface UserData {
   email: string;
   displayName: string | null;
   photoURL?: string;
+  avatarIcon?: string;
   role?: string;
   experience?: string;
   howDidYouHear?: string;
@@ -46,6 +47,7 @@ const userProfileToUserData = (profile: UserProfile): UserData => ({
   email: profile.email,
   displayName: profile.displayName,
   photoURL: profile.photoURL,
+  avatarIcon: profile.avatarIcon,
   role: profile.role,
   experience: profile.experience,
   howDidYouHear: profile.howDidYouHear,

@@ -26,6 +26,7 @@ export interface UserData {
   email: string;
   displayName: string | null;
   photoURL?: string;
+  avatarIcon?: string;
   role?: string;
   experience?: string;
   howDidYouHear?: string;

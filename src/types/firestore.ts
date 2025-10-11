@@ -1,5 +1,5 @@
 /**
- * Firestore Data Models for Grant Guide Application
+ * Firestore Data Models for Themockr Application
  * Comprehensive TypeScript interfaces for all database entities
  */
 
@@ -15,6 +15,7 @@ export interface UserProfile {
   email: string;
   displayName: string;
   photoURL?: string;
+  avatarIcon?: string;
 
   // Profile Details
   role?: string;
@@ -142,7 +143,7 @@ export interface InterviewSession {
   totalDuration: number; // actual minutes spent
 
   // Performance Data
-  scores: SessionScores;
+  scores?: SessionScores;
 
   // Questions and Responses
   questions: InterviewQuestion[];

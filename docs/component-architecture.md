@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Grant Guide application uses a modular component architecture built with React and TypeScript. Components are organized by atomic design principles, separating concerns into atoms, molecules, organisms, and layout components.
+The Themockr application uses a modular component architecture built with React and TypeScript. Components are organized by atomic design principles, separating concerns into atoms, molecules, organisms, and layout components.
 
 ## Component Hierarchy
 
@@ -12,7 +12,7 @@ src/components/
 │   ├── company-logos.tsx
 │   ├── light-rays.tsx
 │   ├── loading-page.tsx
-│   ├── logo-grant-guide.tsx
+│   ├── logo-the-mockr.tsx
 │   └── theme-toggle.tsx
 ├── molecules/          # Simple component combinations
 │   ├── cubes.tsx
@@ -602,4 +602,4 @@ export function DropdownMenu({ items, onSelect }) {
 
 ---
 
-*This component architecture provides a scalable, maintainable foundation for the Grant Guide application with consistent design patterns and excellent developer experience.*
+*This component architecture provides a scalable, maintainable foundation for the Themockr application with consistent design patterns and excellent developer experience.*

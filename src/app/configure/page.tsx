@@ -32,7 +32,7 @@ import { useState } from "react";
 import { FaGoogle, FaMicrosoft } from "react-icons/fa";
 import { SiAmazon, SiApple, SiMeta, SiNetflix } from "react-icons/si";
 import LoadingPage from "@/components/atoms/loading-page";
-import Logo from "@/components/atoms/logo-grant-guide";
+import Logo from "@/components/atoms/logo-the-mockr";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -988,7 +988,7 @@ export default function ConfigurePage() {
         className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}
       >
         <div className="flex items-center justify-between h-16 px-6 border-b border-sidebar-border">
-          <Logo size="md" />
+          <Logo />
           <Button
             variant="ghost"
             size="sm"

@@ -72,7 +72,6 @@ export default function InterviewPage() {
     isDemoMode: false,
   });
 
-  // Load config from URL params after component mounts (client-side only)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const technologiesParam = params.get("technologies");
@@ -99,7 +98,6 @@ export default function InterviewPage() {
     setMounted(true);
   }, []);
 
-  // Update session and timer when config changes
   useEffect(() => {
     if (mounted) {
       setSession((prev) => ({
@@ -120,38 +118,73 @@ export default function InterviewPage() {
     }
   }, [config, mounted]);
 
-  // Interview state
   const [session, setSession] = useState<InterviewSession>({
     messages: [],
     currentQuestionCount: 0,
-    totalQuestions: 8, // Default value, will be updated in useEffect
+    totalQuestions: 8,
     startTime: new Date(),
     isComplete: false,
     isPaused: false,
-    isDemoMode: false, // Default value, will be updated in useEffect
+    isDemoMode: false,
     hasPersonalizedIntro: false,
   });
 
   const [currentMessage, setCurrentMessage] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(30 * 60); // Default 30 minutes
+  const [timeRemaining, setTimeRemaining] = useState(30 * 60);
   const [isInterviewStarted, setIsInterviewStarted] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  // biome-ignore lint/suspicious/noExplicitAny: Speech Recognition API requires any type
-  const recognitionRef = useRef<any>(null);
 
-  // Initialize speech recognition
+  // Type definitions for Speech Recognition API
+  interface SpeechRecognitionEvent {
+    resultIndex: number;
+    results: {
+      length: number;
+      [index: number]: {
+        [index: number]: {
+          transcript: string;
+        };
+      };
+    };
+  }
+
+  interface SpeechRecognitionErrorEvent {
+    error: string;
+  }
+
+  interface SpeechRecognition {
+    continuous: boolean;
+    interimResults: boolean;
+    lang: string;
+    start: () => void;
+    stop: () => void;
+    onresult: (event: SpeechRecognitionEvent) => void;
+    onerror: (event: SpeechRecognitionErrorEvent) => void;
+    onend: () => void;
+    onstart: () => void;
+  }
+
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const SpeechRecognition =
-        // biome-ignore lint/suspicious/noExplicitAny: Browser API requires any type
-        (window as any).SpeechRecognition ||
-        // biome-ignore lint/suspicious/noExplicitAny: Browser API requires any type
-        (window as any).webkitSpeechRecognition;
+        (
+          window as unknown as {
+            SpeechRecognition?: new () => SpeechRecognition;
+            webkitSpeechRecognition?: new () => SpeechRecognition;
+          }
+        ).SpeechRecognition ||
+        (
+          window as unknown as {
+            SpeechRecognition?: new () => SpeechRecognition;
+            webkitSpeechRecognition?: new () => SpeechRecognition;
+          }
+        ).webkitSpeechRecognition;
 
       if (SpeechRecognition) {
         const recognition = new SpeechRecognition();
@@ -163,21 +196,17 @@ export default function InterviewPage() {
           console.log("Speech recognition started");
         };
 
-        // biome-ignore lint/suspicious/noExplicitAny: Speech Recognition event types not available
-        recognition.onresult = (event: any) => {
+        recognition.onresult = (event: SpeechRecognitionEvent) => {
           let transcript = "";
           for (let i = event.resultIndex; i < event.results.length; i++) {
-            if (event.results[i].isFinal) {
-              transcript += event.results[i][0].transcript;
-            }
+            transcript += event.results[i][0].transcript;
           }
           if (transcript) {
             setCurrentMessage(transcript);
           }
         };
 
-        // biome-ignore lint/suspicious/noExplicitAny: Speech Recognition error event types not available
-        recognition.onerror = (event: any) => {
+        recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
           console.error("Speech recognition error:", event.error);
           setIsListening(false);
         };
@@ -191,7 +220,6 @@ export default function InterviewPage() {
     }
   }, []);
 
-  // AI Response function using Mistral API
   const getAIResponse = async (
     userMessage: string,
     questionCount: number,
@@ -251,12 +279,10 @@ export default function InterviewPage() {
     }
   };
 
-  // Auto-scroll to bottom of messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   });
 
-  // Timer effect
   useEffect(() => {
     if (
       !isInterviewStarted ||
@@ -284,7 +310,6 @@ export default function InterviewPage() {
     config.interviewMode,
   ]);
 
-  // Format time display
   const formatTime = (seconds: number) => {
     if (seconds === Number.POSITIVE_INFINITY) return "∞";
     const mins = Math.floor(seconds / 60);
@@ -292,7 +317,6 @@ export default function InterviewPage() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Pause/Resume interview
   const pauseInterview = () => {
     setSession((prev) => ({ ...prev, isPaused: true }));
   };
@@ -301,11 +325,9 @@ export default function InterviewPage() {
     setSession((prev) => ({ ...prev, isPaused: false }));
   };
 
-  // Stop interview early
   const stopInterview = () => {
     setSession((prev) => ({ ...prev, isComplete: true }));
 
-    // Save progress
     const sessionData = {
       ...session,
       isComplete: true,
@@ -317,11 +339,9 @@ export default function InterviewPage() {
     localStorage.setItem("interviewConfig", JSON.stringify(config));
   };
 
-  // Start interview
   const startInterview = async () => {
     setIsInterviewStarted(true);
 
-    // Initialize session with start time
     setSession((prev) => ({
       ...prev,
       messages: [],
@@ -329,7 +349,6 @@ export default function InterviewPage() {
       hasPersonalizedIntro: true,
     }));
 
-    // Get the first question directly
     try {
       const firstQuestion = await getAIResponse("", 0);
       setSession((prev) => ({
@@ -342,7 +361,6 @@ export default function InterviewPage() {
     }
   };
 
-  // Send message
   const sendMessage = async () => {
     if (!currentMessage.trim() || isLoading) return;
 
@@ -362,7 +380,6 @@ export default function InterviewPage() {
     setIsTyping(true);
 
     try {
-      // Decide whether to ask follow-up or new question
       const shouldFollowUp =
         Math.random() > 0.6 &&
         session.currentQuestionCount < session.totalQuestions;
@@ -379,7 +396,6 @@ export default function InterviewPage() {
           timestamp: new Date(),
         };
 
-        // Save interview data for analysis (skip for demo mode)
         if (!session.isDemoMode) {
           const updatedSession = {
             ...session,
@@ -388,17 +404,14 @@ export default function InterviewPage() {
             endTime: new Date(),
           };
 
-          // Save to localStorage for immediate access by results page
           localStorage.setItem(
             "interviewSession",
             JSON.stringify(updatedSession),
           );
           localStorage.setItem("interviewConfig", JSON.stringify(config));
 
-          // Also save to database if user is authenticated
           if (user?.uid) {
             try {
-              // We'll save the analysis results when they're generated in the results page
               console.log(
                 "Interview completed, will save to database after analysis",
               );
@@ -435,7 +448,6 @@ export default function InterviewPage() {
     }
   };
 
-  // Skip current question
   const skipQuestion = async () => {
     if (isLoading || session.isPaused) return;
 
@@ -473,7 +485,6 @@ export default function InterviewPage() {
     }
   };
 
-  // Voice recording functions using Speech Recognition
   const startRecording = () => {
     if (recognitionRef.current && !isListening) {
       setIsRecording(true);

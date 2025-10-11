@@ -1,5 +1,5 @@
 /**
- * Simplified Database Service for Grant Guide Application
+ * Simplified Database Service for Themockr Application
  * Core Firestore operations with proper error handling
  */
 

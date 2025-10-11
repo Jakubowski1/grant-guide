@@ -135,6 +135,13 @@ export default function InterviewHistoryPage() {
     });
   };
 
+  const capitalizeTitle = (title: string) => {
+    return title
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
+
   const calculateStats = () => {
     if (sessions.length === 0)
       return { avgScore: 0, totalSessions: 0, totalTime: 0 };
@@ -253,7 +260,7 @@ export default function InterviewHistoryPage() {
       </Card>
 
       {/* Sessions List */}
-      <div className="space-y-6">
+      <div className="space-y-8">
         {filteredSessions.length === 0 ? (
           <Card>
             <CardContent className="text-center py-12">
@@ -285,7 +292,7 @@ export default function InterviewHistoryPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg">
-                        {session.config.position} Interview
+                        {capitalizeTitle(session.config.position)} Interview
                       </h3>
                       <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400 mt-1">
                         <span className="flex items-center">
@@ -315,10 +322,12 @@ export default function InterviewHistoryPage() {
                         {session.config.interviewType}
                       </div>
                     </div>
-                    <Button variant="outline" size="sm">
-                      <Eye className="h-4 w-4 mr-1" />
-                      View Details
-                    </Button>
+                    <Link href={`/history/${session.sessionId}`}>
+                      <Button variant="outline" size="sm">
+                        <Eye className="h-4 w-4 mr-1" />
+                        View Details
+                      </Button>
+                    </Link>
                   </div>
                 </div>
 
