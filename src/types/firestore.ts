@@ -38,6 +38,22 @@ export interface UserProfile {
     version: string;
   };
 
+  // GDPR Data (for easier access and compliance reporting)
+  gdprData?: {
+    cookieConsentGiven: boolean;
+    cookieConsentDate: Timestamp;
+    cookiePreferences: {
+      necessary: boolean;
+      analytics: boolean;
+      marketing: boolean;
+      personalization: boolean;
+    };
+    consentVersion: string;
+    lastUpdated: Timestamp;
+    dataProcessingConsent?: boolean;
+    marketingEmailConsent?: boolean;
+  };
+
   // Metadata
   createdAt: Timestamp;
   lastLoginAt: Timestamp;

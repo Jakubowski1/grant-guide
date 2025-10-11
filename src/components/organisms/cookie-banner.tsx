@@ -59,6 +59,7 @@ export const CookieBanner = () => {
   const [showBanner, setShowBanner] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showFloatingButton, setShowFloatingButton] = useState(false);
   const [preferences, setPreferences] = useState<CookiePreferences>({
     necessary: true, // Always required
     analytics: false,
@@ -80,6 +81,8 @@ export const CookieBanner = () => {
           consent.hasConsented
         ) {
           setShowBanner(false);
+          setShowFloatingButton(true);
+          setPreferences(consent.preferences);
           return;
         }
       }
@@ -96,8 +99,16 @@ export const CookieBanner = () => {
             dbConsent.hasConsented
           ) {
             // Update localStorage to match database
-            localStorage.setItem(COOKIE_NAME, JSON.stringify(dbConsent));
+            const localConsent: CookieConsent = {
+              hasConsented: dbConsent.hasConsented,
+              consentDate: dbConsent.consentDate.toDate(),
+              preferences: dbConsent.preferences,
+              version: dbConsent.version,
+            };
+            localStorage.setItem(COOKIE_NAME, JSON.stringify(localConsent));
             setShowBanner(false);
+            setShowFloatingButton(true);
+            setPreferences(dbConsent.preferences);
             return;
           }
         }
@@ -160,6 +171,14 @@ export const CookieBanner = () => {
 
         await DatabaseService.updateUserProfile(user.uid, {
           cookieConsent: dbConsent,
+          // Save GDPR data for compliance reporting and easier access
+          gdprData: {
+            cookieConsentGiven: consentGiven,
+            cookieConsentDate: Timestamp.fromDate(new Date()),
+            cookiePreferences: finalPreferences,
+            consentVersion: COOKIE_CONSENT_VERSION,
+            lastUpdated: Timestamp.fromDate(new Date()),
+          },
         });
       }
 
@@ -167,6 +186,7 @@ export const CookieBanner = () => {
       applyCookiePreferences(finalPreferences);
 
       setShowBanner(false);
+      setShowFloatingButton(true);
     } catch (error) {
       console.error("Error saving cookie consent:", error);
       // Still hide banner and save locally on database error
@@ -185,6 +205,7 @@ export const CookieBanner = () => {
       };
       localStorage.setItem(COOKIE_NAME, JSON.stringify(consent));
       setShowBanner(false);
+      setShowFloatingButton(true);
     } finally {
       setLoading(false);
     }
@@ -254,6 +275,28 @@ export const CookieBanner = () => {
     if (key === "necessary") return; // Cannot disable necessary cookies
     setPreferences((prev) => ({ ...prev, [key]: value }));
   };
+
+  const openCookieSettings = () => {
+    setShowBanner(true);
+    setShowDetails(false);
+  };
+
+  // Render floating cookie button when banner is hidden but user has consented
+  if (!showBanner && showFloatingButton) {
+    return (
+      <div className="fixed bottom-4 left-4 z-50">
+        <Button
+          onClick={openCookieSettings}
+          variant="outline"
+          size="icon"
+          className="h-12 w-12 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 bg-background/95 backdrop-blur-sm border-2"
+          title="Cookie Settings"
+        >
+          <Cookie className="h-5 w-5" />
+        </Button>
+      </div>
+    );
+  }
 
   if (!showBanner) return null;
 
