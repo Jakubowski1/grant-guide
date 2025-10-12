@@ -1,10 +1,8 @@
 "use client";
 
+import React, { useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
-import type React from "react";
-
-import { useRef, useState } from "react";
-import { cn } from "@/lib/utils";
+import { gsap } from "gsap";
 
 interface Logo {
   node?: React.ReactNode;
@@ -16,86 +14,112 @@ interface Logo {
 
 interface LogoLoopProps {
   logos: Logo[];
-  speed?: number;
-  direction?: "left" | "right";
   logoHeight?: number;
   gap?: number;
-  pauseOnHover?: boolean;
+  speed?: number;
   scaleOnHover?: boolean;
-  fadeOut?: boolean;
-  fadeOutColor?: string;
-  ariaLabel?: string;
+  pauseOnHover?: boolean;
+  fadeWidth?: number;
   className?: string;
 }
 
 export default function LogoLoop({
   logos,
-  speed = 120,
-  direction = "left",
   logoHeight = 48,
   gap = 40,
-  pauseOnHover = true,
+  speed = 100,
   scaleOnHover = true,
-  fadeOut = true,
-  fadeOutColor = "#000000",
-  ariaLabel = "Logo carousel",
+  pauseOnHover = true,
+  fadeWidth = 80,
   className = "",
 }: LogoLoopProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isPaused, setIsPaused] = useState(false);
+  const loopRef = useRef<HTMLDivElement>(null);
 
-  // Duplicate logos for seamless loop
-  const duplicatedLogos = [...logos, ...logos];
+  // Duplicate logos enough to fill container twice for seamless loop
+  const duplicatedLogos = useMemo(() => {
+    if (!containerRef.current || logos.length === 0) return [];
 
-  const animationDuration = `${(logos.length * speed) / 10}s`;
-  const animationDirection = direction === "left" ? "normal" : "reverse";
+    const containerWidth = containerRef.current.offsetWidth;
+    const singleLogoWidth = logoHeight * 1.2 + gap;
+    const repeatCount = Math.ceil((containerWidth * 2) / (logos.length * singleLogoWidth));
+    const duplicated: Logo[] = [];
+
+    for (let i = 0; i < repeatCount; i++) {
+      duplicated.push(...logos);
+    }
+
+    return [...duplicated, ...duplicated];
+  }, [logos, logoHeight, gap]);
+
+  // GSAP infinite scroll with per-logo fade
+  useEffect(() => {
+    if (!loopRef.current || duplicatedLogos.length === 0) return;
+    const loop = loopRef.current;
+    const container = containerRef.current;
+    const totalWidth = loop.scrollWidth / 2;
+
+    gsap.set(loop, { x: 0 });
+
+    const tween = gsap.to(loop, {
+      x: -totalWidth,
+      duration: totalWidth / speed,
+      ease: "linear",
+      modifiers: {
+        x: (x) => {
+          let val = parseFloat(x);
+          if (val <= -totalWidth) val += totalWidth;
+          return `${val}px`;
+        },
+      },
+      repeat: -1,
+      onUpdate: () => {
+        if (!container) return;
+        const containerRect = container.getBoundingClientRect();
+        const children = Array.from(loop.children) as HTMLElement[];
+        children.forEach((child) => {
+          const childRect = child.getBoundingClientRect();
+          const distanceLeft = childRect.left - containerRect.left;
+          const distanceRight = containerRect.right - childRect.right;
+          let opacity = 1;
+
+          if (distanceLeft < fadeWidth) opacity = distanceLeft / fadeWidth;
+          if (distanceRight < fadeWidth) opacity = Math.min(opacity, distanceRight / fadeWidth);
+
+          child.style.opacity = opacity.toString();
+        });
+      },
+    });
+
+    if (pauseOnHover && container) {
+      const handleEnter = () => tween.pause();
+      const handleLeave = () => tween.resume();
+      container.addEventListener("mouseenter", handleEnter);
+      container.addEventListener("mouseleave", handleLeave);
+
+      return () => {
+        tween.kill();
+        container.removeEventListener("mouseenter", handleEnter);
+        container.removeEventListener("mouseleave", handleLeave);
+      };
+    }
+
+    return () => tween.kill();
+  }, [duplicatedLogos, speed, fadeWidth, pauseOnHover]);
 
   return (
     <section
       ref={containerRef}
-      className={cn("relative w-full overflow-hidden", className)}
-      style={{ height: `${logoHeight + 40}px` }}
-      onMouseEnter={() => pauseOnHover && setIsPaused(true)}
-      onMouseLeave={() => pauseOnHover && setIsPaused(false)}
-      aria-label={ariaLabel}
+      className={`relative w-full overflow-hidden ${className}`}
+      style={{ height: `${logoHeight}px` }}
     >
-      {fadeOut && (
-        <>
+      <div ref={loopRef} className="flex items-center h-full" style={{ gap: `${gap}px`, width: "fit-content" }}>
+        {duplicatedLogos.map((logo, idx) => (
           <div
-            className="absolute left-0 top-0 z-10 h-full w-20 pointer-events-none"
-            style={{
-              background: `linear-gradient(to right, ${fadeOutColor}, transparent)`,
-            }}
-          />
-          <div
-            className="absolute right-0 top-0 z-10 h-full w-20 pointer-events-none"
-            style={{
-              background: `linear-gradient(to left, ${fadeOutColor}, transparent)`,
-            }}
-          />
-        </>
-      )}
-
-      <div
-        className="flex items-center h-full"
-        style={{
-          animation: `logoLoop ${animationDuration} linear infinite ${animationDirection}`,
-          animationPlayState: isPaused ? "paused" : "running",
-          gap: `${gap}px`,
-          width: "fit-content",
-        }}
-      >
-        {duplicatedLogos.map((logo, index) => (
-          <div
-            key={`${logo.title || logo.alt || logo.src || "logo"}-${index}`}
-            className={cn(
-              "flex-shrink-0 flex items-center justify-center transition-transform duration-200",
-              scaleOnHover && "hover:scale-110",
-            )}
-            style={{
-              height: `${logoHeight}px`,
-              minWidth: `${logoHeight * 1.2}px`,
-            }}
+            key={idx}
+            className={`flex-shrink-0 flex items-center justify-center transition-transform duration-200 ${scaleOnHover ? "hover:scale-110" : ""
+              }`}
+            style={{ height: `${logoHeight}px`, minWidth: `${logoHeight * 1.2}px` }}
           >
             {logo.href ? (
               <a
@@ -106,58 +130,33 @@ export default function LogoLoop({
                 title={logo.title || logo.alt}
               >
                 {logo.node ? (
-                  <div style={{ fontSize: `${logoHeight * 0.5}px` }}>
-                    {logo.node}
-                  </div>
+                  <div style={{ fontSize: `${logoHeight * 0.5}px` }}>{logo.node}</div>
                 ) : logo.src ? (
                   <Image
                     src={logo.src || "/placeholder.svg"}
                     alt={logo.alt || ""}
                     width={logoHeight * 1.1}
                     height={logoHeight * 0.7}
-                    style={{
-                      maxHeight: `${logoHeight * 0.7}px`,
-                      maxWidth: `${logoHeight * 1.1}px`,
-                      width: "auto",
-                      height: "auto",
-                    }}
+                    style={{ width: "auto", height: "auto" }}
                     className="object-contain"
                   />
                 ) : null}
               </a>
             ) : logo.node ? (
-              <div style={{ fontSize: `${logoHeight * 0.5}px` }}>
-                {logo.node}
-              </div>
+              <div style={{ fontSize: `${logoHeight * 0.5}px` }}>{logo.node}</div>
             ) : logo.src ? (
               <Image
                 src={logo.src || "/placeholder.svg"}
                 alt={logo.alt || ""}
                 width={logoHeight * 1.1}
                 height={logoHeight * 0.7}
-                style={{
-                  maxHeight: `${logoHeight * 0.7}px`,
-                  maxWidth: `${logoHeight * 1.1}px`,
-                  width: "auto",
-                  height: "auto",
-                }}
+                style={{ width: "auto", height: "auto" }}
                 className="object-contain"
               />
             ) : null}
           </div>
         ))}
       </div>
-
-      <style jsx>{`
-        @keyframes logoLoop {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-${100 / 2}%);
-          }
-        }
-      `}</style>
     </section>
   );
 }

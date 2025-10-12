@@ -371,7 +371,7 @@ export const CookieBanner = () => {
                 Customize
               </Button>
               <Button
-                variant="ghost"
+                variant="outline"
                 onClick={handleRejectAll}
                 disabled={loading}
                 className="flex-1 sm:flex-none text-muted-foreground"
@@ -536,7 +536,7 @@ export const CookieBanner = () => {
                 Accept All
               </Button>
               <Button
-                variant="ghost"
+                variant="outline"
                 onClick={() => setShowDetails(false)}
                 disabled={loading}
                 className="flex-1 sm:flex-none"

@@ -74,15 +74,12 @@ export default function CompanyLogos() {
       <div className="relative">
         <LogoLoop
           logos={companyLogos}
-          speed={120}
-          direction="left"
+          speed={50}
           logoHeight={48}
-          gap={80}
+          gap={60}
           pauseOnHover
           scaleOnHover
-          fadeOut
-          fadeOutColor="hsl(var(--background))"
-          ariaLabel="Company logos carousel"
+          fadeWidth={80}
           className="py-8"
         />
       </div>

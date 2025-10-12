@@ -10,18 +10,22 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
+          "bg-[var(--primary)] text-[var(--primary-foreground)] shadow-xs hover:bg-[color-mix(in oklch, var(--primary) 85%, black)] dark:hover:bg-[color-mix(in oklch, var(--primary) 80%, white)] focus-visible:ring-[var(--ring)]",
+
         destructive:
-          "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+          "bg-[var(--destructive)] text-[var(--destructive-foreground)] shadow-xs hover:bg-[var(--destructive)/90] focus-visible:ring-[var(--destructive)/20] dark:focus-visible:ring-[var(--destructive)/40] dark:bg-[color-mix(in oklch, var(--destructive) 60%, black)]",
 
         outline:
-          "bg-transparent border text-white hover:border-primary hover:text-black hover:bg-primary hover:shadow-md",
+          "bg-transparent border border-[var(--foreground)] text-[var(--foreground)] hover:bg-[var(--accent)] hover:border-[var(--accent)] hover:text-[var(--foreground)] dark:border-[var(--muted-foreground)] dark:text-[var(--muted-foreground)] dark:hover:bg-[color-mix(in oklch, var(--accent) 30%, black)] dark:hover:border-[var(--accent)] dark:hover:text-white shadow-none",
 
         secondary:
-          "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
+          "bg-[var(--secondary)] text-[var(--secondary-foreground)] shadow-xs hover:bg-[var(--secondary)/80] dark:bg-[var(--secondary)] dark:text-white dark:hover:bg-[color-mix(in oklch, var(--secondary) 80%, black)]",
+
         ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
-        link: "text-primary underline-offset-4 hover:underline",
+          "bg-transparent text-[var(--muted-foreground)] hover:bg-[var(--accent)] hover:text-[var(--foreground)] dark:text-[var(--muted-foreground)] dark:hover:bg-[color-mix(in oklch, var(--accent) 30%, black)] dark:hover:text-white shadow-none",
+
+        link:
+          "text-[var(--primary)] underline-offset-4 hover:underline",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
