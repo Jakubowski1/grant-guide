@@ -23,7 +23,6 @@ export default function DashboardSidebar({
 
   return (
     <>
-      {/* Sidebar */}
       <div
         className={`fixed inset-y-0 left-0 z-50 w-64 h-screen bg-sidebar text-sky-50 border-r border-sidebar-border transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col overflow-hidden`}
       >

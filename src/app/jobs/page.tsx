@@ -544,8 +544,8 @@ export default function JobMarketPage() {
             <div className="space-y-4">
               {isLoading
                 ? // Show skeleton cards while loading
-                  Array.from({ length: 6 }).map((i) => (
-                    <JobCardSkeleton key={`skeleton-${i}`} />
+                  Array.from({ length: 6 }).map((_) => (
+                    <JobCardSkeleton key={`skeleton-${_}`} />
                   ))
                 : jobs?.map((job, index) => (
                     <Card
