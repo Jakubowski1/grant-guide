@@ -34,7 +34,7 @@ export default function DashboardSidebar({
               <Button
                 variant="ghost"
                 size="sm"
-                className="lg:hidden text-sidebar-foreground hover:bg-sidebar-accent"
+                className="lg:hidden text-sidebar-foreground active:bg-sidebar-accent md:hover:bg-sidebar-accent transition-colors"
                 onClick={() => setSidebarOpen(false)}
               >
                 <X className="h-4 w-4" />
@@ -46,70 +46,80 @@ export default function DashboardSidebar({
         <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
           <Link
             href="/dashboard"
-            className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
+            className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors w-full ${
               isActive("/dashboard")
                 ? "bg-sidebar-primary text-sidebar-primary-foreground"
                 : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             }`}
           >
-            <Home className="h-5 w-5" />
-            <span className={isActive("/dashboard") ? "font-medium" : ""}>
+            <Home className="h-5 w-5 flex-shrink-0" />
+            <span
+              className={`truncate ${isActive("/dashboard") ? "font-medium" : ""}`}
+            >
               Dashboard
             </span>
           </Link>
 
           <Link
             href="/configure"
-            className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
+            className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors w-full ${
               isActive("/configure")
                 ? "bg-sidebar-primary text-sidebar-primary-foreground"
                 : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             }`}
           >
-            <Plus className="h-5 w-5" />
-            <span className={isActive("/configure") ? "font-medium" : ""}>
+            <Plus className="h-5 w-5 flex-shrink-0" />
+            <span
+              className={`truncate ${isActive("/configure") ? "font-medium" : ""}`}
+            >
               New Interview
             </span>
           </Link>
 
           <Link
             href="/history"
-            className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
+            className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors w-full ${
               isActive("/history")
                 ? "bg-sidebar-primary text-sidebar-primary-foreground"
                 : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             }`}
           >
-            <History className="h-5 w-5" />
-            <span className={isActive("/history") ? "font-medium" : ""}>
+            <History className="h-5 w-5 flex-shrink-0" />
+            <span
+              className={`truncate ${isActive("/history") ? "font-medium" : ""}`}
+            >
               Interview History
             </span>
           </Link>
 
           <Link
             href="/practice"
-            className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
+            className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors w-full ${
               isActive("/practice")
                 ? "bg-sidebar-primary text-sidebar-primary-foreground"
                 : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             }`}
           >
-            <BookOpen className="h-5 w-5" />
-            <span className={isActive("/practice") ? "font-medium" : ""}>
+            <BookOpen className="h-5 w-5 flex-shrink-0" />
+            <span
+              className={`truncate ${isActive("/practice") ? "font-medium" : ""}`}
+            >
               Practice Library
             </span>
           </Link>
 
           <Link
             href="/jobs"
-            className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
+            className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors w-full ${
               isActive("/jobs")
                 ? "bg-sidebar-primary text-sidebar-primary-foreground"
                 : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             }`}
           >
-            <Briefcase className="h-5 w-5" />
-            <span className={isActive("/jobs") ? "font-medium" : ""}>
+            <Briefcase className="h-5 w-5 flex-shrink-0" />
+            <span
+              className={`truncate ${isActive("/jobs") ? "font-medium" : ""}`}
+            >
               Job Listings
             </span>
           </Link>

@@ -38,7 +38,6 @@ export async function POST(request: NextRequest) {
 
     // Check if API key is available
     if (!process.env.MISTRAL_API_KEY) {
-      console.log("No Mistral API key found, using mock analysis");
       analysisText = generateMockAnalysis(interviewConfig);
     } else {
       try {
@@ -123,39 +122,186 @@ interface Message {
   isFollowUp?: boolean;
 }
 
+function identifySkippedOrUnknownResponses(conversationHistory: Message[]): {
+  skippedQuestions: number;
+  unknownResponses: number;
+  totalResponses: number;
+  penaltyScore: number;
+} {
+  const userResponses = conversationHistory.filter(
+    (msg) => msg.type === "user",
+  );
+
+  let skippedQuestions = 0;
+  let unknownResponses = 0;
+
+  const unknownPatterns = [
+    /^\s*\[question skipped\]\s*$/i,
+    /^\s*i don'?t know\s*$/i,
+    /^\s*not sure\s*$/i,
+    /^\s*no idea\s*$/i,
+    /^\s*i'?m not sure\s*$/i,
+    /^\s*skip\s*$/i,
+    /^\s*pass\s*$/i,
+    /^\s*don'?t know\s*$/i,
+    /^\s*idk\s*$/i,
+    /^\s*unknown\s*$/i,
+  ];
+
+  const vaguePatterns = [
+    /^\s*maybe\s*$/i,
+    /^\s*possibly\s*$/i,
+    /^\s*i think\s*$/i,
+    /^\s*probably\s*$/i,
+    /^\s*perhaps\s*$/i,
+  ];
+
+  userResponses.forEach((response) => {
+    const content = response.content.trim();
+
+    // Check for explicit skip
+    if (content === "[Question skipped]") {
+      skippedQuestions++;
+      return;
+    }
+
+    // Check for "I don't know" patterns
+    const isUnknown = unknownPatterns.some((pattern) => pattern.test(content));
+    if (isUnknown) {
+      unknownResponses++;
+      return;
+    }
+
+    // Check for very short or vague responses that are essentially non-answers
+    if (content.length < 10) {
+      const isVague = vaguePatterns.some((pattern) => pattern.test(content));
+      if (isVague) {
+        unknownResponses++;
+      }
+    }
+  });
+
+  const totalResponses = userResponses.length;
+  const totalPenalizedResponses = skippedQuestions + unknownResponses;
+
+  // Calculate penalty score (maximum 20 points penalty)
+  const penaltyScore = Math.min(20, totalPenalizedResponses * 5);
+
+  return {
+    skippedQuestions,
+    unknownResponses,
+    totalResponses,
+    penaltyScore,
+  };
+}
+
+function getSeniorityAnalysisExpectations(seniority: string): string {
+  const expectations = {
+    junior: `
+- **Technical Depth**: Basic to intermediate understanding of core technologies
+- **Expected Score Range**: 60-75 points for solid junior performance
+- **Problem Solving**: Should break down problems step-by-step with some guidance needed
+- **Communication**: Should explain concepts clearly but may lack precision
+- **Experience Context**: Academic projects, tutorials, internships`,
+
+    mid: `
+- **Technical Depth**: Solid understanding with some specialization areas
+- **Expected Score Range**: 70-85 points for strong mid-level performance  
+- **Problem Solving**: Independent problem solving with consideration of trade-offs
+- **Communication**: Clear technical communication with business context
+- **Experience Context**: 2-5 years production experience, mentoring junior developers`,
+
+    senior: `
+- **Technical Depth**: Deep expertise with architectural thinking
+- **Expected Score Range**: 80-95 points for excellent senior performance
+- **Problem Solving**: Systematic approach with multiple solution paths considered
+- **Communication**: Can explain complex concepts to various audiences
+- **Experience Context**: 5+ years experience, technical leadership, system design`,
+  };
+
+  return (
+    expectations[seniority as keyof typeof expectations] || expectations.mid
+  );
+}
+
 function generateAnalysisSystemPrompt(config: InterviewConfig): string {
-  const { position, seniority } = config;
+  const { position, seniority, interviewType } = config;
 
-  return `You are an expert technical interviewer and career coach analyzing interview performance. Your task is to provide comprehensive, constructive feedback on a candidate's interview responses for a ${seniority}-level ${position} position.
+  return `You are a senior technical interviewer with expertise in ${position} roles and 15+ years of experience at leading tech companies. You're conducting a comprehensive analysis of a ${seniority}-level ${position} candidate's ${interviewType} interview performance.
 
-Evaluation Criteria:
-1. Technical Knowledge & Accuracy
-2. Problem-Solving Approach
-3. Communication Clarity
-4. Depth of Understanding
-5. Real-world Application
-6. Areas for Improvement
+## ANALYSIS FRAMEWORK:
 
-Provide your analysis in this structured format:
+### TECHNICAL COMPETENCY ASSESSMENT (30 points):
+- **Accuracy**: Correctness of technical information and concepts
+- **Depth**: Level of technical understanding demonstrated
+- **Currency**: Knowledge of modern practices and technologies
+- **Application**: Practical application of technical knowledge
+
+### PROBLEM-SOLVING METHODOLOGY (25 points):
+- **Approach**: Systematic breakdown of complex problems
+- **Trade-offs**: Consideration of alternatives and their implications
+- **Edge Cases**: Awareness of potential issues and limitations
+- **Optimization**: Ability to improve solutions iteratively
+
+### COMMUNICATION EFFECTIVENESS (25 points):
+- **Clarity**: Clear explanation of technical concepts
+- **Structure**: Logical organization of responses
+- **Audience Awareness**: Appropriate level of technical detail
+- **Examples**: Use of concrete examples and analogies
+
+### PROFESSIONAL READINESS (20 points):
+- **Experience Application**: Connecting theory to real-world scenarios
+- **Best Practices**: Knowledge of industry standards and conventions
+- **Collaboration**: Understanding of team dynamics and processes
+- **Growth Mindset**: Learning orientation and adaptability
+
+## SENIORITY EXPECTATIONS FOR ${seniority.toUpperCase()}:
+${getSeniorityAnalysisExpectations(seniority)}
+
+## SCORING PENALTIES:
+- **Skipped Questions**: Each "[Question skipped]" response = 0 points for that question, -5 points overall penalty
+- **"I Don't Know" Responses**: Responses like "I don't know", "not sure", "no idea" = 0 points for that question, -5 points overall penalty  
+- **Vague Non-Answers**: Very short responses like "maybe", "possibly" without elaboration = significant point deduction
+- **Maximum Penalty**: Up to -20 points total for multiple skipped/unknown responses
+
+## OUTPUT FORMAT:
 
 ## OVERALL SCORE
 Score: [NUMBER]/100
-[Brief summary of performance]
+**Performance Level**: [Below Expectations | Meets Expectations | Exceeds Expectations]
+[2-3 sentence executive summary]
 
-## STRENGTHS
-[List 3-5 key strengths demonstrated]
+## TECHNICAL COMPETENCY ([SCORE]/30)
+**Strengths**: [Specific technical strengths with examples]
+**Areas for Growth**: [Specific technical gaps with examples]
 
-## AREAS FOR IMPROVEMENT
-[List 3-5 specific areas needing development]
+## PROBLEM-SOLVING ([SCORE]/25)  
+**Strengths**: [Problem-solving approach highlights]
+**Areas for Growth**: [Problem-solving methodology improvements]
 
-## DETAILED ANALYSIS
-[Detailed breakdown by category with specific examples]
+## COMMUNICATION ([SCORE]/25)
+**Strengths**: [Communication effectiveness highlights] 
+**Areas for Growth**: [Communication improvement areas]
 
-## RECOMMENDATIONS
-[Actionable advice for improvement]
+## PROFESSIONAL READINESS ([SCORE]/20)
+**Strengths**: [Professional experience and readiness indicators]
+**Areas for Growth**: [Professional development areas]
 
-## NEXT STEPS
-[Specific resources, topics to study, or practices to adopt]
+## DETAILED RECOMMENDATIONS
+### Immediate Focus Areas:
+1. [Specific actionable item with timeline]
+2. [Specific actionable item with timeline]
+3. [Specific actionable item with timeline]
+
+### Learning Resources:
+- [Specific books, courses, or materials]
+- [Practice problems or projects]
+- [Communities or mentorship opportunities]
+
+### Interview Performance Tips:
+- [Specific behavioral recommendations]
+- [Communication improvements]
+- [Technical presentation suggestions]
 
 Be constructive, specific, and actionable in your feedback. Reference specific responses when possible.`;
 }
@@ -165,6 +311,10 @@ function generateAnalysisPrompt(
   config: InterviewConfig,
 ): string {
   const { position, seniority, interviewType } = config;
+
+  // Analyze skipped and unknown responses
+  const responseAnalysis =
+    identifySkippedOrUnknownResponses(conversationHistory);
 
   const conversation = conversationHistory
     .map(
@@ -184,6 +334,14 @@ CONTEXT:
 - Interview Type: ${interviewType}
 - Total Questions: ${conversationHistory.filter((msg) => msg.type === "ai" && !msg.content.includes("Hello!")).length}
 - Total Responses: ${conversationHistory.filter((msg) => msg.type === "user").length}
+
+RESPONSE QUALITY ANALYSIS:
+- Skipped Questions: ${responseAnalysis.skippedQuestions}
+- "I Don't Know" Responses: ${responseAnalysis.unknownResponses}
+- Total Penalty Score: -${responseAnalysis.penaltyScore} points
+- Effective Response Rate: ${Math.round(((responseAnalysis.totalResponses - responseAnalysis.skippedQuestions - responseAnalysis.unknownResponses) / responseAnalysis.totalResponses) * 100)}%
+
+IMPORTANT: Apply the penalty score (-${responseAnalysis.penaltyScore} points) to the overall score. Skipped questions and "I don't know" responses should be treated as 0-point answers and negatively impact the technical competency and problem-solving scores.
 
 Please provide a comprehensive analysis following the structured format in your system prompt.`;
 }

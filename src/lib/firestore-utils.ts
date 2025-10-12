@@ -79,7 +79,7 @@ export const safeGetDoc = async (
     console.error(`Firestore getDoc error (attempt ${retryCount + 1}):`, error);
 
     if (isConnectionError(error) && retryCount < RETRY_ATTEMPTS) {
-      console.log(`Retrying Firestore operation in ${RETRY_DELAY}ms...`);
+      console.warn(`Retrying Firestore operation in ${RETRY_DELAY}ms...`);
 
       // Try to re-enable network connection
       try {

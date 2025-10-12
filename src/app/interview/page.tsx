@@ -8,6 +8,7 @@ import {
   CheckCircle,
   Clock,
   Code,
+  HelpCircle,
   Mic,
   MicOff,
   Pause,
@@ -384,9 +385,32 @@ export default function InterviewPage() {
     setIsTyping(true);
 
     try {
-      const shouldFollowUp =
-        Math.random() > 0.6 &&
-        session.currentQuestionCount < session.totalQuestions;
+      // Use intelligent follow-up decision instead of random
+      let shouldFollowUp = false;
+      if (session.currentQuestionCount < session.totalQuestions) {
+        try {
+          const followUpResponse = await fetch("/api/interview", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              message: currentMessage,
+              conversationHistory: session.messages,
+              interviewConfig: config,
+              questionCount: session.currentQuestionCount,
+              checkFollowUpOnly: true,
+            }),
+          });
+
+          const followUpData = await followUpResponse.json();
+          shouldFollowUp = followUpData.success && followUpData.shouldFollowUp;
+        } catch (error) {
+          console.error("Error checking follow-up decision:", error);
+          // Fallback to simpler logic if API fails
+          shouldFollowUp =
+            session.currentQuestionCount < session.totalQuestions &&
+            currentMessage.trim().length > 50;
+        }
+      }
 
       let aiResponse: Message;
 
@@ -489,6 +513,43 @@ export default function InterviewPage() {
     }
   };
 
+  const submitDontKnow = async () => {
+    if (isLoading || session.isPaused) return;
+
+    const dontKnowMessage: Message = {
+      id: `user-${Date.now()}`,
+      type: "user",
+      content: "I don't know",
+      timestamp: new Date(),
+    };
+
+    setSession((prev) => ({
+      ...prev,
+      messages: [...prev.messages, dontKnowMessage],
+    }));
+
+    setCurrentMessage("");
+    setIsTyping(true);
+
+    try {
+      const aiResponse = await getAIResponse(
+        "I don't know",
+        session.currentQuestionCount,
+        false,
+      );
+
+      setSession((prev) => ({
+        ...prev,
+        messages: [...prev.messages, aiResponse],
+        currentQuestionCount: prev.currentQuestionCount + 1,
+      }));
+    } catch (error) {
+      console.error("Error submitting 'I don't know':", error);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
   const startRecording = () => {
     if (recognitionRef.current && !isListening) {
       setIsRecording(true);
@@ -562,7 +623,7 @@ export default function InterviewPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {mounted && !config.isDemoMode && (
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div className="space-y-2">
                       <Badge
                         variant="outline"
@@ -772,7 +833,7 @@ export default function InterviewPage() {
               }`}
             >
               <div
-                className={`flex max-w-[80%] ${
+                className={`flex max-w-[90%] sm:max-w-[80%] ${
                   message.type === "user" ? "flex-row-reverse" : "flex-row"
                 } items-start space-x-3`}
               >
@@ -822,7 +883,7 @@ export default function InterviewPage() {
 
           {isTyping && (
             <div className="flex justify-start">
-              <div className="flex items-start space-x-3 max-w-[80%]">
+              <div className="flex items-start space-x-3 max-w-[90%] sm:max-w-[80%]">
                 <Avatar className="h-8 w-8">
                   <AvatarFallback>
                     <Bot className="h-4 w-4" />
@@ -892,8 +953,19 @@ export default function InterviewPage() {
                   variant="outline"
                   size="sm"
                   className="text-orange-600 hover:text-orange-700 border-orange-300 hover:border-orange-400"
+                  title="Skip this question"
                 >
                   <SkipForward className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={submitDontKnow}
+                  disabled={isLoading || session.isPaused}
+                  variant="outline"
+                  size="sm"
+                  className="text-gray-600 hover:text-gray-700 border-gray-300 hover:border-gray-400"
+                  title="I don't know"
+                >
+                  <HelpCircle className="h-4 w-4" />
                 </Button>
                 <Button
                   onClick={isRecording ? stopRecording : startRecording}

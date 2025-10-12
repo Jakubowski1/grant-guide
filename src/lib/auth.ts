@@ -269,15 +269,11 @@ export const getUserData = async (uid: string): Promise<UserData | null> => {
   try {
     console.log("🔍 getUserData called for uid:", uid);
 
-    // Use our comprehensive database service to get user profile
     const profile = await DatabaseService.getUserProfile(uid);
 
     if (profile) {
-      console.log("✅ User profile retrieved:", profile);
-      // Convert UserProfile to UserData for backward compatibility
       return userProfileToUserData(profile);
     } else {
-      console.log("❌ User profile does not exist in Firestore for uid:", uid);
       return null;
     }
   } catch (error: unknown) {
@@ -308,7 +304,6 @@ export const onAuthStateChange = (callback: (user: User | null) => void) => {
   return onAuthStateChanged(auth, callback);
 };
 
-// Error message helper
 const getErrorMessage = (error: AuthError): string => {
   switch (error.code) {
     case "auth/user-not-found":

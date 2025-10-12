@@ -176,90 +176,102 @@ export default function DashboardPage() {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
               <Card className="border-border bg-card">
-                <CardContent className="p-6">
+                <CardContent className="p-3 sm:p-4 lg:p-6">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs sm:text-sm text-muted-foreground truncate">
                         Total Sessions
                       </p>
-                      <p className="text-3xl font-bold text-primary">
+                      <p className="text-lg sm:text-2xl lg:text-3xl font-bold text-primary">
                         {stats.totalSessions}
                       </p>
-                      <p className="text-xs text-chart-2">+3 this week</p>
+                      <p className="text-xs text-chart-2 truncate">
+                        +3 this week
+                      </p>
                     </div>
-                    <BarChart3 className="h-8 w-8 text-primary" />
+                    <BarChart3 className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="border-border bg-card">
-                <CardContent className="p-6">
+                <CardContent className="p-3 sm:p-4 lg:p-6">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs sm:text-sm text-muted-foreground truncate">
                         Average Score
                       </p>
-                      <p className="text-3xl font-bold text-primary">
+                      <p className="text-lg sm:text-2xl lg:text-3xl font-bold text-primary">
                         {stats.averageScore}%
                       </p>
-                      <p className="text-xs text-chart-2">
+                      <p className="text-xs text-chart-2 truncate">
                         +{stats.improvementRate}% improvement
                       </p>
                     </div>
-                    <Target className="h-8 w-8 text-primary" />
+                    <Target className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="border-border bg-card">
-                <CardContent className="p-6">
+                <CardContent className="p-3 sm:p-4 lg:p-6">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs sm:text-sm text-muted-foreground truncate">
                         Practice Time
                       </p>
-                      <p className="text-3xl font-bold text-primary">
+                      <p className="text-lg sm:text-2xl lg:text-3xl font-bold text-primary">
                         {Math.floor(stats.totalTime / 60)}h
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {stats.totalTime % 60}m total
                       </p>
                     </div>
-                    <Clock className="h-8 w-8 text-primary" />
+                    <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="border-border bg-card">
-                <CardContent className="p-6">
+                <CardContent className="p-3 sm:p-4 lg:p-6">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs sm:text-sm text-muted-foreground truncate">
                         Current Streak
                       </p>
-                      <p className="text-3xl font-bold text-primary">
+                      <p className="text-lg sm:text-2xl lg:text-3xl font-bold text-primary">
                         {stats.streakDays}
                       </p>
-                      <p className="text-xs text-muted-foreground">days</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        days
+                      </p>
                     </div>
-                    <Award className="h-8 w-8 text-primary" />
+                    <Award className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
                   </div>
                 </CardContent>
               </Card>
             </div>
 
             <Tabs defaultValue="activity" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="performance">Performance</TabsTrigger>
-                <TabsTrigger value="skills">Skills Analysis</TabsTrigger>
-                <TabsTrigger value="activity">Activity</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
+                <TabsTrigger value="overview" className="text-xs md:text-sm">
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger value="performance" className="text-xs md:text-sm">
+                  Performance
+                </TabsTrigger>
+                <TabsTrigger value="skills" className="text-xs md:text-sm">
+                  Skills
+                </TabsTrigger>
+                <TabsTrigger value="activity" className="text-xs md:text-sm">
+                  Activity
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="space-y-6">
-                <div className="grid lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
                   {/* Performance Trend */}
                   <Card className="lg:col-span-2 border-border bg-card">
                     <CardHeader>
@@ -373,7 +385,7 @@ export default function DashboardPage() {
               </TabsContent>
 
               <TabsContent value="performance" className="space-y-6">
-                <div className="grid lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                   {/* Multi-line Performance Chart */}
                   <Card className="border-border bg-card">
                     <CardHeader>
@@ -559,7 +571,7 @@ export default function DashboardPage() {
               </TabsContent>
 
               <TabsContent value="activity" className="space-y-6">
-                <div className="grid lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                   {/* Weekly Activity */}
                   <Card className="border-border bg-card">
                     <CardHeader>

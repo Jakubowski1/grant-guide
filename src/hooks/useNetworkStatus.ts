@@ -13,7 +13,6 @@ export const useNetworkStatus = () => {
     }
 
     const handleOnline = () => {
-      console.log("Network: Back online");
       setIsOnline(true);
       setWasOffline(false);
     };

@@ -165,7 +165,7 @@ export function AvatarIconSelector({
         </p>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
           {avatarIcons.map((avatarIcon) => {
             const IconComponent = avatarIcon.icon;
             const isSelected = selectedIcon === avatarIcon.id;
@@ -182,10 +182,12 @@ export function AvatarIconSelector({
                   }`}
                   onClick={() => onSelectIcon(avatarIcon.id)}
                 >
-                  <IconComponent className={`h-8 w-8 ${avatarIcon.color}`} />
+                  <IconComponent
+                    className={`h-6 w-6 sm:h-8 sm:w-8 ${avatarIcon.color}`}
+                  />
                   {isSelected && (
-                    <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center">
-                      <div className="w-2 h-2 bg-current rounded-full" />
+                    <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center">
+                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-current rounded-full" />
                     </div>
                   )}
                 </Button>

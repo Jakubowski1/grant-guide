@@ -107,16 +107,16 @@ export default function SupportPage() {
       <div className="flex-1 flex flex-col overflow-hidden">
         <DashboardNavbar setSidebarOpen={setSidebarOpen} />
         <main className="flex-1 overflow-auto">
-          <div className="container mx-auto px-6 py-8 max-w-4xl">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-4xl">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                   <HelpCircle className="h-5 w-5" />
                   Frequently Asked Questions
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-2 sm:space-y-4">
                   {faqData.map((faq) => (
                     <Collapsible
                       key={faq.id}
@@ -126,17 +126,19 @@ export default function SupportPage() {
                       <CollapsibleTrigger asChild>
                         <Button
                           variant="ghost"
-                          className="flex w-full justify-between p-4 text-left hover:bg-muted/50"
+                          className="flex w-full justify-between p-4 sm:p-4 text-left hover:bg-muted/50 active:bg-muted/50 min-h-[44px] items-start"
                         >
-                          <span className="font-semibold">{faq.question}</span>
+                          <span className="font-semibold text-sm sm:text-base pr-3 text-left leading-relaxed">
+                            {faq.question}
+                          </span>
                           {openItems.includes(faq.id) ? (
-                            <ChevronUp className="h-4 w-4" />
+                            <ChevronUp className="h-5 w-5 sm:h-4 sm:w-4 flex-shrink-0 mt-0.5" />
                           ) : (
-                            <ChevronDown className="h-4 w-4" />
+                            <ChevronDown className="h-5 w-5 sm:h-4 sm:w-4 flex-shrink-0 mt-0.5" />
                           )}
                         </Button>
                       </CollapsibleTrigger>
-                      <CollapsibleContent className="px-4 pb-4">
+                      <CollapsibleContent className="px-4 sm:px-4 pb-4 sm:pb-4">
                         <p className="text-sm text-muted-foreground leading-relaxed">
                           {faq.answer}
                         </p>

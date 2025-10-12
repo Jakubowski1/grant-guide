@@ -52,7 +52,8 @@
     "regenerator-runtime": "^0.14.1",
     "remark-gfm": "^4.0.1",
     "swr": "^2.3.6",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.0",

@@ -51,22 +51,22 @@ const JobCardSkeleton = () => (
     <CardContent className="pt-6">
       <div className="space-y-4">
         {/* Job Header Skeleton */}
-        <div className="flex justify-between items-start">
-          <div className="space-y-2 flex-1">
+        <div className="flex flex-col sm:flex-row sm:justify-between items-start gap-3 sm:gap-0">
+          <div className="space-y-2 flex-1 w-full">
             <div className="flex items-center gap-2">
-              <div className="h-6 bg-muted rounded w-2/3"></div>
-              <div className="h-5 bg-muted rounded w-16"></div>
+              <div className="h-5 sm:h-6 bg-muted rounded w-2/3"></div>
+              <div className="h-4 sm:h-5 bg-muted rounded w-16"></div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
               <div className="h-4 bg-muted rounded w-32"></div>
               <div className="h-4 bg-muted rounded w-24"></div>
             </div>
           </div>
-          <div className="h-8 bg-muted rounded w-8"></div>
+          <div className="h-8 bg-muted rounded w-8 self-start"></div>
         </div>
 
         {/* Job Details Skeleton */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           <div className="h-4 bg-muted rounded w-24"></div>
           <div className="h-4 bg-muted rounded w-32"></div>
           <div className="h-4 bg-muted rounded w-20"></div>
@@ -81,11 +81,11 @@ const JobCardSkeleton = () => (
         </div>
 
         {/* Skills Skeleton */}
-        <div className="flex flex-wrap gap-2">
-          <div className="h-6 bg-muted rounded w-16"></div>
-          <div className="h-6 bg-muted rounded w-20"></div>
-          <div className="h-6 bg-muted rounded w-14"></div>
-          <div className="h-6 bg-muted rounded w-18"></div>
+        <div className="flex flex-wrap gap-1.5 sm:gap-2">
+          <div className="h-5 sm:h-6 bg-muted rounded w-16"></div>
+          <div className="h-5 sm:h-6 bg-muted rounded w-20"></div>
+          <div className="h-5 sm:h-6 bg-muted rounded w-14"></div>
+          <div className="h-5 sm:h-6 bg-muted rounded w-18"></div>
         </div>
       </div>
     </CardContent>
@@ -236,7 +236,7 @@ export default function JobMarketPage() {
   };
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen">
       {/* Sidebar */}
       <DashboardSidebar
         sidebarOpen={sidebarOpen}
@@ -276,6 +276,7 @@ export default function JobMarketPage() {
               </CardHeader>
               <CardContent className="space-y-4 sm:space-y-6">
                 {/* Primary Search */}
+                {/* Search Input Fields */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="search-query">Job Title or Keywords</Label>
@@ -324,6 +325,7 @@ export default function JobMarketPage() {
                 </div>
 
                 {/* Advanced Filters */}
+                {/* Filter Tabs */}
                 <Tabs defaultValue="sites" className="w-full">
                   <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
                     <TabsTrigger value="sites">Job Sites</TabsTrigger>
@@ -544,8 +546,8 @@ export default function JobMarketPage() {
             <div className="space-y-4">
               {isLoading
                 ? // Show skeleton cards while loading
-                  Array.from({ length: 6 }).map((_) => (
-                    <JobCardSkeleton key={`skeleton-${_}`} />
+                  Array.from({ length: 6 }, () => (
+                    <JobCardSkeleton key={`job-skeleton-${Math.random()}`} />
                   ))
                 : jobs?.map((job, index) => (
                     <Card

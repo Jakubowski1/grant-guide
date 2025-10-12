@@ -559,7 +559,7 @@ export default function ConfigurePage() {
 
   function renderPositionStep() {
     return (
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {positions.map((position) => {
           const Icon = position.icon;
           return (
@@ -602,7 +602,7 @@ export default function ConfigurePage() {
         onValueChange={(value) =>
           setConfig((prev) => ({ ...prev, seniority: value }))
         }
-        className="grid md:grid-cols-3 gap-4"
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
       >
         {seniorityLevels.map((level) => (
           <div key={level.value} className="h-full">
@@ -761,7 +761,7 @@ export default function ConfigurePage() {
       <div className="space-y-6">
         <div>
           <h4 className="font-semibold mb-3">Company Type</h4>
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {companyProfiles.map((profile) => {
               const Icon = profile.icon;
               return (
@@ -801,7 +801,7 @@ export default function ConfigurePage() {
 
         <div>
           <h4 className="font-semibold mb-3">Or Choose Specific Company</h4>
-          <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {specificCompanies.map((company) => {
               const CompanyIcon = company.icon;
               return (

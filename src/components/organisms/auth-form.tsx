@@ -726,7 +726,7 @@ export default function AuthForm({
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
       {isMobile ? (
-        <Card className="border-border bg-card w-full max-w-md">
+        <Card className="border-border bg-card w-full max-w-md mx-4 sm:mx-auto">
           <CardHeader className="text-center">
             <div
               className={`transition-all duration-500 ease-in-out ${

@@ -6,11 +6,11 @@
 import { DatabaseService } from "@/lib/database";
 
 export const testDatabaseOperations = async (userId: string) => {
-  console.log("🧪 Starting database tests for user:", userId);
+  console.info("🧪 Starting database tests for user:", userId);
 
   try {
     // Test creating a user profile
-    console.log("📝 Creating user profile...");
+    console.info("📝 Creating user profile...");
     const profileData = {
       email: "test@example.com",
       displayName: "Test User",
@@ -23,27 +23,27 @@ export const testDatabaseOperations = async (userId: string) => {
       userId,
       profileData,
     );
-    console.log("✅ User profile created:", createdProfile);
+    console.info("✅ User profile created:", createdProfile);
 
     // Test getting user profile
-    console.log("📖 Getting user profile...");
+    console.info("📖 Getting user profile...");
     const retrievedProfile = await DatabaseService.getUserProfile(userId);
-    console.log("✅ User profile retrieved:", retrievedProfile);
+    console.info("✅ User profile retrieved:", retrievedProfile);
 
     // Test getting user skills
-    console.log("📖 Getting user skills...");
+    console.info("📖 Getting user skills...");
     const skills = await DatabaseService.getUserSkills(userId);
-    console.log("✅ User skills retrieved:", skills.length, "skills");
+    console.info("✅ User skills retrieved:", skills.length, "skills");
     skills.forEach((skill) => {
-      console.log(`  - ${skill.name}: Level ${skill.currentLevel}/10`);
+      console.info(`  - ${skill.name}: Level ${skill.currentLevel}/10`);
     });
 
     // Test getting user sessions
-    console.log("📖 Getting user sessions...");
+    console.info("📖 Getting user sessions...");
     const sessions = await DatabaseService.getUserSessions(userId);
-    console.log("✅ User sessions retrieved:", sessions.length, "sessions");
+    console.info("✅ User sessions retrieved:", sessions.length, "sessions");
 
-    console.log("🎉 All database tests passed!");
+    console.info("🎉 All database tests passed!");
     return true;
   } catch (error) {
     console.error("❌ Database test failed:", error);

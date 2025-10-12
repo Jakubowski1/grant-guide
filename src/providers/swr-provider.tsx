@@ -23,7 +23,7 @@ export function SWRProvider({ children }: SWRProviderProps) {
           console.error("SWR Error:", { key, error: error.message });
         },
         onSuccess: (data, key) => {
-          console.log("SWR Success:", {
+          console.info("SWR Success:", {
             key,
             dataLength: Array.isArray(data) ? data.length : "non-array",
           });

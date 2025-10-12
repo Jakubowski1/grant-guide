@@ -277,10 +277,10 @@ export default function PracticePage() {
 
         {/* Scrollable Content Area */}
         <main className="flex-1 overflow-y-auto">
-          <div className="container mx-auto px-6 py-8 max-w-7xl">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-7xl">
             {/* Header and Statistics */}
-            <div className="flex flex-col mb-8 gap-4">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="flex flex-col mb-6 sm:mb-8 gap-3 sm:gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 <Card>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
@@ -1064,7 +1064,8 @@ export default function PracticePage() {
             </div>
 
             {/* Results Summary */}
-            <div className="mb-6 flex items-center justify-between">
+            {/* Results Header */}
+            <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
               <div>
                 <h2 className="text-lg font-semibold">
                   {filteredQuestions.length} Question
@@ -1087,7 +1088,8 @@ export default function PracticePage() {
             </div>
 
             {/* Questions */}
-            <div className="space-y-6">
+            {/* Question Results */}
+            <div className="space-y-4 sm:space-y-6">
               {filteredQuestions.length === 0 ? (
                 <Card>
                   <CardContent className="p-8 text-center">
@@ -1235,6 +1237,7 @@ export default function PracticePage() {
               )}
             </div>
 
+            {/* Pagination */}
             {/* Pagination */}
             {filteredQuestions.length > 0 && totalPages > 1 && (
               <div className="flex items-center justify-between pt-6 border-t border-border/40">

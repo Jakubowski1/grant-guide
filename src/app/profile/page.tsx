@@ -171,11 +171,11 @@ export default function ProfilePage() {
 
         {/* Scrollable Content Area */}
         <main className="flex-1 overflow-y-auto">
-          <div className="container mx-auto px-6 py-8 max-w-6xl">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-6xl">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
               <Card className="lg:col-span-1">
                 <CardHeader className="text-center">
-                  <div className="relative mx-auto w-32 h-32 mb-4">
+                  <div className="relative mx-auto w-24 h-24 sm:w-32 sm:h-32 mb-4">
                     {userData?.avatarIcon ? (
                       <div className="w-32 h-32 border-4 border-primary/20 rounded-full flex items-center justify-center">
                         <AvatarIconDisplay
@@ -194,10 +194,12 @@ export default function ProfilePage() {
                       </Avatar>
                     )}
                   </div>
-                  <CardTitle className="text-xl">
+                  <CardTitle className="text-lg sm:text-xl">
                     {userData?.displayName || user.displayName || "User"}
                   </CardTitle>
-                  <p className="text-muted-foreground">{user.email}</p>
+                  <p className="text-muted-foreground text-sm sm:text-base break-all">
+                    {user.email}
+                  </p>
                   {(userData?.role || editData.role) && (
                     <Badge variant="secondary" className="mt-2">
                       {userData?.role || editData.role}
@@ -208,7 +210,7 @@ export default function ProfilePage() {
 
               <Card className="lg:col-span-3">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                     <User className="h-5 w-5" />
                     Avatar Settings
                   </CardTitle>
@@ -225,13 +227,14 @@ export default function ProfilePage() {
               </Card>
 
               <Card className="lg:col-span-2">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
+                <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
+                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                     <User className="h-5 w-5" />
                     Profile Details
                   </CardTitle>
                   <Button
                     variant={isEditing ? "outline" : "default"}
+                    className="w-full sm:w-auto"
                     onClick={() => {
                       if (isEditing) {
                         setIsEditing(false);
@@ -248,9 +251,14 @@ export default function ProfilePage() {
                     {isEditing ? "Cancel" : "Edit Profile"}
                   </Button>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-4 sm:space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="displayName">Display Name</Label>
+                    <Label
+                      htmlFor="displayName"
+                      className="text-sm sm:text-base"
+                    >
+                      Display Name
+                    </Label>
                     {isEditing ? (
                       <Input
                         id="displayName"
@@ -271,17 +279,23 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="flex items-center gap-2">
+                    <Label
+                      htmlFor="email"
+                      className="flex items-center gap-2 text-sm sm:text-base"
+                    >
                       <Mail className="h-4 w-4" />
                       Email Address
                     </Label>
-                    <p className="text-sm bg-muted rounded-md p-3 text-muted-foreground">
+                    <p className="text-sm bg-muted rounded-md p-3 text-muted-foreground break-all">
                       {user.email}
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="role" className="flex items-center gap-2">
+                    <Label
+                      htmlFor="role"
+                      className="flex items-center gap-2 text-sm sm:text-base"
+                    >
                       <Briefcase className="h-4 w-4" />
                       Role/Position
                     </Label>
@@ -305,7 +319,12 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="experience">Experience Level</Label>
+                    <Label
+                      htmlFor="experience"
+                      className="text-sm sm:text-base"
+                    >
+                      Experience Level
+                    </Label>
                     {isEditing ? (
                       <Input
                         id="experience"
@@ -345,15 +364,15 @@ export default function ProfilePage() {
                 </CardContent>
               </Card>
 
-              <Card className="lg:col-span-1">
+              <Card className="lg:col-span-2">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                     <Calendar className="h-5 w-5" />
                     Account Information
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div className="space-y-2">
                       <Label className="flex items-center gap-2 text-muted-foreground">
                         <Calendar className="h-4 w-4" />
@@ -378,9 +397,9 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
-                  <Separator className="my-6" />
+                  <Separator className="my-4 sm:my-6" />
 
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     <h4 className="font-semibold">Additional Information</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">

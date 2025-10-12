@@ -196,10 +196,10 @@ export default function ResultsPage() {
                 <div className="flex justify-center mb-4">
                   <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
                 </div>
-                <h3 className="text-lg font-semibold mb-2">
+                <h3 className="text-lg sm:text-xl font-semibold mb-2">
                   Analyzing Your Interview
                 </h3>
-                <p className="text-muted-foreground min-h-[1.5rem] transition-opacity duration-300">
+                <p className="text-muted-foreground min-h-[1.5rem] transition-opacity duration-300 text-sm sm:text-base px-2">
                   {calmingMessages[currentMessageIndex]}
                 </p>
               </CardContent>
@@ -228,9 +228,16 @@ export default function ResultsPage() {
             <Card className="w-full max-w-md text-center">
               <CardContent className="pt-6">
                 <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Analysis Failed</h3>
-                <p className="text-muted-foreground mb-4">{error}</p>
-                <Button onClick={() => router.push("/dashboard")}>
+                <h3 className="text-lg sm:text-xl font-semibold mb-2">
+                  Analysis Failed
+                </h3>
+                <p className="text-muted-foreground mb-4 text-sm sm:text-base px-2">
+                  {error}
+                </p>
+                <Button
+                  onClick={() => router.push("/dashboard")}
+                  className="w-full sm:w-auto"
+                >
                   Return to Dashboard
                 </Button>
               </CardContent>
@@ -279,7 +286,7 @@ export default function ResultsPage() {
         <DashboardNavbar setSidebarOpen={setSidebarOpen} />
 
         <main className="flex-1 overflow-auto">
-          <div className="max-w-6xl mx-auto p-4 space-y-6">
+          <div className="max-w-6xl mx-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
             {/* Overall Score */}
             <Card className={`${getScoreBgColor(results.score)} border-2`}>
               <CardHeader className="text-center">
@@ -315,7 +322,7 @@ export default function ResultsPage() {
             </Card>
 
             {/* Strengths and Areas for Improvement */}
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               <Card className="border-green-200 bg-green-50 dark:bg-green-900/20 dark:border-green-800">
                 <CardHeader>
                   <CardTitle className="flex items-center text-green-700 dark:text-green-300">
@@ -411,7 +418,7 @@ export default function ResultsPage() {
             </Card>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center">
               <Button
                 onClick={() => router.push("/configure")}
                 className="bg-blue-600 hover:bg-blue-700"
